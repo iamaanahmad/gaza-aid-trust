@@ -1,4 +1,4 @@
-import type { Alert, AidRequest } from './types';
+import type { Alert, AidRequest, Contributor } from './types';
 
 export const mockAlerts: Alert[] = [
   {
@@ -67,5 +67,54 @@ export const mockAidRequests: AidRequest[] = [
     status: 'Fulfilled',
     timestamp: Date.now() - 1000 * 60 * 60 * 48,
     locationName: 'Nuseirat Camp',
+    feedback: 'We received the items quickly. Thank you for your kindness and support during these hard times. May you be rewarded.',
+  },
+];
+
+export const mockContributors: Contributor[] = [
+  {
+    id: 'donor1',
+    rank: 1,
+    name: 'Generous Donor A',
+    contributions: 25,
+    type: 'Donor',
+    avatarUrl: 'https://placehold.co/40x40.png',
+  },
+  {
+    id: 'reporter1',
+    rank: 2,
+    name: 'Vigilant Reporter 1',
+    contributions: 18,
+    type: 'Reporter',
+    avatarUrl: 'https://placehold.co/40x40.png',
+  },
+  {
+    id: 'donor2',
+    rank: 3,
+    name: 'Anonymous Giver',
+    contributions: 15,
+    type: 'Donor',
+  },
+  {
+    id: 'reporter2',
+    rank: 4,
+    name: 'Community Watcher',
+    contributions: 12,
+    type: 'Reporter',
+    avatarUrl: 'https://placehold.co/40x40.png',
+  },
+  {
+    id: 'donor3',
+    rank: 5,
+    name: 'Hope Spreader',
+    contributions: 10,
+    type: 'Donor',
+  },
+  {
+    id: 'reporter3',
+    rank: 6,
+    name: 'On-the-Ground Hero',
+    contributions: 7,
+    type: 'Reporter',
   },
 ];

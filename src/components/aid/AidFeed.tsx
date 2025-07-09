@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import { HandHeart, Users, MapPin } from 'lucide-react';
+import { HandHeart, Users, MapPin, MessageSquareQuote } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -95,6 +95,17 @@ function AidRequestCard({ request }: { request: AidRequest }) {
             <span>{request.locationName}</span>
         </div>
       </CardContent>
+       {request.status === 'Fulfilled' && request.feedback && (
+        <div className="px-6 pb-4 pt-0 text-sm">
+           <div className="flex items-center gap-2 font-semibold text-muted-foreground mb-2">
+            <MessageSquareQuote className="h-4 w-4" />
+            <span>Feedback from Recipient</span>
+           </div>
+          <blockquote className="border-l-2 border-primary/50 pl-3 italic text-muted-foreground">
+            {request.feedback}
+          </blockquote>
+        </div>
+      )}
       <Separator />
       <CardFooter className="pt-4 flex justify-between items-center">
         <p className="text-xs text-muted-foreground">

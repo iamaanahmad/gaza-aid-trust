@@ -7,6 +7,7 @@ export function Header() {
   const navLinks = [
     { href: '/map', label: 'Crisis Map' },
     { href: '/aid', label: 'Aid Connect' },
+    { href: '/leaderboard', label: 'Leaderboard' },
     { href: '/zakat', label: 'Zakat Calculator' },
   ];
 

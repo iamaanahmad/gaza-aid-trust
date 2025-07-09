@@ -24,4 +24,14 @@ export interface AidRequest {
   status: 'Needed' | 'Pledged' | 'Fulfilled';
   timestamp: number;
   locationName: string;
+  feedback?: string;
+}
+
+export interface Contributor {
+  id:string;
+  rank: number;
+  name: string;
+  avatarUrl?: string;
+  contributions: number;
+  type: 'Donor' | 'Reporter';
 }
