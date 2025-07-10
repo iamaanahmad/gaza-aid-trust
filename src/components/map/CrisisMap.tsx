@@ -40,7 +40,6 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
 
       const finalAlert = {...updatedAlert, trustScore};
       onUpdate(finalAlert);
-      // The toast for the AI result was too verbose, simplifying.
       toast({ title: 'Trust Score Updated', description: `The score is now ${trustScore}%.` });
 
     } catch (e) {
@@ -64,47 +63,54 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         anchor="bottom"
         className="font-body z-40"
     >
-      <div className="w-80 rounded-lg shadow-lg bg-background text-foreground overflow-hidden">
-        <button onClick={onClose} className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:text-foreground bg-background/50 hover:bg-background/80 z-10 transition-colors">
-          <X className="h-5 w-5" />
-          <span className="sr-only">Close popup</span>
-        </button>
-        
-        <div className="p-4 space-y-3">
-            <h3 className="font-bold text-lg font-headline pr-8">{alert.locationName}</h3>
-            
-            <div className="flex items-center text-sm text-muted-foreground">
-                <RadioTower className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span>Reported by Anonymous</span>
+        <div className="w-80 rounded-lg shadow-lg bg-background text-foreground overflow-hidden">
+            {/* Header */}
+            <div className="p-4 flex justify-between items-start gap-4">
+                <h3 className="font-bold text-lg font-headline pt-1">{alert.locationName}</h3>
+                <button 
+                    onClick={onClose} 
+                    className="p-1 rounded-full text-muted-foreground hover:text-foreground bg-transparent hover:bg-muted/50 transition-colors flex-shrink-0"
+                    aria-label="Close popup"
+                >
+                    <X className="h-5 w-5" />
+                </button>
             </div>
             
-            <p className="text-sm">{alert.description}</p>
-            
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Trust Score: {alert.trustScore}%</label>
-              <Progress value={alert.trustScore} className="mt-1 h-2" />
+            {/* Content */}
+            <div className="px-4 pb-4 space-y-3">
+                <div className="flex items-center text-sm text-muted-foreground">
+                    <RadioTower className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span>Reported by Anonymous</span>
+                </div>
+                
+                <p className="text-sm">{alert.description}</p>
+                
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Trust Score: {alert.trustScore}%</label>
+                  <Progress value={alert.trustScore} className="mt-1 h-2" />
+                </div>
+
+                <div className="flex items-center text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
+                </div>
             </div>
 
-            <div className="flex items-center text-sm text-muted-foreground">
-                <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
+            {/* Footer */}
+            <div className="px-4 py-3 border-t bg-muted/50 text-center">
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Is this information accurate?</p>
+                <div className="grid grid-cols-2 gap-2 w-full">
+                    <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background hover:bg-green-50 hover:border-green-300">
+                        <ThumbsUp className="mr-2 h-4 w-4 text-green-600" />
+                        Confirm ({alert.confirmations})
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background hover:bg-red-50 hover:border-red-300">
+                        <ThumbsDown className="mr-2 h-4 w-4 text-red-600" />
+                        Dispute ({alert.disputes})
+                    </Button>
+                </div>
             </div>
         </div>
-
-        <div className="px-4 py-3 border-t bg-muted/50">
-            <p className="text-xs font-semibold text-muted-foreground mb-2 text-center">Is this information accurate?</p>
-            <div className="grid grid-cols-2 gap-2 w-full">
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background hover:bg-green-50 hover:border-green-300">
-                    <ThumbsUp className="mr-2 h-4 w-4 text-green-600" />
-                    Confirm ({alert.confirmations})
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background hover:bg-red-50 hover:border-red-300">
-                    <ThumbsDown className="mr-2 h-4 w-4 text-red-600" />
-                    Dispute ({alert.disputes})
-                </Button>
-            </div>
-        </div>
-      </div>
     </Popup>
   );
 }
