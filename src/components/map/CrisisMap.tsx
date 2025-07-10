@@ -13,7 +13,7 @@ import Map, { Marker, Popup } from 'react-map-gl';
 
 function getPinColor(score: number) {
   if (score > 75) return '#22c55e'; // green-500
-  if (score > 50) return '#f59e0b'; // yellow-500
+  if (score > 50) return '#f59e0b'; // amber-500
   return '#ef4444'; // red-500
 }
 
@@ -40,7 +40,8 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
 
       const finalAlert = {...updatedAlert, trustScore};
       onUpdate(finalAlert);
-      toast({ title: 'Trust Score Updated', description: `New score: ${trustScore}. Reason: ${reasoning}` });
+      // The toast for the AI result was too verbose, simplifying.
+      toast({ title: 'Trust Score Updated', description: `The score is now ${trustScore}%.` });
 
     } catch (e) {
         console.error(e);
@@ -63,12 +64,14 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         anchor="bottom"
         className="font-body z-40"
     >
-      <div className="w-80">
-        <button onClick={onClose} className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:text-foreground bg-background/50 hover:bg-background/80 z-10">
+      <div className="w-80 rounded-lg shadow-lg bg-background text-foreground overflow-hidden">
+        <button onClick={onClose} className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:text-foreground bg-background/50 hover:bg-background/80 z-10 transition-colors">
           <X className="h-5 w-5" />
+          <span className="sr-only">Close popup</span>
         </button>
+        
         <div className="p-4 space-y-3">
-            <h3 className="font-bold text-base font-headline pr-8">{alert.locationName}</h3>
+            <h3 className="font-bold text-lg font-headline pr-8">{alert.locationName}</h3>
             
             <div className="flex items-center text-sm text-muted-foreground">
                 <RadioTower className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -89,14 +92,14 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         </div>
 
         <div className="px-4 py-3 border-t bg-muted/50">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Is this accurate?</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-2 text-center">Is this information accurate?</p>
             <div className="grid grid-cols-2 gap-2 w-full">
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background">
-                    <ThumbsUp className="mr-2 h-4 w-4" />
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background hover:bg-green-50 hover:border-green-300">
+                    <ThumbsUp className="mr-2 h-4 w-4 text-green-600" />
                     Confirm ({alert.confirmations})
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background">
-                    <ThumbsDown className="mr-2 h-4 w-4" />
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background hover:bg-red-50 hover:border-red-300">
+                    <ThumbsDown className="mr-2 h-4 w-4 text-red-600" />
                     Dispute ({alert.disputes})
                 </Button>
             </div>
@@ -126,13 +129,12 @@ export function CrisisMap() {
         <style jsx global>{`
           .mapboxgl-popup-content {
             padding: 0;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            overflow: hidden;
+            background: transparent;
+            box-shadow: none;
           }
         `}</style>
         <Map
-          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "pk.eyJ1IjoiYXNocWtpbmciLCJhIjoiY21jd3FmZ2p3MDM5dzJpc2J3djdrOTc3aSJ9.qK7ir3IbGbiEjmcUozUBxw"}
           initialViewState={initialViewState}
           style={{width: '100%', height: '100%'}}
           mapStyle="mapbox://styles/mapbox/streets-v11"
@@ -143,7 +145,7 @@ export function CrisisMap() {
                     e.originalEvent.stopPropagation();
                     setSelectedAlert(alert);
                 }}>
-                    <div className="cursor-pointer">
+                    <div className="cursor-pointer" aria-label={`Alert: ${alert.locationName}`}>
                         <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert.trustScore)}}>
                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         </svg>
