@@ -8,35 +8,24 @@ export function AppLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) 
       height="24"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
       xmlns="http://www.w3.org/2000/svg"
       className={cn('text-primary', className)}
       {...props}
     >
       <path 
-        d="M12.004 21.354c.73-.693 5.48-5.18 5.48-9.852 0-2.828-2.3-5.128-5.16-5.128-1.74 0-3.32.84-4.28 2.144-.13.17-.25.35-.35.54M8.5 3.5c-1.79 1.94-2.5 4.58-2.5 7.5 0 4.672 4.75 9.16 5.48 9.852"
-        fill="hsl(var(--primary))"
-        stroke="none"
+        d="M12 21.35C7.94 16.25 4 12.36 4 9.5C4 5.36 7.5 2 12 2C16.5 2 20 5.36 20 9.5C20 12.36 16.06 16.25 12 21.35Z" 
+        stroke="hsl(var(--primary))" 
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path 
-        d="M8.5 3.5c-1.99 2.16-2.79 5.06-2.67 8.1.13 3.42 1.95 6.55 4.67 8.75" 
+        d="M12 12.5C11.19 11.66 10.05 11 9 11C7.34 11 6 12.34 6 14C6 15.34 6.88 16.73 8.36 17.65L12 15.5L15.64 17.65C17.12 16.73 18 15.34 18 14C18 12.34 16.66 11 15 11C13.95 11 12.81 11.66 12 12.5Z"
+        fill="hsl(var(--primary))"
         stroke="hsl(var(--primary-foreground))"
-        opacity="0.3"
+        strokeWidth="1"
+        strokeOpacity="0.5"
       />
-      <path
-        d="M14.5,5.5 A4,4 0 0,0 10.5,9.5 M10.5,9.5 A4,4 0 0,1 6.5,13.5"
-        strokeWidth="1.2"
-        fill="none"
-        stroke="hsl(var(--primary-foreground))"
-      />
-      <circle cx="15" cy="5" r="1" fill="hsl(var(--primary-foreground))" stroke="none" />
-      <circle cx="13" cy="7" r="1" fill="hsl(var(--primary-foreground))" stroke="none" />
-      <circle cx="11" cy="9" r="1" fill="hsl(var(--primary-foreground))" stroke="none" />
-      <circle cx="9" cy="11" r="1" fill="hsl(var(--primary-foreground))" stroke="none" />
-      <circle cx="7" cy="13" r="1" fill="hsl(var(--primary-foreground))" stroke="none" />
     </svg>
   );
 }
