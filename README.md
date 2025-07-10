@@ -58,8 +58,11 @@ Our approach is guided by three principles:
 
 *(This is where you would link to your live demo and add compelling screenshots of the app in action)*
 
+![Screenshot 1](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-2-1024x464.png)
 **Screenshot 1: The Crisis Map with an active alert.**
+![Screenshot 2](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-1-1024x576.png)
 **Screenshot 2: The Aid Connect feed showing various requests.**
+![Screenshot 3](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-3-1024x646.png)
 **Screenshot 3: The mobile UI in Arabic (RTL).**
 
 ## Tech Stack
