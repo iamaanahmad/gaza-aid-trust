@@ -6,7 +6,7 @@ export default function ZakatPage() {
     <div className="container mx-auto max-w-2xl py-12 px-4">
       <Card className="w-full">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold font-headline">Zakat Calculator</CardTitle>
+          <CardTitle className="text-3xl font-bold">Zakat Calculator</CardTitle>
           <CardDescription className="text-lg">
             Calculate your obligatory charity and make a difference.
           </CardDescription>

@@ -121,9 +121,9 @@ export function ZakatCalculator() {
       {zakatAmount !== null && (
         <Alert className="mt-8 text-center">
             <Calculator className="h-4 w-4" />
-            <AlertTitle className="font-headline text-lg">Your Total Zakat Due</AlertTitle>
+            <AlertTitle className="font-bold text-lg">Your Total Zakat Due</AlertTitle>
             <AlertDescription>
-                <p className="text-4xl font-bold text-primary my-2 font-headline">
+                <p className="text-4xl font-bold text-primary my-2">
                 ${zakatAmount.toFixed(2)}
                 </p>
                 <p className="text-muted-foreground mt-2">

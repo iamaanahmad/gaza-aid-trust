@@ -80,7 +80,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
     >
         <div className="w-80 rounded-lg shadow-lg bg-background text-foreground overflow-hidden">
             <div className="p-4 flex justify-between items-start gap-4">
-                <h3 className="font-bold text-lg font-headline pt-1">{alert.locationName}</h3>
+                <h3 className="font-bold text-lg pt-1">{alert.locationName}</h3>
                 <button 
                     onClick={onClose} 
                     className="p-1 rounded-full text-muted-foreground hover:text-foreground bg-transparent hover:bg-muted/50 transition-colors flex-shrink-0"

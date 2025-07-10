@@ -19,7 +19,6 @@ export default {
     extend: {
       fontFamily: {
         body: ['var(--font-pt-sans)', ...fontFamily.sans],
-        headline: ['var(--font-anton)', ...fontFamily.sans],
         code: ['monospace'],
       },
       colors: {

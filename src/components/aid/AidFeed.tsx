@@ -55,7 +55,7 @@ function DonateDialog({ request }: { request: AidRequest }) {
       </DialogHeader>
       {pledged ? (
         <div className="text-center py-8">
-          <h3 className="text-2xl font-bold text-green-600 font-headline">Thank You!</h3>
+          <h3 className="text-2xl font-bold text-green-600">Thank You!</h3>
           <p className="text-muted-foreground mt-2">Your pledge has been recorded. This will bring much needed relief.</p>
         </div>
       ) : (
@@ -103,7 +103,7 @@ function AidRequestCard({ request }: { request: AidRequest }) {
       )}
       <CardHeader>
         <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-headline">{request.category} Request</CardTitle>
+            <CardTitle className="text-lg font-bold">{request.category} Request</CardTitle>
             <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
         </div>
         <CardDescription className="pt-2">{request.description}</CardDescription>

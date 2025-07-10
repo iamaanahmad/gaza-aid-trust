@@ -4,7 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { PT_Sans, Anton } from 'next/font/google';
+import { PT_Sans } from 'next/font/google';
 
 export const metadata: Metadata = {
   title: 'Gaza Aid & Trust: Crisis Connect',
@@ -18,12 +18,6 @@ const pt_sans = PT_Sans({
   variable: '--font-pt-sans',
 });
 
-const anton = Anton({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-anton',
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${pt_sans.variable} ${anton.variable} font-body antialiased min-h-screen bg-background flex flex-col`}>
+      <body className={`${pt_sans.variable} font-body antialiased min-h-screen bg-background flex flex-col`}>
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

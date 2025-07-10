@@ -22,7 +22,7 @@ export function TutorialDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-headline">How "Gaza Aid & Trust" Works</DialogTitle>
+          <DialogTitle className="font-bold">How "Gaza Aid & Trust" Works</DialogTitle>
           <DialogDescription>
             A quick guide to using our platform for community support.
           </DialogDescription>

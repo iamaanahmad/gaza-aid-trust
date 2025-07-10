@@ -17,7 +17,7 @@ export function Header() {
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <HeartHandshake className="h-6 w-6 text-primary" />
-            <span className="font-bold sm:inline-block font-headline">
+            <span className="font-bold sm:inline-block">
               Gaza Aid & Trust
             </span>
           </Link>
@@ -45,7 +45,7 @@ export function Header() {
               <nav className="flex flex-col gap-4 pt-6">
                  <Link href="/" className="mb-4 flex items-center space-x-2">
                     <HeartHandshake className="h-6 w-6 text-primary" />
-                    <span className="font-bold text-lg font-headline">
+                    <span className="font-bold text-lg">
                       Gaza Aid & Trust
                     </span>
                   </Link>

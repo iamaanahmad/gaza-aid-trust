@@ -105,7 +105,7 @@ export function PrayerTimes() {
     return (
         <div>
             <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold font-headline">Today's Prayer Times</h2>
+                <h2 className="text-3xl font-bold">Today's Prayer Times</h2>
                 <p className="text-muted-foreground">Loading times for Gaza...</p>
             </div>
             <PrayerTimeSkeleton />
@@ -128,7 +128,7 @@ export function PrayerTimes() {
             <div className="inline-block bg-primary/10 p-4 rounded-full mb-4">
                 <MosqueIcon className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-3xl font-bold font-headline">Daily Prayer Times</h2>
+            <h2 className="text-3xl font-bold">Daily Prayer Times</h2>
             <p className="text-muted-foreground">
                 For Gaza, Palestine on {prayerTimes?.date}
             </p>
@@ -138,7 +138,7 @@ export function PrayerTimes() {
                 <Card key={name} className="text-center flex flex-col justify-center">
                     <CardHeader className="items-center pb-2">
                         {(prayerIcons as any)[name]}
-                        <CardTitle className="text-lg font-headline mt-2">{name}</CardTitle>
+                        <CardTitle className="text-lg font-bold mt-2">{name}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-2xl font-bold">{time}</p>
