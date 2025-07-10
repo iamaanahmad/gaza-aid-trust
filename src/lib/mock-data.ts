@@ -1,8 +1,5 @@
 import type { Alert, AidRequest, Contributor } from './types';
 
-// This file is now used for seeding the database.
-// The app will fetch data from Firestore directly.
-
 export const mockAlerts: Omit<Alert, 'id'>[] = [
   {
     location: { lat: 31.3547, lng: 34.3088 },

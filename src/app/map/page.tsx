@@ -28,7 +28,7 @@ export default function MapPage() {
                 <span className="sr-only">{t('post_alert_button')}</span>
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent side={ 'bottom' }>
               <SheetHeader>
                 <SheetTitle>{t('submit_alert_form_title')}</SheetTitle>
                 <SheetDescription>

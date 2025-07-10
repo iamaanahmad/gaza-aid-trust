@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: 'Gaza Aid & Trust: Crisis Connect',
   description:
     'A community-powered crisis map and aid platform for Gaza. Built for the "Hack for Gaza" hackathon.',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 const pt_sans = PT_Sans({
