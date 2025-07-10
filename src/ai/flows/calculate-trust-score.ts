@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -20,15 +21,11 @@ const CalculateTrustScoreInputSchema = z.object({
 export type CalculateTrustScoreInput = z.infer<typeof CalculateTrustScoreInputSchema>;
 
 const CalculateTrustScoreOutputSchema = z.object({
-  trustScore: z.number().describe('The calculated trust score for the alert.'),
+  trustScore: z.number().min(0).max(100).describe('The calculated trust score for the alert, as an integer between 0 and 100.'),
   reasoning: z.string().describe('The reasoning behind the calculated trust score.'),
 });
 
 export type CalculateTrustScoreOutput = z.infer<typeof CalculateTrustScoreOutputSchema>;
-
-export async function calculateTrustScore(input: CalculateTrustScoreInput): Promise<CalculateTrustScoreOutput> {
-  return calculateTrustScoreFlow(input);
-}
 
 const calculateTrustScorePrompt = ai.definePrompt({
   name: 'calculateTrustScorePrompt',
@@ -36,15 +33,19 @@ const calculateTrustScorePrompt = ai.definePrompt({
   output: {schema: CalculateTrustScoreOutputSchema},
   prompt: `You are an AI assistant that calculates the trust score of crisis alerts based on user confirmations and disputes.
 
-You will receive the number of confirmations and disputes for a given alert.
-Your task is to calculate a trust score based on these values.
+You will receive the number of confirmations and disputes for a given alert. Your task is to calculate a trust score as an integer between 0 and 100.
 
-Consider an initial score of {{{initialScore}}} if provided. A confirmation should increase the score and a dispute should decrease it.
+- Start with an initial score of {{initialScore}}. If not provided, assume 50.
+- Each confirmation should significantly increase the score, especially at the beginning.
+- Each dispute should significantly decrease the score.
+- The score should never go below 0 or above 100.
+- The final output must be a valid JSON object with 'trustScore' (integer) and 'reasoning' (string).
 
-Confirmations: {{{confirmations}}}
-Disputes: {{{disputes}}}
+Alert Data:
+- Confirmations: {{{confirmations}}}
+- Disputes: {{{disputes}}}
 
-Please provide a final trust score and reasoning for the score.
+Calculate the new trust score and provide a brief reasoning.
 `,
 });
 
@@ -56,6 +57,13 @@ const calculateTrustScoreFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await calculateTrustScorePrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("Failed to get a response from the AI model.");
+    }
+    return output;
   }
 );
+
+export async function calculateTrustScore(input: CalculateTrustScoreInput): Promise<CalculateTrustScoreOutput> {
+  return calculateTrustScoreFlow(input);
+}

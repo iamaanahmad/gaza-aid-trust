@@ -29,101 +29,116 @@ interface SpeechRecognition extends EventTarget {
 
 // Custom hook for Web Speech API
 const useSpeechRecognition = (lang: string) => {
-    const [transcript, setTranscript] = useState('');
-    const [isListening, setIsListening] = useState(false);
-    const recognitionRef = useRef<SpeechRecognition | null>(null);
     const { toast } = useToast();
     const { t } = useTranslation();
+    const [isListening, setIsListening] = useState(false);
+    const recognitionRef = useRef<SpeechRecognition | null>(null);
+    const finalTranscriptRef = useRef('');
 
-    useEffect(() => {
+    const startListening = useCallback(() => {
+        if (recognitionRef.current) {
+            finalTranscriptRef.current = '';
+            recognitionRef.current.start();
+            setIsListening(true);
+        }
+    }, []);
+
+    const stopListening = useCallback(() => {
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        }
+    }, []);
+    
+    const initializeRecognition = useCallback((onTranscriptUpdate: (transcript: string) => void) => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            recognitionRef.current = new SpeechRecognition();
-            const recognition = recognitionRef.current;
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = lang;
+        if (!SpeechRecognition) {
+            toast({
+                variant: 'destructive',
+                title: t('toast_unsupported_browser'),
+                description: t('toast_unsupported_browser_desc'),
+            });
+            return;
+        }
 
-            recognition.onresult = (event: any) => {
-                const currentTranscript = event.results[0][0].transcript;
-                setTranscript(currentTranscript);
-            };
+        recognitionRef.current = new SpeechRecognition();
+        const recognition = recognitionRef.current;
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = lang;
 
-            recognition.onerror = (event: any) => {
-                console.error('Speech recognition error:', event.error);
+        recognition.onresult = (event: any) => {
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscriptRef.current += event.results[i][0].transcript + '. ';
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            onTranscriptUpdate(finalTranscriptRef.current + interimTranscript);
+        };
+
+        recognition.onerror = (event: any) => {
+            console.error('Speech recognition error:', event.error);
+            if (event.error !== 'no-speech') {
                 toast({
                     variant: 'destructive',
                     title: t('toast_audio_error'),
                     description: t('toast_audio_error_desc'),
                 });
-            };
+            }
+             setIsListening(false);
+        };
 
-            recognition.onend = () => {
-                setIsListening(false);
-            };
-        }
-    }, [toast, lang, t]);
-    
-    const startListening = useCallback(() => {
-        if (recognitionRef.current && !isListening) {
-            setIsListening(true);
-            recognitionRef.current.start();
-        }
-    }, [isListening]);
-
-    const stopListening = useCallback(() => {
-        if (recognitionRef.current && isListening) {
-            setIsListening(false);
-            recognitionRef.current.stop();
-        }
-    }, [isListening]);
+        recognition.onend = () => {
+             setIsListening(false);
+        };
+    }, [lang, t, toast]);
 
     return {
-        transcript,
         isListening,
         startListening,
         stopListening,
-        hasSupport: !!recognitionRef.current
+        initializeRecognition,
+        hasSupport: !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
     };
 };
 
 export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   const { toast } = useToast();
   const { t, language } = useTranslation();
-  const { transcript, isListening, startListening, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const alertSchema = z.object({
-    description: z.string().min(10, t('validation_description_min_alert')).max(200),
-    locationName: z.string().min(3, t('validation_location_min')),
+  
+  const form = useForm<{description: string, locationName: string}>({
+      resolver: zodResolver(z.object({
+        description: z.string().min(10, t('validation_description_min_alert')).max(500),
+        locationName: z.string().min(3, t('validation_location_min')),
+      })),
+      defaultValues: { description: '', locationName: '' },
   });
 
-  type AlertFormValues = z.infer<typeof alertSchema>;
-
-  const form = useForm<AlertFormValues>({
-    resolver: zodResolver(alertSchema),
-    defaultValues: { description: '', locationName: '' },
-  });
+  const { isListening, startListening, stopListening, initializeRecognition, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
 
   useEffect(() => {
-    if (transcript) {
-      form.setValue('description', transcript);
-    }
-  }, [transcript, form]);
+    initializeRecognition((transcript) => {
+        form.setValue('description', transcript, { shouldValidate: true });
+    });
+  }, [initializeRecognition, form]);
 
-  async function onSubmit(data: AlertFormValues) {
+
+  async function onSubmit(data: {description: string, locationName: string}) {
     setIsSubmitting(true);
     try {
-        // For now, we'll use a mock location in Gaza. A real app would use geolocation.
         const newAlert: Omit<Alert, 'id'> = {
-            location: { lat: 31.5, lng: 34.4667 }, // Gaza City center
+            location: { lat: 31.5, lng: 34.4667 },
             locationName: data.locationName,
             description: data.description,
             timestamp: Date.now(),
-            reporterId: 'anonymous-user', // Placeholder
+            reporterId: 'anonymous-user',
             confirmations: 0,
             disputes: 0,
-            trustScore: 50, // Start with a neutral score
+            trustScore: 50,
         };
 
         await addDoc(alertsCollection, newAlert);
@@ -147,16 +162,18 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
   }
 
   const handleMicClick = () => {
-    if (!hasSupport) {
-        toast({
-            variant: 'destructive',
-            title: t('toast_unsupported_browser'),
-            description: t('toast_unsupported_browser_desc'),
-        });
-        return;
-    }
-    if (!isListening) {
-        startListening();
+    if (!hasSupport) return;
+    if (isListening) {
+      stopListening();
+    } else {
+      const currentDescription = form.getValues('description');
+      startListening();
+      if(currentDescription) {
+        // To allow appending
+        setTimeout(() => {
+          form.setValue('description', currentDescription, { shouldDirty: true });
+        }, 100);
+      }
     }
   }
 
@@ -173,7 +190,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
                 <div className="relative w-full">
                   <Textarea
                     placeholder={t('form_placeholder_description_alert')}
-                    className="ltr:pr-12 rtl:pl-12"
+                    className="ltr:pr-12 rtl:pl-12 min-h-[120px]"
                     {...field}
                   />
                   <Button 
@@ -181,9 +198,9 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
                     size="icon" 
                     variant="ghost"
                     onClick={handleMicClick} 
-                    disabled={isListening} 
-                    aria-label={t('use_voice_input_label')}
-                    className="absolute rtl:left-1 ltr:right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground"
+                    disabled={!hasSupport}
+                    aria-label={isListening ? 'Stop voice input' : t('use_voice_input_label')}
+                    className="absolute rtl:left-1 ltr:right-1 top-2 h-8 w-8 text-muted-foreground"
                   >
                     <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse text-red-500' : ''}`} />
                   </Button>
