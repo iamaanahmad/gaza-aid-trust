@@ -60,14 +60,14 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         closeButton={false}
         offset={35}
         anchor="bottom"
-        className="font-body"
+        className="font-body z-40"
     >
-      <div className="w-72 bg-background rounded-lg shadow-lg">
-          <button onClick={onClose} className="absolute top-2 right-2 p-1 text-muted-foreground hover:text-foreground">
+      <div className="w-72 relative">
+          <button onClick={onClose} className="absolute top-2 right-2 p-1 text-muted-foreground hover:text-foreground z-50">
             <X className="h-4 w-4" />
             <span className="sr-only">Close alert</span>
           </button>
-          <div className="p-4 space-y-3">
+          <div className="space-y-3 p-4">
             <h3 className="font-bold text-base font-headline pr-6">{alert.locationName}</h3>
             <div className="flex items-center text-xs text-muted-foreground">
                 <RadioTower className="h-3 w-3 mr-1.5" />
