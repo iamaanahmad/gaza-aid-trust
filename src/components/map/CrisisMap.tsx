@@ -5,7 +5,7 @@ import { mockAlerts } from '@/lib/mock-data';
 import type { Alert } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ThumbsUp, ThumbsDown, RadioTower, Clock, MapPin } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, RadioTower, Clock, MapPin, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
@@ -57,18 +57,21 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         longitude={alert.location.lng}
         latitude={alert.location.lat}
         onClose={onClose}
-        closeButton={true}
+        closeButton={false}
         closeOnClick={false}
         offset={35}
         anchor="bottom"
         className="font-body z-40"
     >
       <div className="w-72">
-        <div className="p-4 space-y-3">
+        <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground z-10">
+          <X className="h-4 w-4" />
+        </button>
+        <div className="pt-4 px-4 pb-3 space-y-3">
             <h3 className="font-bold text-base font-headline pr-6">{alert.locationName}</h3>
             
             <div className="flex items-center text-xs text-muted-foreground">
-                <RadioTower className="h-3 w-3 mr-1.5" />
+                <RadioTower className="h-4 w-4 mr-1.5" />
                 Reported by Anonymous
             </div>
             
@@ -80,7 +83,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
             </div>
 
             <div className="flex items-center text-xs text-muted-foreground">
-                <Clock className="h-3 w-3 mr-1.5" />
+                <Clock className="h-4 w-4 mr-1.5" />
                 <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
             </div>
         </div>
@@ -124,12 +127,7 @@ export function CrisisMap() {
           .mapboxgl-popup-content {
             padding: 0;
             border-radius: 0.5rem;
-          }
-          .mapboxgl-popup-close-button {
-            right: 6px;
-            top: 6px;
-            font-size: 1.25rem;
-            line-height: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
           }
         `}</style>
         <Map
@@ -137,6 +135,7 @@ export function CrisisMap() {
           initialViewState={initialViewState}
           style={{width: '100%', height: '100%'}}
           mapStyle="mapbox://styles/mapbox/streets-v11"
+          onClick={() => setSelectedAlert(null)}
         >
             {alerts.map((alert) => (
                 <Marker key={alert.id} longitude={alert.location.lng} latitude={alert.location.lat} onClick={(e) => {
@@ -144,7 +143,7 @@ export function CrisisMap() {
                     setSelectedAlert(alert);
                 }}>
                     <div className="cursor-pointer">
-                        <MapPin className={`h-8 w-8 drop-shadow-lg transition-transform hover:scale-125`} style={{color: getPinColor(alert.trustScore)}} />
+                        <MapPin className={`h-8 w-8 drop-shadow-lg transition-transform hover:scale-125`} style={{color: getPinColor(alert.trustScore)}} fillOpacity={0.7} fill={getPinColor(alert.trustScore)} strokeWidth={1.5} stroke="white" />
                     </div>
                 </Marker>
             ))}
