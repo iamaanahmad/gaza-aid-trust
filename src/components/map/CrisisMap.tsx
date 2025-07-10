@@ -67,7 +67,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         <button onClick={onClose} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10 p-1 rounded-full">
           <X className="h-5 w-5" />
         </button>
-        <div className="pt-4 px-4 pb-3 space-y-3">
+        <div className="p-4 space-y-3">
             <h3 className="font-bold text-base font-headline pr-6">{alert.locationName}</h3>
             
             <div className="flex items-center text-sm text-muted-foreground">
@@ -88,7 +88,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
             </div>
         </div>
 
-        <div className="px-4 pb-4 pt-3 border-t bg-muted/30">
+        <div className="px-4 pb-3 pt-3 border-t bg-muted/30">
             <p className="text-xs text-muted-foreground mb-2">Is this accurate?</p>
             <div className="flex gap-2 w-full">
                 <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1 bg-background">
