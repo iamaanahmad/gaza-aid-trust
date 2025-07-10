@@ -5,7 +5,7 @@
 
 ![Gaza Aid & Trust Hero Image](https://i.imgur.com/Gxi2V3o.png)
 
-> This project is a prototype built for the **"Hack for Gaza"** hackathon. Its goal is to demonstrate a viable, technology-driven solution to real-world humanitarian challenges.
+> This project is built for the **"Hack for Gaza"** hackathon. Its goal is to demonstrate a viable, technology-driven solution to real-world humanitarian challenges.
 
 ## The Problem
 

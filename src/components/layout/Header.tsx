@@ -4,10 +4,11 @@
 import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, HeartHandshake } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useState } from 'react';
+import { AppLogo } from './AppLogo';
 
 export function Header() {
   const { t } = useTranslation();
@@ -38,7 +39,7 @@ export function Header() {
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <nav className="flex flex-col gap-4 pt-6">
                  <Link href="/" onClick={handleLinkClick} className="mb-4 flex items-center space-x-2 rtl:space-x-reverse">
-                    <HeartHandshake className="h-6 w-6 text-primary" />
+                    <AppLogo className="h-6 w-6" />
                     <span className="font-bold text-lg">
                       {t('app_title')}
                     </span>
@@ -57,7 +58,7 @@ export function Header() {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
-            <HeartHandshake className="h-6 w-6 text-primary" />
+            <AppLogo className="h-6 w-6" />
             <span className="font-bold sm:inline-block">
               {t('app_title')}
             </span>
