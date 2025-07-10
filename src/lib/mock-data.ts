@@ -52,6 +52,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     status: 'Pledged',
     timestamp: Date.now() - 1000 * 60 * 60 * 24,
     locationName: 'Deir al-Balah',
+    photoUrl: 'https://placehold.co/600x400.png',
   },
   {
     requesterId: 'gaza-user-3',
@@ -99,6 +100,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     name: 'Yusuf I.',
     contributions: 11,
     type: 'Donor',
+    avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
     rank: 6,
