@@ -3,7 +3,7 @@
 
 **A community-powered crisis map and direct aid platform for Gaza, built with trust and accessibility at its core.**
 
-![Gaza Aid & Trust Hero Image](https://i.imgur.com/Gxi2V3o.png)
+![Gaza Aid & Trust Hero Image](https://iili.io/FENr48F.md.png)
 
 > This project is built for the **"Hack for Gaza"** hackathon. Its goal is to demonstrate a viable, technology-driven solution to real-world humanitarian challenges.
 
@@ -51,8 +51,8 @@ The platform is fully bilingual (Arabic/English) and built as a Progressive Web 
 
 1.  **Clone the repository:**
     ```bash
-    git clone [your-repo-url]
-    cd [your-repo-name]
+    git clone https://github.com/iamaanahmad/gaza-aid-trust.git
+    cd gaza-aid-trust
     ```
 
 2.  **Install dependencies:**
