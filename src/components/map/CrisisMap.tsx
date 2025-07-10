@@ -64,7 +64,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         className="font-body z-40"
     >
       <div className="w-80">
-        <button onClick={onClose} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10 p-1 rounded-full">
+        <button onClick={onClose} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10 p-1 rounded-full bg-white/50 hover:bg-white/80">
           <X className="h-5 w-5" />
         </button>
         <div className="p-4 space-y-3">
@@ -90,13 +90,13 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
 
         <div className="px-4 pb-3 pt-3 border-t bg-muted/30">
             <p className="text-xs text-muted-foreground mb-2">Is this accurate?</p>
-            <div className="flex gap-2 w-full">
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1 bg-background">
-                    <ThumbsUp className="h-4 w-4 mr-2" />
+            <div className="grid grid-cols-2 gap-2 w-full">
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background">
+                    <ThumbsUp className="mr-2" />
                     Confirm ({alert.confirmations})
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1 bg-background">
-                    <ThumbsDown className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background">
+                    <ThumbsDown className="mr-2" />
                     Dispute ({alert.disputes})
                 </Button>
             </div>
@@ -128,6 +128,7 @@ export function CrisisMap() {
             padding: 0;
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            overflow: hidden;
           }
         `}</style>
         <Map
