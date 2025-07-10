@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -9,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Mic, Send } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { addDoc } from 'firebase/firestore';
 import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
@@ -21,37 +22,79 @@ const alertSchema = z.object({
 
 type AlertFormValues = z.infer<typeof alertSchema>;
 
-// Mock Web Speech API hook
-const useSpeechRecognition = (toast: (options: { title: string; description: string }) => void) => {
-    const [text, setText] = useState('');
+interface SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    start(): void;
+    stop(): void;
+    onresult: ((this: SpeechRecognition, ev: any) => any) | null;
+    onerror: ((this: SpeechRecognition, ev: any) => any) | null;
+    onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+}
+
+// Custom hook for Web Speech API
+const useSpeechRecognition = () => {
+    const [transcript, setTranscript] = useState('');
     const [isListening, setIsListening] = useState(false);
-    const [hasRecognitionSupport, setHasRecognitionSupport] = useState(false);
-    
+    const recognitionRef = useRef<SpeechRecognition | null>(null);
+    const { toast } = useToast();
+
     useEffect(() => {
-        if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-            setHasRecognitionSupport(true);
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognitionRef.current = new SpeechRecognition();
+            const recognition = recognitionRef.current;
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'ar-EG'; // Set to Arabic for better accuracy with expected phrases
+
+            recognition.onresult = (event: any) => {
+                const currentTranscript = event.results[0][0].transcript;
+                setTranscript(currentTranscript);
+            };
+
+            recognition.onerror = (event: any) => {
+                console.error('Speech recognition error:', event.error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Voice Error',
+                    description: 'Could not recognize speech. Please try again.',
+                });
+            };
+
+            recognition.onend = () => {
+                setIsListening(false);
+            };
         }
-    }, []);
+    }, [toast]);
+    
+    const startListening = useCallback(() => {
+        if (recognitionRef.current && !isListening) {
+            setIsListening(true);
+            recognitionRef.current.start();
+        }
+    }, [isListening]);
 
-    const startListening = () => {
-        setIsListening(true);
-        // In a real app, you would use the SpeechRecognition API
-        toast({
-            title: "Listening...",
-            description: "Please speak now. (This is a 2-second mock)"
-        });
-        setTimeout(() => {
-            setText('Mocked speech to text: food and water available at the main square.');
+    const stopListening = useCallback(() => {
+        if (recognitionRef.current && isListening) {
             setIsListening(false);
-        }, 2000);
-    };
+            recognitionRef.current.stop();
+        }
+    }, [isListening]);
 
-    return { text, isListening, startListening, hasRecognitionSupport };
+    return {
+        transcript,
+        isListening,
+        startListening,
+        stopListening,
+        hasSupport: !!recognitionRef.current
+    };
 };
 
 export function SubmitAlertForm() {
   const { toast } = useToast();
-  const { text, isListening, startListening, hasRecognitionSupport } = useSpeechRecognition(toast);
+  const { transcript, isListening, startListening, hasSupport } = useSpeechRecognition();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AlertFormValues>({
@@ -60,10 +103,10 @@ export function SubmitAlertForm() {
   });
 
   useEffect(() => {
-    if (text) {
-      form.setValue('description', text);
+    if (transcript) {
+      form.setValue('description', transcript);
     }
-  }, [text, form]);
+  }, [transcript, form]);
 
   async function onSubmit(data: AlertFormValues) {
     setIsSubmitting(true);
@@ -100,6 +143,20 @@ export function SubmitAlertForm() {
     }
   }
 
+  const handleMicClick = () => {
+    if (!hasSupport) {
+        toast({
+            variant: 'destructive',
+            title: 'Unsupported Browser',
+            description: 'Your browser does not support voice recognition.',
+        });
+        return;
+    }
+    if (!isListening) {
+        startListening();
+    }
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
@@ -110,17 +167,23 @@ export function SubmitAlertForm() {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <div className="flex items-center gap-2">
+                <div className="relative w-full">
                   <Textarea
                     placeholder="e.g., Safe route to Rafah open..."
-                    className="flex-grow"
+                    className="pr-12"
                     {...field}
                   />
-                  {hasRecognitionSupport && (
-                    <Button type="button" size="icon" onClick={startListening} disabled={isListening} aria-label="Use voice input">
-                      <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse text-red-500' : ''}`} />
-                    </Button>
-                  )}
+                  <Button 
+                    type="button" 
+                    size="icon" 
+                    variant="ghost"
+                    onClick={handleMicClick} 
+                    disabled={isListening} 
+                    aria-label="Use voice input"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground"
+                  >
+                    <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse text-red-500' : ''}`} />
+                  </Button>
                 </div>
               </FormControl>
               <FormMessage />
