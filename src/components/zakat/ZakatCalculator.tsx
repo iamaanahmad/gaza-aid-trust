@@ -7,7 +7,6 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Calculator } from 'lucide-react';
@@ -124,7 +123,7 @@ export function ZakatCalculator() {
             <Calculator className="h-4 w-4" />
             <AlertTitle className="font-headline text-lg">Your Total Zakat Due</AlertTitle>
             <AlertDescription>
-                <p className="text-4xl font-bold text-primary my-2">
+                <p className="text-4xl font-bold text-primary my-2 font-headline">
                 ${zakatAmount.toFixed(2)}
                 </p>
                 <p className="text-muted-foreground mt-2">

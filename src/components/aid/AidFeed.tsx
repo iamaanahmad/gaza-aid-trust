@@ -89,7 +89,7 @@ function AidRequestCard({ request }: { request: AidRequest }) {
   };
   
   return (
-    <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-lg">
+    <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
       {request.photoUrl && (
         <div className="relative h-48 w-full">
             <Image

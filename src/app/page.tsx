@@ -47,11 +47,12 @@ export default function Home() {
           alt="Gaza landscape"
           data-ai-hint="gaza child hope"
           fill
+          priority
           className="object-cover -z-10"
         />
         <div className="absolute inset-0 bg-black/50 -z-10" />
         <div className="container px-4 md:px-6">
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none font-headline">
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none font-headline uppercase">
             Hope and Aid for Gaza
           </h1>
           <p className="mx-auto max-w-[700px] text-gray-200 md:text-xl mt-4">
@@ -70,7 +71,7 @@ export default function Home() {
         <div className="container px-4 md:px-6">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <Card key={feature.title} className="flex flex-col text-center">
+              <Card key={feature.title} className="flex flex-col text-center transition-all hover:shadow-lg hover:-translate-y-1">
                 <CardHeader className="items-center">
                   {feature.icon}
                   <CardTitle className="mt-4 font-headline">{feature.title}</CardTitle>
