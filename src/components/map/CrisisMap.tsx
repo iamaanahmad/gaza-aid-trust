@@ -64,14 +64,14 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         className="font-body z-40"
     >
       <div className="w-80">
-        <button onClick={onClose} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10 p-1 rounded-full bg-white/50 hover:bg-white/80">
+        <button onClick={onClose} className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:text-foreground bg-background/50 hover:bg-background/80 z-10">
           <X className="h-5 w-5" />
         </button>
         <div className="p-4 space-y-3">
-            <h3 className="font-bold text-base font-headline pr-6">{alert.locationName}</h3>
+            <h3 className="font-bold text-base font-headline pr-8">{alert.locationName}</h3>
             
             <div className="flex items-center text-sm text-muted-foreground">
-                <RadioTower className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                <RadioTower className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span>Reported by Anonymous</span>
             </div>
             
@@ -79,24 +79,24 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
             
             <div>
               <label className="text-xs font-medium text-muted-foreground">Trust Score: {alert.trustScore}%</label>
-              <Progress value={alert.trustScore} className="mt-1 h-1.5" />
+              <Progress value={alert.trustScore} className="mt-1 h-2" />
             </div>
 
             <div className="flex items-center text-sm text-muted-foreground">
-                <Clock className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
             </div>
         </div>
 
-        <div className="px-4 pb-3 pt-3 border-t bg-muted/30">
-            <p className="text-xs text-muted-foreground mb-2">Is this accurate?</p>
+        <div className="px-4 py-3 border-t bg-muted/50">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Is this accurate?</p>
             <div className="grid grid-cols-2 gap-2 w-full">
                 <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background">
-                    <ThumbsUp className="mr-2" />
+                    <ThumbsUp className="mr-2 h-4 w-4" />
                     Confirm ({alert.confirmations})
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background">
-                    <ThumbsDown className="mr-2" />
+                    <ThumbsDown className="mr-2 h-4 w-4" />
                     Dispute ({alert.disputes})
                 </Button>
             </div>
