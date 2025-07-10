@@ -15,7 +15,7 @@ export function TutorialDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="lg">
+        <Button variant="outline" size="lg" className="bg-background/20 text-white border-white hover:bg-background/30 hover:text-white">
             <HelpCircle className="mr-2 h-5 w-5" />
             How It Works
         </Button>

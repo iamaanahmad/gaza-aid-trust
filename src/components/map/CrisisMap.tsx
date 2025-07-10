@@ -62,44 +62,40 @@ function SelectedAlertCard({ alert, onUpdate, onClose }: { alert: Alert | null; 
         offset={25}
         anchor="bottom"
     >
-        <Card className="w-full max-w-sm shadow-2xl z-20">
-            <CardHeader>
-                <div className='flex justify-between items-start'>
-                    <div>
-                        <CardTitle className="font-headline">{alert.locationName}</CardTitle>
-                        <CardDescription className="flex items-center pt-1">
-                            <RadioTower className="h-3 w-3 mr-1.5" />
-                            Reported by Anonymous
-                        </CardDescription>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={onClose}>
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Close alert</span>
-                    </Button>
-                </div>
+        <Card className="w-80 shadow-2xl z-20 border-none">
+             <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-1 right-1 h-7 w-7">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close alert</span>
+            </Button>
+            <CardHeader className="pb-3">
+                <CardTitle className="font-headline text-xl pr-6">{alert.locationName}</CardTitle>
+                <CardDescription className="flex items-center pt-1 text-xs">
+                    <RadioTower className="h-3 w-3 mr-1.5" />
+                    Reported by Anonymous
+                </CardDescription>
             </CardHeader>
-            <CardContent>
-                <p className="mb-4">{alert.description}</p>
+            <CardContent className="pb-3">
+                <p className="mb-4 text-sm">{alert.description}</p>
                 <div>
-                <label className="text-sm font-medium">Trust Score: {alert.trustScore}%</label>
-                <Progress value={alert.trustScore} className="mt-1 h-2" />
+                <label className="text-xs font-medium">Trust Score: {alert.trustScore}%</label>
+                <Progress value={alert.trustScore} className="mt-1 h-1.5" />
                 </div>
-                <div className="flex items-center text-xs text-muted-foreground mt-4">
+                <div className="flex items-center text-xs text-muted-foreground mt-3">
                     <Clock className="h-3 w-3 mr-1.5" />
                     <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
                 </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-                <p className="text-sm text-muted-foreground">Is this accurate?</p>
-                <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)}>
-                    <ThumbsUp className="h-4 w-4 mr-2" />
-                    Confirm ({alert.confirmations})
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)}>
-                    <ThumbsDown className="h-4 w-4 mr-2" />
-                    Dispute ({alert.disputes})
-                </Button>
+            <CardFooter className="flex-col items-start gap-2">
+                 <p className="text-xs text-muted-foreground">Is this accurate?</p>
+                <div className="flex gap-2 w-full">
+                    <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1">
+                        <ThumbsUp className="h-4 w-4 mr-2" />
+                        Confirm ({alert.confirmations})
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1">
+                        <ThumbsDown className="h-4 w-4 mr-2" />
+                        Dispute ({alert.disputes})
+                    </Button>
                 </div>
             </CardFooter>
         </Card>
