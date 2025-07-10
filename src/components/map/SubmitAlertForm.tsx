@@ -19,7 +19,7 @@ const alertSchema = z.object({
 type AlertFormValues = z.infer<typeof alertSchema>;
 
 // Mock Web Speech API hook
-const useSpeechRecognition = () => {
+const useSpeechRecognition = (toast: (options: { title: string; description: string }) => void) => {
     const [text, setText] = useState('');
     const [isListening, setIsListening] = useState(false);
     const [hasRecognitionSupport, setHasRecognitionSupport] = useState(false);
@@ -48,7 +48,7 @@ const useSpeechRecognition = () => {
 
 export function SubmitAlertForm() {
   const { toast } = useToast();
-  const { text, isListening, startListening, hasRecognitionSupport } = useSpeechRecognition();
+  const { text, isListening, startListening, hasRecognitionSupport } = useSpeechRecognition(toast);
 
   const form = useForm<AlertFormValues>({
     resolver: zodResolver(alertSchema),
