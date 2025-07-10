@@ -57,45 +57,47 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         longitude={alert.location.lng}
         latitude={alert.location.lat}
         onClose={onClose}
-        closeButton={false}
+        closeButton={true}
+        closeOnClick={false}
         offset={35}
         anchor="bottom"
         className="font-body z-40"
     >
-      <div className="w-72 relative">
-          <button onClick={onClose} className="absolute top-2 right-2 p-1 text-muted-foreground hover:text-foreground z-50">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close alert</span>
-          </button>
-          <div className="space-y-3 p-4">
+      <div className="w-72">
+        <div className="p-4 space-y-3">
             <h3 className="font-bold text-base font-headline pr-6">{alert.locationName}</h3>
+            
             <div className="flex items-center text-xs text-muted-foreground">
                 <RadioTower className="h-3 w-3 mr-1.5" />
                 Reported by Anonymous
             </div>
+            
             <p className="text-sm">{alert.description}</p>
+            
             <div>
               <label className="text-xs font-medium text-muted-foreground">Trust Score: {alert.trustScore}%</label>
-              <Progress value={alert.trustScore} className="mt-1 h-1" />
+              <Progress value={alert.trustScore} className="mt-1 h-1.5" />
             </div>
+
             <div className="flex items-center text-xs text-muted-foreground">
                 <Clock className="h-3 w-3 mr-1.5" />
                 <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
             </div>
-          </div>
-          <div className="px-4 pb-4 pt-2 border-t border-border">
-              <p className="text-xs text-muted-foreground mb-2">Is this accurate?</p>
-              <div className="flex gap-2 w-full">
-                  <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1">
-                      <ThumbsUp className="h-4 w-4 mr-2" />
-                      Confirm ({alert.confirmations})
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1">
-                      <ThumbsDown className="h-4 w-4 mr-2" />
-                      Dispute ({alert.disputes})
-                  </Button>
-              </div>
-          </div>
+        </div>
+
+        <div className="px-4 pb-4 pt-3 border-t border-border">
+            <p className="text-xs text-muted-foreground mb-2">Is this accurate?</p>
+            <div className="flex gap-2 w-full">
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1">
+                    <ThumbsUp className="h-4 w-4 mr-2" />
+                    Confirm ({alert.confirmations})
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1">
+                    <ThumbsDown className="h-4 w-4 mr-2" />
+                    Dispute ({alert.disputes})
+                </Button>
+            </div>
+        </div>
       </div>
     </Popup>
   );
