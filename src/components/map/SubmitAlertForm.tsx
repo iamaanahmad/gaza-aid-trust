@@ -10,6 +10,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Mic, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { addDoc } from 'firebase/firestore';
+import { alertsCollection } from '@/lib/firebase';
+import type { Alert } from '@/lib/types';
 
 const alertSchema = z.object({
   description: z.string().min(10, 'Please provide more details.').max(200),
@@ -49,6 +52,7 @@ const useSpeechRecognition = (toast: (options: { title: string; description: str
 export function SubmitAlertForm() {
   const { toast } = useToast();
   const { text, isListening, startListening, hasRecognitionSupport } = useSpeechRecognition(toast);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AlertFormValues>({
     resolver: zodResolver(alertSchema),
@@ -61,13 +65,39 @@ export function SubmitAlertForm() {
     }
   }, [text, form]);
 
-  function onSubmit(data: AlertFormValues) {
-    console.log(data);
-    toast({
-        title: "Alert Submitted!",
-        description: "Thank you for helping your community. Your alert is now live.",
-    });
-    // Here you would typically close the sheet
+  async function onSubmit(data: AlertFormValues) {
+    setIsSubmitting(true);
+    try {
+        // For now, we'll use a mock location in Gaza. A real app would use geolocation.
+        const newAlert: Omit<Alert, 'id'> = {
+            location: { lat: 31.5, lng: 34.4667 }, // Gaza City center
+            locationName: data.locationName,
+            description: data.description,
+            timestamp: Date.now(),
+            reporterId: 'anonymous-user', // Placeholder
+            confirmations: 0,
+            disputes: 0,
+            trustScore: 50, // Start with a neutral score
+        };
+
+        await addDoc(alertsCollection, newAlert);
+
+        toast({
+            title: "Alert Submitted!",
+            description: "Thank you for helping your community. Your alert is now live.",
+        });
+        form.reset();
+        // Here you would typically close the sheet, which needs state management from the parent
+    } catch (error) {
+        console.error("Error submitting alert:", error);
+        toast({
+            variant: "destructive",
+            title: "Submission Error",
+            description: "Could not submit your alert. Please try again.",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -110,9 +140,9 @@ export function SubmitAlertForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
             <Send className="mr-2 h-4 w-4" />
-            Post Alert
+            {isSubmitting ? "Posting..." : "Post Alert"}
         </Button>
       </form>
     </Form>
