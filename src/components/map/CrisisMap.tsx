@@ -5,7 +5,7 @@ import { mockAlerts } from '@/lib/mock-data';
 import type { Alert } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ThumbsUp, ThumbsDown, RadioTower, Clock, MapPin, X } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, RadioTower, Clock, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
@@ -63,16 +63,16 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         anchor="bottom"
         className="font-body z-40"
     >
-      <div className="w-72">
-        <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground z-10">
-          <X className="h-4 w-4" />
+      <div className="w-80">
+        <button onClick={onClose} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10 p-1 rounded-full">
+          <X className="h-5 w-5" />
         </button>
         <div className="pt-4 px-4 pb-3 space-y-3">
             <h3 className="font-bold text-base font-headline pr-6">{alert.locationName}</h3>
             
-            <div className="flex items-center text-xs text-muted-foreground">
-                <RadioTower className="h-4 w-4 mr-1.5" />
-                Reported by Anonymous
+            <div className="flex items-center text-sm text-muted-foreground">
+                <RadioTower className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                <span>Reported by Anonymous</span>
             </div>
             
             <p className="text-sm">{alert.description}</p>
@@ -82,20 +82,20 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
               <Progress value={alert.trustScore} className="mt-1 h-1.5" />
             </div>
 
-            <div className="flex items-center text-xs text-muted-foreground">
-                <Clock className="h-4 w-4 mr-1.5" />
+            <div className="flex items-center text-sm text-muted-foreground">
+                <Clock className="h-4 w-4 mr-1.5 flex-shrink-0" />
                 <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
             </div>
         </div>
 
-        <div className="px-4 pb-4 pt-3 border-t border-border">
+        <div className="px-4 pb-4 pt-3 border-t bg-muted/30">
             <p className="text-xs text-muted-foreground mb-2">Is this accurate?</p>
             <div className="flex gap-2 w-full">
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1">
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1 bg-background">
                     <ThumbsUp className="h-4 w-4 mr-2" />
                     Confirm ({alert.confirmations})
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1">
+                <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1 bg-background">
                     <ThumbsDown className="h-4 w-4 mr-2" />
                     Dispute ({alert.disputes})
                 </Button>
@@ -143,7 +143,9 @@ export function CrisisMap() {
                     setSelectedAlert(alert);
                 }}>
                     <div className="cursor-pointer">
-                        <MapPin className={`h-8 w-8 drop-shadow-lg transition-transform hover:scale-125`} style={{color: getPinColor(alert.trustScore)}} fillOpacity={0.7} fill={getPinColor(alert.trustScore)} strokeWidth={1.5} stroke="white" />
+                        <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert.trustScore)}}>
+                           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                        </svg>
                     </div>
                 </Marker>
             ))}
