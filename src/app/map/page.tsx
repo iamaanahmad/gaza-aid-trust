@@ -13,8 +13,7 @@ import { Megaphone } from 'lucide-react';
 
 export default function MapPage() {
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-      <div className="flex-1 relative">
+    <div className="relative w-full h-[calc(100vh-3.5rem)]">
         <CrisisMap />
         <div className="absolute bottom-6 right-6 z-30">
           <Sheet>
@@ -35,7 +34,6 @@ export default function MapPage() {
             </SheetContent>
           </Sheet>
         </div>
-      </div>
     </div>
   );
 }
