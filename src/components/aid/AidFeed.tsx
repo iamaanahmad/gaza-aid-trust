@@ -21,6 +21,7 @@ import {
 import { Separator } from '../ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
+import { mockAidRequests } from '@/lib/mock-data';
 
 function DonateDialog({ request }: { request: AidRequest }) {
   const [pledged, setPledged] = useState(false);
@@ -185,7 +186,11 @@ export function AidFeed() {
   useEffect(() => {
     const unsubscribe = onSnapshot(aidRequestsCollection, 
       (snapshot) => {
-        const aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
+        let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
+        // Fallback to mock data if Firestore is empty
+        if (aidData.length === 0) {
+            aidData = mockAidRequests.map((req, index) => ({...req, id: `mock-${index}`}));
+        }
         setRequests(aidData);
         setLoading(false);
       },
@@ -194,8 +199,10 @@ export function AidFeed() {
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Could not fetch aid requests. You may be viewing stale data."
+            description: "Could not fetch aid requests. Falling back to mock data."
         })
+        // Fallback to mock data on error
+        setRequests(mockAidRequests.map((req, index) => ({...req, id: `mock-${index}`})));
         setLoading(false);
       }
     );

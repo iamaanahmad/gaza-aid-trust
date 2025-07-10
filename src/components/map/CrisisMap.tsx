@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
 import Map, { Marker, Popup } from 'react-map-gl';
 import { Skeleton } from '../ui/skeleton';
+import { mockAlerts } from '@/lib/mock-data';
 
 function getPinColor(score: number) {
   if (score > 75) return '#22c55e'; // green-500
@@ -146,7 +147,11 @@ export function CrisisMap() {
   useEffect(() => {
     const unsubscribe = onSnapshot(alertsCollection, 
       (snapshot) => {
-        const alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+        let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+        // Fallback to mock data if Firestore is empty
+        if (alertsData.length === 0) {
+            alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
+        }
         setAlerts(alertsData);
         setLoading(false);
       }, 
@@ -155,8 +160,10 @@ export function CrisisMap() {
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Could not fetch alerts. You may be viewing stale data."
+            description: "Could not fetch alerts. Falling back to mock data."
         })
+        // Fallback to mock data on error
+        setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
         setLoading(false);
       }
     );
