@@ -223,6 +223,10 @@ export const translations = {
     en: 'Recognizing the top contributors to our community\'s well-being.',
     ar: 'تكريم لأبرز المساهمين في رفاهية مجتمعنا.',
   },
+  leaderboard_disclaimer: {
+    en: 'Note: This leaderboard shows sample data. A full version would require user accounts to track contributions.',
+    ar: 'ملاحظة: تعرض لوحة الشرف هذه بيانات نموذجية. يتطلب الإصدار الكامل حسابات مستخدمين لتتبع المساهمات.',
+  },
   leaderboard_col_rank: {
     en: 'Rank',
     ar: 'الترتيب',

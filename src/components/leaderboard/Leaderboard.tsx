@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -97,7 +98,7 @@ const LeaderboardSkeleton = () => {
 export function Leaderboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const { toast } = useTranslation();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -169,6 +170,11 @@ export function Leaderboard() {
             </Table>
         )}
       </CardContent>
+      <CardFooter>
+        <p className="text-xs text-muted-foreground text-center w-full">
+            {t('leaderboard_disclaimer')}
+        </p>
+      </CardFooter>
     </Card>
   );
 }
