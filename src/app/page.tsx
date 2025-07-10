@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { TutorialDialog } from '@/components/home/TutorialDialog';
 import { PrayerTimes } from '@/components/home/PrayerTimes';
 import { Separator } from '@/components/ui/separator';
+import communityImage from './community.png';
 
 export default function Home() {
   const features = [
@@ -43,9 +44,8 @@ export default function Home() {
     <div className="flex flex-col">
       <section className="relative w-full h-[60vh] min-h-[400px] flex items-center justify-center text-center text-white">
         <Image
-          src="https://placehold.co/1200x800.png"
-          alt="Gaza landscape"
-          data-ai-hint="gaza child hope"
+          src={communityImage}
+          alt="A supportive community in Gaza"
           fill
           priority
           className="object-cover -z-10"
