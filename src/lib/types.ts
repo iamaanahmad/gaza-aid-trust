@@ -35,3 +35,14 @@ export interface Contributor {
   contributions: number;
   type: 'Donor' | 'Reporter';
 }
+
+export interface PrayerTimesData {
+    timings: {
+        Fajr: string;
+        Dhuhr: string;
+        Asr: string;
+        Maghrib: string;
+        Isha: string;
+    };
+    date: string;
+}

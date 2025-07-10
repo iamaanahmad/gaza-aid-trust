@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Map, HandHeart, Calculator, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import { TutorialDialog } from '@/components/home/TutorialDialog';
+import { PrayerTimes } from '@/components/home/PrayerTimes';
+import { Separator } from '@/components/ui/separator';
 
 export default function Home() {
   const features = [
@@ -85,6 +87,14 @@ export default function Home() {
             ))}
           </div>
         </div>
+      </section>
+
+      <Separator />
+
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
+          <div className="container px-4 md:px-6">
+            <PrayerTimes />
+          </div>
       </section>
     </div>
   );
