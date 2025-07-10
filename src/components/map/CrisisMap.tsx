@@ -62,31 +62,31 @@ function SelectedAlertCard({ alert, onUpdate, onClose }: { alert: Alert | null; 
         offset={25}
         anchor="bottom"
     >
-        <Card className="w-80 shadow-2xl z-20 border-none">
+        <Card className="w-80 shadow-2xl z-20 border-none relative">
              <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-1 right-1 h-7 w-7">
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close alert</span>
             </Button>
-            <CardHeader className="pb-3">
-                <CardTitle className="font-headline text-xl pr-6">{alert.locationName}</CardTitle>
+            <CardHeader className="p-4 pb-2">
+                <CardTitle className="font-headline text-lg pr-6">{alert.locationName}</CardTitle>
                 <CardDescription className="flex items-center pt-1 text-xs">
                     <RadioTower className="h-3 w-3 mr-1.5" />
                     Reported by Anonymous
                 </CardDescription>
             </CardHeader>
-            <CardContent className="pb-3">
-                <p className="mb-4 text-sm">{alert.description}</p>
-                <div>
-                <label className="text-xs font-medium">Trust Score: {alert.trustScore}%</label>
-                <Progress value={alert.trustScore} className="mt-1 h-1.5" />
+            <CardContent className="p-4 pt-2 pb-3">
+                <p className="mb-3 text-sm">{alert.description}</p>
+                <div className="mb-2">
+                    <label className="text-xs font-medium">Trust Score: {alert.trustScore}%</label>
+                    <Progress value={alert.trustScore} className="mt-1 h-1.5" />
                 </div>
-                <div className="flex items-center text-xs text-muted-foreground mt-3">
+                <div className="flex items-center text-xs text-muted-foreground">
                     <Clock className="h-3 w-3 mr-1.5" />
                     <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
                 </div>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2">
-                 <p className="text-xs text-muted-foreground">Is this accurate?</p>
+            <CardFooter className="flex-col items-start gap-2 p-4 pt-0">
+                 <p className="text-xs text-muted-foreground mb-1">Is this accurate?</p>
                 <div className="flex gap-2 w-full">
                     <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1">
                         <ThumbsUp className="h-4 w-4 mr-2" />
