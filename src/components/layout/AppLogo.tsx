@@ -13,13 +13,20 @@ export function AppLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) 
       {...props}
     >
       <path
-        d="M12 21.35L11.08 20.46C7.5 17.15 5 14.88 5 12C5 9.79 6.79 8 9 8C10.34 8 11.62 8.67 12 9.71C12.38 8.67 13.66 8 15 8C17.21 8 19 9.79 19 12C19 14.88 16.5 17.15 12.92 20.46L12 21.35Z"
-        stroke="hsl(var(--primary))"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="hsl(var(--primary))"
-        fillOpacity="0.2"
+        d="M12 2c-4.42 0-8 3.58-8 8 0 5.25 8 13 8 13s8-7.75 8-13c0-4.42-3.58-8-8-8zm0 11.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="0"
+      />
+      <path
+        d="M12 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"
+        fill="none"
+      />
+      <path
+        d="M12 10.31c.62-.62 1.64-1.81 1.64-1.81.33-.33.86-.33 1.19 0 .33.33.33.86 0 1.19l-1.07 1.07c-.33.33-.86.33-1.19 0l-.57-.57-.57.57c-.33.33-.86.33-1.19 0l-1.07-1.07c-.33-.33-.33-.86 0-1.19s.86-.33 1.19 0l1.64 1.81z"
+        transform="translate(0, -1)"
+        fill="hsl(var(--card))"
+        className="group-hover:fill-primary-foreground/20"
       />
     </svg>
   );
