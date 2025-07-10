@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { mockContributors } from '@/lib/mock-data';
+import { useState, useEffect } from 'react';
 import type { Contributor } from '@/lib/types';
+import { contributorsCollection } from '@/lib/firebase';
+import { onSnapshot, query, orderBy } from 'firebase/firestore';
 import {
   Card,
   CardContent,
@@ -20,6 +21,8 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Crown, Medal, ShieldCheck } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '../ui/skeleton';
 
 const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="h-5 w-5 text-yellow-400" />;
@@ -47,8 +50,61 @@ const ContributorRow = ({ contributor }: { contributor: Contributor }) => (
   </TableRow>
 );
 
+const LeaderboardSkeleton = () => (
+    <Table>
+        <TableHeader>
+            <TableRow>
+              <TableHead className="w-16 text-center">Rank</TableHead>
+              <TableHead>Contributor</TableHead>
+              <TableHead className="text-right">Contributions</TableHead>
+            </TableRow>
+        </TableHeader>
+        <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                    <TableCell className="w-16 text-center"><Skeleton className="h-5 w-5 rounded-full mx-auto" /></TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-4">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div>
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-3 w-16 mt-1" />
+                            </div>
+                        </div>
+                    </TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-5 w-8 ml-auto" /></TableCell>
+                </TableRow>
+            ))}
+        </TableBody>
+    </Table>
+)
+
 export function Leaderboard() {
-  const [contributors] = useState<Contributor[]>(mockContributors.sort((a, b) => a.rank - b.rank));
+  const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const q = query(contributorsCollection, orderBy('rank'));
+    const unsubscribe = onSnapshot(q,
+      (snapshot) => {
+        const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
+        setContributors(contributorData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching contributors:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch leaderboard. You may be viewing stale data."
+        })
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [toast]);
 
   return (
     <Card>
@@ -59,20 +115,24 @@ export function Leaderboard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-16 text-center">Rank</TableHead>
-              <TableHead>Contributor</TableHead>
-              <TableHead className="text-right">Contributions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {contributors.map((contributor) => (
-              <ContributorRow key={contributor.id} contributor={contributor} />
-            ))}
-          </TableBody>
-        </Table>
+        {loading ? (
+            <LeaderboardSkeleton />
+        ) : (
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead className="w-16 text-center">Rank</TableHead>
+                <TableHead>Contributor</TableHead>
+                <TableHead className="text-right">Contributions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {contributors.map((contributor) => (
+                <ContributorRow key={contributor.id} contributor={contributor} />
+                ))}
+            </TableBody>
+            </Table>
+        )}
       </CardContent>
     </Card>
   );

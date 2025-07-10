@@ -1,8 +1,10 @@
 import type { Alert, AidRequest, Contributor } from './types';
 
-export const mockAlerts: Alert[] = [
+// This file is now used for seeding the database.
+// The app will fetch data from Firestore directly.
+
+export const mockAlerts: Omit<Alert, 'id'>[] = [
   {
-    id: '1',
     location: { lat: 31.3547, lng: 34.3088 },
     locationName: 'Khan Younis Center',
     description: 'Food aid distribution happening now. Water and bread available.',
@@ -13,7 +15,6 @@ export const mockAlerts: Alert[] = [
     trustScore: 92,
   },
   {
-    id: '2',
     location: { lat: 31.5222, lng: 34.4533 },
     locationName: 'Gaza City Clinic',
     description: 'Medical supplies just arrived. Open for families with children.',
@@ -24,7 +25,6 @@ export const mockAlerts: Alert[] = [
     trustScore: 65,
   },
   {
-    id: '3',
     location: { lat: 31.2913, lng: 34.2618 },
     locationName: 'Rafah Shelter',
     description: 'This location is reported to be full. Avoid for now.',
@@ -36,9 +36,8 @@ export const mockAlerts: Alert[] = [
   },
 ];
 
-export const mockAidRequests: AidRequest[] = [
+export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
   {
-    id: 'req1',
     requesterId: 'gaza-user-1',
     category: 'Food',
     description: 'Need rice, flour, and cooking oil for a family of 5.',
@@ -48,7 +47,6 @@ export const mockAidRequests: AidRequest[] = [
     locationName: 'Jabalia Camp',
   },
   {
-    id: 'req2',
     requesterId: 'gaza-user-2',
     category: 'Food',
     description: 'Urgently need baby formula and diapers.',
@@ -59,7 +57,6 @@ export const mockAidRequests: AidRequest[] = [
     photoUrl: 'https://placehold.co/600x400.png',
   },
   {
-    id: 'req3',
     requesterId: 'gaza-user-3',
     category: 'Food',
     description: 'Requesting canned goods and clean water for an elderly couple.',
@@ -71,9 +68,8 @@ export const mockAidRequests: AidRequest[] = [
   },
 ];
 
-export const mockContributors: Contributor[] = [
+export const mockContributors: Omit<Contributor, 'id'>[] = [
   {
-    id: 'donor1',
     rank: 1,
     name: 'Generous Donor A',
     contributions: 25,
@@ -81,7 +77,6 @@ export const mockContributors: Contributor[] = [
     avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
-    id: 'reporter1',
     rank: 2,
     name: 'Vigilant Reporter 1',
     contributions: 18,
@@ -89,14 +84,12 @@ export const mockContributors: Contributor[] = [
     avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
-    id: 'donor2',
     rank: 3,
     name: 'Anonymous Giver',
     contributions: 15,
     type: 'Donor',
   },
   {
-    id: 'reporter2',
     rank: 4,
     name: 'Community Watcher',
     contributions: 12,
@@ -104,14 +97,12 @@ export const mockContributors: Contributor[] = [
     avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
-    id: 'donor3',
     rank: 5,
     name: 'Hope Spreader',
     contributions: 10,
     type: 'Donor',
   },
   {
-    id: 'reporter3',
     rank: 6,
     name: 'On-the-Ground Hero',
     contributions: 7,

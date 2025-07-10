@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { mockAlerts } from '@/lib/mock-data';
+import { useState, useEffect } from 'react';
+import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
+import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ThumbsUp, ThumbsDown, RadioTower, Clock, X } from 'lucide-react';
@@ -10,6 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
 import Map, { Marker, Popup } from 'react-map-gl';
+import { Skeleton } from '../ui/skeleton';
 
 function getPinColor(score: number) {
   if (score > 75) return '#22c55e'; // green-500
@@ -31,15 +33,28 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
       disputes: alert.disputes + (isConfirm ? 0 : 1),
     };
     
+    // Optimistic UI update
+    onUpdate(updatedAlert);
+
     try {
-      const { trustScore, reasoning } = await calculateTrustScore({
+      const { trustScore } = await calculateTrustScore({
         confirmations: updatedAlert.confirmations,
         disputes: updatedAlert.disputes,
         initialScore: 50, // Base score for a new alert
       });
 
       const finalAlert = {...updatedAlert, trustScore};
+      // Final update with AI score
       onUpdate(finalAlert);
+
+      // Update Firestore document
+      const alertDoc = doc(alertsCollection, alert.id);
+      await updateDoc(alertDoc, { 
+          confirmations: finalAlert.confirmations,
+          disputes: finalAlert.disputes,
+          trustScore: finalAlert.trustScore
+       });
+
       toast({ title: 'Trust Score Updated', description: `The score is now ${trustScore}%.` });
 
     } catch (e) {
@@ -64,7 +79,6 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
         className="font-body z-40"
     >
         <div className="w-80 rounded-lg shadow-lg bg-background text-foreground overflow-hidden">
-            {/* Header */}
             <div className="p-4 flex justify-between items-start gap-4">
                 <h3 className="font-bold text-lg font-headline pt-1">{alert.locationName}</h3>
                 <button 
@@ -76,7 +90,6 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
                 </button>
             </div>
             
-            {/* Content */}
             <div className="px-4 pb-4 space-y-3">
                 <div className="flex items-center text-sm text-muted-foreground">
                     <RadioTower className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -96,7 +109,6 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
                 </div>
             </div>
 
-            {/* Footer */}
             <div className="px-4 py-3 border-t bg-muted/50 text-center">
                 <p className="text-xs font-semibold text-muted-foreground mb-2">Is this information accurate?</p>
                 <div className="grid grid-cols-2 gap-2 w-full">
@@ -115,9 +127,42 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
   );
 }
 
+const MapSkeleton = () => (
+    <div className="w-full h-full bg-muted flex items-center justify-center">
+        <div className="text-center">
+            <RadioTower className="h-12 w-12 mx-auto text-muted-foreground animate-pulse" />
+            <p className="mt-4 text-muted-foreground">Loading Map and Alerts...</p>
+        </div>
+    </div>
+);
+
 export function CrisisMap() {
-  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const { toast } = useToast();
+
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(alertsCollection, 
+      (snapshot) => {
+        const alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+        setAlerts(alertsData);
+        setLoading(false);
+      }, 
+      (error) => {
+        console.error("Error fetching alerts:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch alerts. You may be viewing stale data."
+        })
+        setLoading(false);
+      }
+    );
+    
+    return () => unsubscribe();
+  }, [toast]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
@@ -130,6 +175,10 @@ export function CrisisMap() {
       zoom: 10
   }
 
+  if (loading) {
+      return <MapSkeleton />;
+  }
+
   return (
     <div className="w-full h-full relative" role="application" aria-label="Crisis Map">
         <style jsx global>{`
@@ -140,7 +189,7 @@ export function CrisisMap() {
           }
         `}</style>
         <Map
-          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "pk.eyJ1IjoiYXNocWtpbmciLCJhIjoiY21jd3FmZ2p3MDM5dzJpc2J3djdrOTc3aSJ9.qK7ir3IbGbiEjmcUozUBxw"}
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           initialViewState={initialViewState}
           style={{width: '100%', height: '100%'}}
           mapStyle="mapbox://styles/mapbox/streets-v11"

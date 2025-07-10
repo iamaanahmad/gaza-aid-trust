@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { mockAidRequests } from '@/lib/mock-data';
+import { useState, useEffect } from 'react';
 import type { AidRequest } from '@/lib/types';
+import { aidRequestsCollection } from '@/lib/firebase';
+import { getDocs, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -18,9 +19,31 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Separator } from '../ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '../ui/skeleton';
 
 function DonateDialog({ request }: { request: AidRequest }) {
   const [pledged, setPledged] = useState(false);
+  const { toast } = useToast();
+
+  const handlePledge = async () => {
+    try {
+      const requestDoc = doc(aidRequestsCollection, request.id);
+      await updateDoc(requestDoc, { status: 'Pledged' });
+      setPledged(true);
+      toast({
+        title: 'Thank You!',
+        description: 'Your pledge has been recorded. This will bring much needed relief.',
+      });
+    } catch (error) {
+      console.error('Error pledging donation: ', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not record your pledge. Please try again.',
+      });
+    }
+  };
 
   return (
     <DialogContent>
@@ -41,7 +64,7 @@ function DonateDialog({ request }: { request: AidRequest }) {
             A local partner will use your donation to purchase and deliver the requested items to the family in {request.locationName}.
           </p>
           <p className="font-bold text-lg mb-4">Simulated Donation: $50</p>
-          <Button onClick={() => setPledged(true)} className="w-full" size="lg">
+          <Button onClick={handlePledge} className="w-full" size="lg">
             Confirm Pledge
           </Button>
           <p className="text-xs text-muted-foreground mt-2 text-center">This is a mock donation flow for the hackathon prototype.</p>
@@ -127,9 +150,63 @@ function AidRequestCard({ request }: { request: AidRequest }) {
   );
 }
 
-export function AidFeed() {
-  const [requests] = useState<AidRequest[]>(mockAidRequests);
+const AidFeedSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="flex flex-col h-full">
+                <Skeleton className="h-48 w-full" />
+                <CardHeader>
+                    <div className="flex justify-between items-start">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-6 w-1/4" />
+                    </div>
+                     <Skeleton className="h-4 w-full pt-2" />
+                </CardHeader>
+                <CardContent className="flex-grow space-y-3">
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-1/3" />
+                </CardContent>
+                <Separator />
+                <CardFooter className="pt-4 flex justify-between items-center">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-10 w-24" />
+                </CardFooter>
+            </Card>
+        ))}
+    </div>
+);
 
+
+export function AidFeed() {
+  const [requests, setRequests] = useState<AidRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(aidRequestsCollection, 
+      (snapshot) => {
+        const aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
+        setRequests(aidData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching aid requests:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch aid requests. You may be viewing stale data."
+        })
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [toast]);
+
+  if (loading) {
+    return <AidFeedSkeleton />;
+  }
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {requests.map((request) => (
