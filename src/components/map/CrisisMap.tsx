@@ -151,10 +151,28 @@ export function CrisisMap() {
 
 
   useEffect(() => {
+    let isSubscribed = true;
+
+    // Set a timeout to prevent infinitely long load times on connection errors.
+    const timeoutId = setTimeout(() => {
+      if (isSubscribed && loading) {
+        console.warn("Firestore connection timed out. Falling back to mock data.");
+        setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
+        setLoading(false);
+        toast({
+          variant: "destructive",
+          title: t('toast_error_title'),
+          description: "Could not connect to the database. Displaying sample data."
+        });
+      }
+    }, 5000); // 5-second timeout
+
     const unsubscribe = onSnapshot(alertsCollection, 
       (snapshot) => {
+        if (!isSubscribed) return;
+        clearTimeout(timeoutId); // Connection successful, clear the timeout.
+
         let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
-        // Fallback to mock data if Firestore is empty
         if (alertsData.length === 0) {
             alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
         }
@@ -162,20 +180,25 @@ export function CrisisMap() {
         setLoading(false);
       }, 
       (error) => {
+        if (!isSubscribed) return;
+        clearTimeout(timeoutId); // Error occurred, clear the timeout.
         console.error("Error fetching alerts:", error);
         toast({
             variant: "destructive",
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
         })
-        // Fallback to mock data on error
         setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
         setLoading(false);
       }
     );
     
-    return () => unsubscribe();
-  }, [toast, t]);
+    return () => {
+      isSubscribed = false;
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
+  }, [toast, t, loading]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));

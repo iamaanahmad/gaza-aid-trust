@@ -201,31 +201,56 @@ export function AidFeed() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(aidRequestsCollection, 
+    let isSubscribed = true;
+
+    // Set a timeout to prevent infinitely long load times on connection errors.
+    const timeoutId = setTimeout(() => {
+      if (isSubscribed && loading) {
+        console.warn("Firestore connection timed out. Falling back to mock data.");
+        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
+        setLoading(false);
+        toast({
+          variant: "destructive",
+          title: t('toast_error_title'),
+          description: "Could not connect to the database. Displaying sample data."
+        });
+      }
+    }, 5000); // 5-second timeout
+
+    const unsubscribe = onSnapshot(aidRequestsCollection,
       (snapshot) => {
+        if (!isSubscribed) return;
+        clearTimeout(timeoutId); // Connection successful, clear the timeout.
+
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
-        // Fallback to mock data if Firestore is empty
+        // Fallback to mock data if Firestore is empty but connection was successful
         if (aidData.length === 0) {
-            aidData = mockAidRequests.map((req, index) => ({...req, id: `mock-${index}`}));
+          aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
         }
         setRequests(aidData);
         setLoading(false);
       },
       (error) => {
+        if (!isSubscribed) return;
+        clearTimeout(timeoutId); // Error occurred, clear the timeout.
         console.error("Error fetching aid requests:", error);
         toast({
-            variant: "destructive",
-            title: t('toast_error_title'),
-            description: t('toast_fetch_aid_error')
+          variant: "destructive",
+          title: t('toast_error_title'),
+          description: t('toast_fetch_aid_error')
         })
         // Fallback to mock data on error
-        setRequests(mockAidRequests.map((req, index) => ({...req, id: `mock-${index}`})));
+        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
         setLoading(false);
       }
     );
 
-    return () => unsubscribe();
-  }, [toast, t]);
+    return () => {
+      isSubscribed = false;
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
+  }, [toast, t, loading]);
 
   if (loading) {
     return <AidFeedSkeleton />;
