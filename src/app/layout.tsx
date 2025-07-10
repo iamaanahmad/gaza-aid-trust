@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description:
     'A community-powered crisis map and aid platform for Gaza. Built for the "Hack for Gaza" hackathon.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo.png',
   },
 };
 
