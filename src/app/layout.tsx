@@ -3,6 +3,8 @@ import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
+import 'mapbox-gl/dist/mapbox-gl.css';
+
 
 export const metadata: Metadata = {
   title: 'Gaza Aid & Trust: Crisis Connect',
