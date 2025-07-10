@@ -5,7 +5,7 @@ import { mockAlerts } from '@/lib/mock-data';
 import type { Alert } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ThumbsUp, ThumbsDown, RadioTower, Clock, X, MapPin } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, RadioTower, Clock, MapPin } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
@@ -120,6 +120,18 @@ export function CrisisMap() {
 
   return (
     <div className="w-full h-full relative" role="application" aria-label="Crisis Map">
+        <style jsx global>{`
+          .mapboxgl-popup-content {
+            padding: 0;
+            border-radius: 0.5rem;
+          }
+          .mapboxgl-popup-close-button {
+            right: 6px;
+            top: 6px;
+            font-size: 1.25rem;
+            line-height: 1.25rem;
+          }
+        `}</style>
         <Map
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           initialViewState={initialViewState}
