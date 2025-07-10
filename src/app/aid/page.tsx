@@ -1,3 +1,5 @@
+'use client';
+
 import { AidFeed } from '@/components/aid/AidFeed';
 import { RequestAidForm } from '@/components/aid/RequestAidForm';
 import { Button } from '@/components/ui/button';
@@ -9,30 +11,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { useTranslation } from '@/hooks/use-translation';
 import { HandHeart } from 'lucide-react';
 
 export default function AidPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="text-center md:text-left">
-          <h1 className="text-4xl font-bold">توصيل المساعدات</h1>
+          <h1 className="text-4xl font-bold">{t('aid_title')}</h1>
           <p className="text-muted-foreground mt-2 text-lg">
-            تواصل مباشرة مع الأسر في غزة. لبِّ حاجة، وشارك أملاً.
+            {t('aid_subtitle')}
           </p>
         </div>
         <Dialog>
           <DialogTrigger asChild>
             <Button size="lg">
-              <HandHeart className="ml-2 h-5 w-5" />
-              اطلب مساعدة
+              <HandHeart className="rtl:ml-2 ltr:mr-2 h-5 w-5" />
+              {t('request_aid_button')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>إرسال طلب مساعدة</DialogTitle>
+              <DialogTitle>{t('request_aid_form_title')}</DialogTitle>
               <DialogDescription>
-                يرجى وصف احتياجاتك بوضوح. سيكون طلبك مرئيًا للمانحين.
+                {t('request_aid_form_description')}
               </DialogDescription>
             </DialogHeader>
             <RequestAidForm />

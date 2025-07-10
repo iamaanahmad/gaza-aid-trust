@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -14,13 +13,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { addDoc } from 'firebase/firestore';
 import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
-
-const alertSchema = z.object({
-  description: z.string().min(10, 'يرجى تقديم تفاصيل أكثر.').max(200),
-  locationName: z.string().min(3, 'يرجى تقديم اسم الموقع.'),
-});
-
-type AlertFormValues = z.infer<typeof alertSchema>;
+import { useTranslation } from '@/hooks/use-translation';
 
 interface SpeechRecognition extends EventTarget {
     continuous: boolean;
@@ -34,11 +27,12 @@ interface SpeechRecognition extends EventTarget {
 }
 
 // Custom hook for Web Speech API
-const useSpeechRecognition = () => {
+const useSpeechRecognition = (lang: string) => {
     const [transcript, setTranscript] = useState('');
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
     const { toast } = useToast();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -47,7 +41,7 @@ const useSpeechRecognition = () => {
             const recognition = recognitionRef.current;
             recognition.continuous = false;
             recognition.interimResults = false;
-            recognition.lang = 'ar-EG'; // Set to Arabic for better accuracy with expected phrases
+            recognition.lang = lang;
 
             recognition.onresult = (event: any) => {
                 const currentTranscript = event.results[0][0].transcript;
@@ -58,8 +52,8 @@ const useSpeechRecognition = () => {
                 console.error('Speech recognition error:', event.error);
                 toast({
                     variant: 'destructive',
-                    title: 'خطأ في الصوت',
-                    description: 'لم يتم التعرف على الكلام. يرجى المحاولة مرة أخرى.',
+                    title: t('toast_audio_error'),
+                    description: t('toast_audio_error_desc'),
                 });
             };
 
@@ -67,7 +61,7 @@ const useSpeechRecognition = () => {
                 setIsListening(false);
             };
         }
-    }, [toast]);
+    }, [toast, lang, t]);
     
     const startListening = useCallback(() => {
         if (recognitionRef.current && !isListening) {
@@ -94,8 +88,16 @@ const useSpeechRecognition = () => {
 
 export function SubmitAlertForm() {
   const { toast } = useToast();
-  const { transcript, isListening, startListening, hasSupport } = useSpeechRecognition();
+  const { t, language } = useTranslation();
+  const { transcript, isListening, startListening, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const alertSchema = z.object({
+    description: z.string().min(10, t('validation_description_min_alert')).max(200),
+    locationName: z.string().min(3, t('validation_location_min')),
+  });
+
+  type AlertFormValues = z.infer<typeof alertSchema>;
 
   const form = useForm<AlertFormValues>({
     resolver: zodResolver(alertSchema),
@@ -126,8 +128,8 @@ export function SubmitAlertForm() {
         await addDoc(alertsCollection, newAlert);
 
         toast({
-            title: "تم إرسال التنبيه!",
-            description: "شكرًا لمساعدتك لمجتمعك. تنبيهك الآن مباشر.",
+            title: t('toast_alert_submitted'),
+            description: t('toast_alert_submitted_desc'),
         });
         form.reset();
         // Here you would typically close the sheet, which needs state management from the parent
@@ -135,8 +137,8 @@ export function SubmitAlertForm() {
         console.error("Error submitting alert:", error);
         toast({
             variant: "destructive",
-            title: "خطأ في الإرسال",
-            description: "لم نتمكن من إرسال تنبيهك. يرجى المحاولة مرة أخرى.",
+            title: t('toast_submission_error'),
+            description: t('toast_alert_submission_error_desc'),
         });
     } finally {
         setIsSubmitting(false);
@@ -147,8 +149,8 @@ export function SubmitAlertForm() {
     if (!hasSupport) {
         toast({
             variant: 'destructive',
-            title: 'متصفح غير مدعوم',
-            description: 'متصفحك لا يدعم التعرف على الصوت.',
+            title: t('toast_unsupported_browser'),
+            description: t('toast_unsupported_browser_desc'),
         });
         return;
     }
@@ -165,12 +167,12 @@ export function SubmitAlertForm() {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>الوصف</FormLabel>
+              <FormLabel>{t('form_label_description')}</FormLabel>
               <FormControl>
                 <div className="relative w-full">
                   <Textarea
-                    placeholder="مثال: طريق آمن إلى رفح مفتوح..."
-                    className="pl-12"
+                    placeholder={t('form_placeholder_description_alert')}
+                    className="ltr:pr-12 rtl:pl-12"
                     {...field}
                   />
                   <Button 
@@ -179,8 +181,8 @@ export function SubmitAlertForm() {
                     variant="ghost"
                     onClick={handleMicClick} 
                     disabled={isListening} 
-                    aria-label="استخدام الإدخال الصوتي"
-                    className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground"
+                    aria-label={t('use_voice_input_label')}
+                    className="absolute rtl:left-1 ltr:right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground"
                   >
                     <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse text-red-500' : ''}`} />
                   </Button>
@@ -195,17 +197,17 @@ export function SubmitAlertForm() {
           name="locationName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>اسم الموقع</FormLabel>
+              <FormLabel>{t('form_label_location_name')}</FormLabel>
               <FormControl>
-                <Input placeholder="مثال: وسط خان يونس" {...field} />
+                <Input placeholder={t('form_placeholder_location_name')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-            <Send className="ml-2 h-4 w-4" />
-            {isSubmitting ? "جاري النشر..." : "انشر التنبيه"}
+            <Send className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
+            {isSubmitting ? t('publishing_alert_button') : t('publish_alert_button')}
         </Button>
       </form>
     </Form>

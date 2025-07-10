@@ -19,20 +19,22 @@ import { addDoc } from 'firebase/firestore';
 import { aidRequestsCollection } from '@/lib/firebase';
 import type { AidRequest } from '@/lib/types';
 import { useState } from 'react';
-
-const requestAidSchema = z.object({
-  category: z.enum(['Food', 'Medicine', 'Shelter'], { required_error: 'يرجى اختيار فئة.' }),
-  description: z.string().min(10, 'يرجى تقديم وصف مفصل.').max(200),
-  familySize: z.coerce.number().min(1, 'يجب أن يكون حجم الأسرة 1 على الأقل.'),
-  locationName: z.string().min(3, 'يرجى تقديم موقع.'),
-  photo: z.any().optional(),
-});
-
-type RequestAidFormValues = z.infer<typeof requestAidSchema>;
+import { useTranslation } from '@/hooks/use-translation';
 
 export function RequestAidForm() {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { t } = useTranslation();
+
+    const requestAidSchema = z.object({
+      category: z.enum(['Food', 'Medicine', 'Shelter'], { required_error: t('validation_category_required') }),
+      description: z.string().min(10, t('validation_description_min')).max(200),
+      familySize: z.coerce.number().min(1, t('validation_family_size_min')),
+      locationName: z.string().min(3, t('validation_location_min')),
+      photo: z.any().optional(),
+    });
+
+    type RequestAidFormValues = z.infer<typeof requestAidSchema>;
     
     const form = useForm<RequestAidFormValues>({
       resolver: zodResolver(requestAidSchema),
@@ -60,8 +62,8 @@ export function RequestAidForm() {
         await addDoc(aidRequestsCollection, newRequest);
         
         toast({
-            title: "تم إرسال الطلب",
-            description: "تم نشر طلب المساعدة الخاص بك. سنقوم بإعلامك بالتحديثات.",
+            title: t('toast_request_submitted'),
+            description: t('toast_request_submitted_desc'),
         });
         form.reset();
         // Ideally, close the dialog here. This requires state from parent.
@@ -69,8 +71,8 @@ export function RequestAidForm() {
         console.error("Error submitting aid request:", error);
         toast({
             variant: "destructive",
-            title: "خطأ في الإرسال",
-            description: "لم نتمكن من إرسال طلبك. يرجى المحاولة مرة أخرى.",
+            title: t('toast_submission_error'),
+            description: t('toast_request_submission_error_desc'),
         });
     } finally {
         setIsSubmitting(false);
@@ -85,17 +87,17 @@ export function RequestAidForm() {
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>فئة المساعدة</FormLabel>
+              <FormLabel>{t('form_label_category')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر فئة" />
+                    <SelectValue placeholder={t('form_placeholder_select_category')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Food">طعام</SelectItem>
-                  <SelectItem value="Medicine">دواء</SelectItem>
-                  <SelectItem value="Shelter">مأوى</SelectItem>
+                  <SelectItem value="Food">{t('category_food')}</SelectItem>
+                  <SelectItem value="Medicine">{t('category_medicine')}</SelectItem>
+                  <SelectItem value="Shelter">{t('category_shelter')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -107,9 +109,9 @@ export function RequestAidForm() {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>وصف الحاجة</FormLabel>
+              <FormLabel>{t('form_label_description')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="مثال: بحاجة إلى أرز وماء نظيف للأسرة..." {...field} />
+                <Textarea placeholder={t('form_placeholder_description_aid')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -121,7 +123,7 @@ export function RequestAidForm() {
             name="familySize"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>حجم الأسرة</FormLabel>
+                <FormLabel>{t('form_label_family_size')}</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="5" {...field} />
                 </FormControl>
@@ -134,9 +136,9 @@ export function RequestAidForm() {
             name="locationName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>الموقع</FormLabel>
+                <FormLabel>{t('form_label_location')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="مثال: خان يونس" {...field} />
+                  <Input placeholder={t('form_placeholder_location')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -148,7 +150,7 @@ export function RequestAidForm() {
           name="photo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>صورة اختيارية</FormLabel>
+              <FormLabel>{t('form_label_photo')}</FormLabel>
               <FormControl>
                 <Input type="file" className="flex items-center pt-2" {...field} />
               </FormControl>
@@ -157,7 +159,7 @@ export function RequestAidForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "جاري الإرسال..." : "إرسال الطلب"}
+            {isSubmitting ? t('submitting_button') : t('submit_request_button')}
         </Button>
       </form>
     </Form>

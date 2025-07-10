@@ -9,10 +9,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useTranslation } from '@/hooks/use-translation';
 
 export function AccessibilityControls() {
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [fontSize, setFontSize] = useState(100);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -38,37 +40,37 @@ export function AccessibilityControls() {
       <div className="flex items-center gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={decreaseFontSize} aria-label="Decrease font size">
+            <Button variant="ghost" size="icon" onClick={decreaseFontSize} aria-label={t('a11y_decrease_font_size')}>
               <ZoomOut className="h-5 w-5" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Decrease font size</TooltipContent>
+          <TooltipContent>{t('a11y_decrease_font_size')}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={resetFontSize} aria-label="Reset font size">
+            <Button variant="ghost" size="icon" onClick={resetFontSize} aria-label={t('a11y_reset_font_size')}>
               <RotateCcw className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Reset font size</TooltipContent>
+          <TooltipContent>{t('a11y_reset_font_size')}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={increaseFontSize} aria-label="Increase font size">
+            <Button variant="ghost" size="icon" onClick={increaseFontSize} aria-label={t('a11y_increase_font_size')}>
                <ZoomIn className="h-5 w-5" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Increase font size</TooltipContent>
+          <TooltipContent>{t('a11y_increase_font_size')}</TooltipContent>
         </Tooltip>
         
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={toggleHighContrast} aria-label="Toggle high contrast mode">
+            <Button variant="ghost" size="icon" onClick={toggleHighContrast} aria-label={t('a11y_toggle_high_contrast')}>
               <Contrast className="h-5 w-5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {isHighContrast ? 'Disable high contrast' : 'Enable high contrast'}
+            {isHighContrast ? t('a11y_disable_high_contrast') : t('a11y_enable_high_contrast')}
           </TooltipContent>
         </Tooltip>
       </div>

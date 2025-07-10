@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { AidRequest } from '@/lib/types';
 import { aidRequestsCollection } from '@/lib/firebase';
-import { getDocs, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -22,10 +22,12 @@ import { Separator } from '../ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { mockAidRequests } from '@/lib/mock-data';
+import { useTranslation } from '@/hooks/use-translation';
 
 function DonateDialog({ request }: { request: AidRequest }) {
   const [pledged, setPledged] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handlePledge = async () => {
     try {
@@ -33,15 +35,15 @@ function DonateDialog({ request }: { request: AidRequest }) {
       await updateDoc(requestDoc, { status: 'Pledged' });
       setPledged(true);
       toast({
-        title: 'شكرًا لك!',
-        description: 'تم تسجيل تعهدك. هذا سيجلب الإغاثة التي تشتد الحاجة إليها.',
+        title: t('toast_thank_you'),
+        description: t('toast_pledge_success'),
       });
     } catch (error) {
       console.error('Error pledging donation: ', error);
       toast({
         variant: 'destructive',
-        title: 'خطأ',
-        description: 'لم نتمكن من تسجيل تعهدك. يرجى المحاولة مرة أخرى.',
+        title: t('toast_error_title'),
+        description: t('toast_pledge_error'),
       });
     }
   };
@@ -49,26 +51,26 @@ function DonateDialog({ request }: { request: AidRequest }) {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>التعهد بالتبرع</DialogTitle>
+        <DialogTitle>{t('donate_dialog_title')}</DialogTitle>
         <DialogDescription>
-          أنت على وشك تلبية الطلب لـ "{request.description}".
+          {t('donate_dialog_description', { description: request.description })}
         </DialogDescription>
       </DialogHeader>
       {pledged ? (
         <div className="text-center py-8">
-          <h3 className="text-2xl font-bold text-green-600">شكرًا لك!</h3>
-          <p className="text-muted-foreground mt-2">تم تسجيل تعهدك. هذا سيجلب الإغاثة التي تشتد الحاجة إليها.</p>
+          <h3 className="text-2xl font-bold text-green-600">{t('toast_thank_you')}</h3>
+          <p className="text-muted-foreground mt-2">{t('toast_pledge_success')}</p>
         </div>
       ) : (
         <div className="py-4">
           <p className="mb-4">
-            سيستخدم شريك محلي تبرعك لشراء وتسليم المواد المطلوبة للأسرة في {request.locationName}.
+            {t('donate_dialog_body', { location: request.locationName })}
           </p>
-          <p className="font-bold text-lg mb-4">تبرع وهمي: $50</p>
+          <p className="font-bold text-lg mb-4">{t('donate_dialog_mock_amount')}</p>
           <Button onClick={handlePledge} className="w-full" size="lg">
-            تأكيد التعهد
+            {t('confirm_pledge_button')}
           </Button>
-          <p className="text-xs text-muted-foreground mt-2 text-center">هذا تدفق تبرع وهمي لنموذج الهاكاثون.</p>
+          <p className="text-xs text-muted-foreground mt-2 text-center">{t('donate_dialog_mock_notice')}</p>
         </div>
       )}
     </DialogContent>
@@ -76,6 +78,8 @@ function DonateDialog({ request }: { request: AidRequest }) {
 }
 
 function AidRequestCard({ request }: { request: AidRequest }) {
+  const { t } = useTranslation();
+
   const getStatusVariant = (status: AidRequest['status']) => {
     switch (status) {
       case 'Needed':
@@ -90,15 +94,15 @@ function AidRequestCard({ request }: { request: AidRequest }) {
   };
   
   const statusTranslations: { [key in AidRequest['status']]: string } = {
-    Needed: 'مطلوب',
-    Pledged: 'تم التعهد',
-    Fulfilled: 'تم التلبية',
+    Needed: t('status_needed'),
+    Pledged: t('status_pledged'),
+    Fulfilled: t('status_fulfilled'),
   };
 
   const categoryTranslations: { [key in AidRequest['category']]: string } = {
-    Food: 'طعام',
-    Medicine: 'دواء',
-    Shelter: 'مأوى',
+    Food: t('category_food'),
+    Medicine: t('category_medicine'),
+    Shelter: t('category_shelter'),
   }
 
   return (
@@ -116,18 +120,18 @@ function AidRequestCard({ request }: { request: AidRequest }) {
       )}
       <CardHeader>
         <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-bold">طلب {categoryTranslations[request.category]}</CardTitle>
+            <CardTitle className="text-lg font-bold">{t('aid_request_card_title', { category: categoryTranslations[request.category] })}</CardTitle>
             <Badge variant={getStatusVariant(request.status)}>{statusTranslations[request.status]}</Badge>
         </div>
         <CardDescription className="pt-2">{request.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-3">
         <div className="flex items-center text-sm text-muted-foreground">
-            <Users className="h-4 w-4 ml-2" />
-            <span>أسرة مكونة من {request.familySize} أفراد</span>
+            <Users className="h-4 w-4 rtl:ml-2 ltr:mr-2" />
+            <span>{t('family_size', { count: request.familySize })}</span>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 ml-2" />
+            <MapPin className="h-4 w-4 rtl:ml-2 ltr:mr-2" />
             <span>{request.locationName}</span>
         </div>
       </CardContent>
@@ -135,9 +139,9 @@ function AidRequestCard({ request }: { request: AidRequest }) {
         <div className="px-6 pb-4 pt-0 text-sm">
            <div className="flex items-center gap-2 font-semibold text-muted-foreground mb-2">
             <MessageSquareQuote className="h-4 w-4" />
-            <span>رسالة شكر من المستلم</span>
+            <span>{t('thank_you_message')}</span>
            </div>
-          <blockquote className="border-r-2 border-primary/50 pr-3 italic text-muted-foreground">
+          <blockquote className="ltr:border-l-2 rtl:border-r-2 border-primary/50 ltr:pl-3 rtl:pr-3 italic text-muted-foreground">
             {request.feedback}
           </blockquote>
         </div>
@@ -151,8 +155,8 @@ function AidRequestCard({ request }: { request: AidRequest }) {
            <Dialog>
              <DialogTrigger asChild>
                 <Button>
-                  <HandHeart className="ml-2 h-4 w-4" />
-                  تبرع
+                  <HandHeart className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
+                  {t('donate_button')}
                 </Button>
              </DialogTrigger>
              <DonateDialog request={request} />
@@ -194,6 +198,7 @@ export function AidFeed() {
   const [requests, setRequests] = useState<AidRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(aidRequestsCollection, 
@@ -210,8 +215,8 @@ export function AidFeed() {
         console.error("Error fetching aid requests:", error);
         toast({
             variant: "destructive",
-            title: "خطأ",
-            description: "تعذر جلب طلبات المساعدة. يتم الآن عرض بيانات وهمية."
+            title: t('toast_error_title'),
+            description: t('toast_fetch_aid_error')
         })
         // Fallback to mock data on error
         setRequests(mockAidRequests.map((req, index) => ({...req, id: `mock-${index}`})));
@@ -220,7 +225,7 @@ export function AidFeed() {
     );
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [toast, t]);
 
   if (loading) {
     return <AidFeedSkeleton />;

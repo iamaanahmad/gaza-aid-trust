@@ -13,6 +13,7 @@ import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
 import Map, { Marker, Popup } from 'react-map-gl';
 import { Skeleton } from '../ui/skeleton';
 import { mockAlerts } from '@/lib/mock-data';
+import { useTranslation } from '@/hooks/use-translation';
 
 function getPinColor(score: number) {
   if (score > 75) return '#22c55e'; // green-500
@@ -23,11 +24,12 @@ function getPinColor(score: number) {
 
 function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null; onUpdate: (updatedAlert: Alert) => void; onClose: () => void }) {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   if (!alert) return null;
   
   const handleTrustUpdate = async (isConfirm: boolean) => {
-    toast({ title: 'شكرًا لك!', description: 'يتم تسجيل ملاحظاتك.' });
+    toast({ title: t('toast_thank_you'), description: t('toast_feedback_recorded') });
     const updatedAlert = {
       ...alert,
       confirmations: alert.confirmations + (isConfirm ? 1 : 0),
@@ -56,14 +58,14 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
           trustScore: finalAlert.trustScore
        });
 
-      toast({ title: 'تم تحديث درجة الثقة', description: `الدرجة الآن ${trustScore}%.` });
+      toast({ title: t('toast_trust_score_updated'), description: t('toast_trust_score_updated_desc', { score: trustScore }) });
 
     } catch (e) {
         console.error(e);
         toast({
             variant: "destructive",
-            title: "خطأ في الذكاء الاصطناعي",
-            description: "لم نتمكن من تحديث درجة الثقة.",
+            title: t('toast_ai_error'),
+            description: t('toast_trust_score_update_error'),
         })
     }
   };
@@ -85,7 +87,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
                 <button 
                     onClick={onClose} 
                     className="p-1 rounded-full text-muted-foreground hover:text-foreground bg-transparent hover:bg-muted/50 transition-colors flex-shrink-0"
-                    aria-label="أغلق"
+                    aria-label={t('close_button')}
                 >
                     <X className="h-5 w-5" />
                 </button>
@@ -93,33 +95,33 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
             
             <div className="px-4 pb-4 space-y-3">
                 <div className="flex items-center text-sm text-muted-foreground">
-                    <RadioTower className="h-4 w-4 ml-2 flex-shrink-0" />
-                    <span>تم الإبلاغ بواسطة مجهول</span>
+                    <RadioTower className="h-4 w-4 rtl:ml-2 ltr:mr-2 flex-shrink-0" />
+                    <span>{t('reported_by_anonymous')}</span>
                 </div>
                 
                 <p className="text-sm">{alert.description}</p>
                 
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">درجة الثقة: {alert.trustScore}%</label>
+                  <label className="text-xs font-medium text-muted-foreground">{t('trust_score_label')}: {alert.trustScore}%</label>
                   <Progress value={alert.trustScore} className="mt-1 h-2" />
                 </div>
 
                 <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4 ml-2 flex-shrink-0" />
+                    <Clock className="h-4 w-4 rtl:ml-2 ltr:mr-2 flex-shrink-0" />
                     <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
                 </div>
             </div>
 
             <div className="px-4 py-3 border-t bg-muted/50 text-center">
-                <p className="text-xs font-semibold text-muted-foreground mb-2">هل هذه المعلومة دقيقة؟</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">{t('is_info_accurate')}</p>
                 <div className="grid grid-cols-2 gap-2 w-full">
                     <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background hover:bg-green-50 hover:border-green-300">
-                        <ThumbsUp className="ml-2 h-4 w-4 text-green-600" />
-                        تأكيد ({alert.confirmations})
+                        <ThumbsUp className="rtl:ml-2 ltr:mr-2 h-4 w-4 text-green-600" />
+                        {t('confirm_button')} ({alert.confirmations})
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background hover:bg-red-50 hover:border-red-300">
-                        <ThumbsDown className="ml-2 h-4 w-4 text-red-600" />
-                        نفي ({alert.disputes})
+                        <ThumbsDown className="rtl:ml-2 ltr:mr-2 h-4 w-4 text-red-600" />
+                        {t('dispute_button')} ({alert.disputes})
                     </Button>
                 </div>
             </div>
@@ -128,20 +130,24 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
   );
 }
 
-const MapSkeleton = () => (
+const MapSkeleton = () => {
+  const { t } = useTranslation();
+  return (
     <div className="w-full h-full bg-muted flex items-center justify-center">
         <div className="text-center">
             <RadioTower className="h-12 w-12 mx-auto text-muted-foreground animate-pulse" />
-            <p className="mt-4 text-muted-foreground">جاري تحميل الخريطة والتنبيهات...</p>
+            <p className="mt-4 text-muted-foreground">{t('map_loading')}</p>
         </div>
     </div>
-);
+  )
+};
 
 export function CrisisMap() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
 
   useEffect(() => {
@@ -159,8 +165,8 @@ export function CrisisMap() {
         console.error("Error fetching alerts:", error);
         toast({
             variant: "destructive",
-            title: "خطأ",
-            description: "تعذر جلب التنبيهات. يتم الآن عرض بيانات وهمية."
+            title: t('toast_error_title'),
+            description: t('toast_fetch_alerts_error')
         })
         // Fallback to mock data on error
         setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
@@ -169,7 +175,7 @@ export function CrisisMap() {
     );
     
     return () => unsubscribe();
-  }, [toast]);
+  }, [toast, t]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
@@ -187,7 +193,7 @@ export function CrisisMap() {
   }
 
   return (
-    <div className="w-full h-full relative" role="application" aria-label="Crisis Map">
+    <div className="w-full h-full relative" role="application" aria-label={t('crisis_map_label')}>
         <style jsx global>{`
           .mapboxgl-popup-content {
             padding: 0;
@@ -207,7 +213,7 @@ export function CrisisMap() {
                     e.originalEvent.stopPropagation();
                     setSelectedAlert(alert);
                 }}>
-                    <div className="cursor-pointer" aria-label={`تنبيه: ${alert.locationName}`}>
+                    <div className="cursor-pointer" aria-label={t('alert_label', { location: alert.locationName })}>
                         <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert.trustScore)}}>
                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         </svg>

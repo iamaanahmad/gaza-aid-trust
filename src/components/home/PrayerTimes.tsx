@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Sun, Sunrise, Sunset, Moon } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 const MosqueIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -44,14 +44,6 @@ const prayerIcons = {
   Isha: <Moon className="h-6 w-6 text-primary" />,
 };
 
-const prayerNameTranslations = {
-    Fajr: "الفجر",
-    Dhuhr: "الظهر",
-    Asr: "العصر",
-    Maghrib: "المغرب",
-    Isha: "العشاء",
-}
-
 const PrayerTimeSkeleton = () => (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
@@ -73,6 +65,15 @@ export function PrayerTimes() {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
+
+  const prayerNameTranslations = {
+    Fajr: t('prayer_fajr'),
+    Dhuhr: t('prayer_dhuhr'),
+    Asr: t('prayer_asr'),
+    Maghrib: t('prayer_maghrib'),
+    Isha: t('prayer_isha'),
+  }
 
   useEffect(() => {
     async function fetchPrayerTimes() {
@@ -81,7 +82,7 @@ export function PrayerTimes() {
           'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
         );
         if (!response.ok) {
-          throw new Error('فشل جلب أوقات الصلاة. قد تكون الخدمة غير متوفرة.');
+          throw new Error(t('prayer_times_fetch_error_service'));
         }
         const data = await response.json();
         if (data.code === 200) {
@@ -97,7 +98,7 @@ export function PrayerTimes() {
             date: data.data.date.readable,
           });
         } else {
-          throw new Error(data.data || 'تعذر استرداد أوقات الصلاة.');
+          throw new Error(data.data || t('prayer_times_fetch_error_generic'));
         }
       } catch (err: any) {
         setError(err.message);
@@ -107,14 +108,14 @@ export function PrayerTimes() {
       }
     }
     fetchPrayerTimes();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (
         <div>
             <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold">أوقات الصلاة اليوم</h2>
-                <p className="text-muted-foreground">جاري تحميل الأوقات لغزة...</p>
+                <h2 className="text-3xl font-bold">{t('prayer_times_title')}</h2>
+                <p className="text-muted-foreground">{t('prayer_times_loading')}</p>
             </div>
             <PrayerTimeSkeleton />
         </div>
@@ -124,7 +125,7 @@ export function PrayerTimes() {
   if (error) {
     return (
         <Alert variant="destructive">
-            <AlertTitle>خطأ في جلب أوقات الصلاة</AlertTitle>
+            <AlertTitle>{t('prayer_times_fetch_error_title')}</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
         </Alert>
     );
@@ -136,9 +137,9 @@ export function PrayerTimes() {
             <div className="inline-block bg-primary/10 p-4 rounded-full mb-4">
                 <MosqueIcon className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-3xl font-bold">أوقات الصلاة اليومية</h2>
+            <h2 className="text-3xl font-bold">{t('prayer_times_daily_title')}</h2>
             <p className="text-muted-foreground">
-                لغزة، فلسطين في {prayerTimes?.date}
+                {t('prayer_times_location_date', { date: prayerTimes?.date })}
             </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

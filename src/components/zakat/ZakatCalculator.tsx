@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Calculator } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 const zakatFormSchema = z.object({
   cash: z.coerce.number().min(0).default(0),
@@ -23,6 +24,7 @@ type ZakatFormValues = z.infer<typeof zakatFormSchema>;
 
 export function ZakatCalculator() {
   const [zakatAmount, setZakatAmount] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   const form = useForm<ZakatFormValues>({
     resolver: zodResolver(zakatFormSchema),
@@ -51,7 +53,7 @@ export function ZakatCalculator() {
               name="cash"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>النقد في اليد وفي البنك</FormLabel>
+                  <FormLabel>{t('zakat_form_cash')}</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -64,7 +66,7 @@ export function ZakatCalculator() {
               name="gold"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>قيمة الذهب</FormLabel>
+                  <FormLabel>{t('zakat_form_gold')}</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -77,7 +79,7 @@ export function ZakatCalculator() {
               name="silver"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>قيمة الفضة</FormLabel>
+                  <FormLabel>{t('zakat_form_silver')}</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -90,7 +92,7 @@ export function ZakatCalculator() {
               name="investments"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>قيمة الاستثمارات</FormLabel>
+                  <FormLabel>{t('zakat_form_investments')}</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -103,7 +105,7 @@ export function ZakatCalculator() {
               name="other"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>أصول أخرى</FormLabel>
+                  <FormLabel>{t('zakat_form_other')}</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -113,7 +115,7 @@ export function ZakatCalculator() {
             />
           </div>
           <Button type="submit" className="w-full">
-            احسب الزكاة
+            {t('zakat_form_calculate_button')}
           </Button>
         </form>
       </Form>
@@ -121,16 +123,16 @@ export function ZakatCalculator() {
       {zakatAmount !== null && (
         <Alert className="mt-8 text-center">
             <Calculator className="h-4 w-4" />
-            <AlertTitle className="font-bold text-lg">إجمالي الزكاة المستحقة عليك</AlertTitle>
+            <AlertTitle className="font-bold text-lg">{t('zakat_result_title')}</AlertTitle>
             <AlertDescription>
                 <p className="text-4xl font-bold text-primary my-2">
                 ${zakatAmount.toFixed(2)}
                 </p>
                 <p className="text-muted-foreground mt-2">
-                يمكنك أداء هذا الواجب بمساعدة المحتاجين في غزة.
+                {t('zakat_result_description')}
                 </p>
                 <Button asChild className="mt-4">
-                <Link href="/aid">تبرع بزكاتك</Link>
+                <Link href="/aid">{t('zakat_result_donate_button')}</Link>
                 </Button>
             </AlertDescription>
         </Alert>

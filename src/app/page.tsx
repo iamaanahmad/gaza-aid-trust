@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,36 +9,39 @@ import { TutorialDialog } from '@/components/home/TutorialDialog';
 import { PrayerTimes } from '@/components/home/PrayerTimes';
 import { Separator } from '@/components/ui/separator';
 import communityImage from './community.png';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function Home() {
+  const { t } = useTranslation();
+
   const features = [
     {
       icon: <Map className="h-10 w-10 text-primary" />,
-      title: 'خريطة الأزمات',
-      description: 'عرض تنبيهات فورية وموثقة حول توزيع المساعدات والمناطق الآمنة والحوادث الحرجة.',
+      title: t('feature_map_title'),
+      description: t('feature_map_description'),
       link: '/map',
-      cta: 'عرض الخريطة',
+      cta: t('feature_map_cta'),
     },
     {
       icon: <HandHeart className="h-10 w-10 text-primary" />,
-      title: 'توصيل المساعدات',
-      description: 'اطلب المساعدة الأساسية أو تبرع لدعم الأسر المحتاجة مباشرة.',
+      title: t('feature_aid_title'),
+      description: t('feature_aid_description'),
       link: '/aid',
-      cta: 'قدم/اطلب مساعدة',
+      cta: t('feature_aid_cta'),
     },
     {
       icon: <Calculator className="h-10 w-10 text-primary" />,
-      title: 'حاسبة الزكاة',
-      description: 'احسب زكاتك وساهم في الجهود الإنسانية الحيوية.',
+      title: t('feature_zakat_title'),
+      description: t('feature_zakat_description'),
       link: '/zakat',
-      cta: 'احسب الزكاة',
+      cta: t('feature_zakat_cta'),
     },
     {
         icon: <Trophy className="h-10 w-10 text-primary" />,
-        title: 'لوحة الشرف للمجتمع',
-        description: 'تكريم أكبر المساهمين الذين يقوون مجتمعنا بأفعالهم وتوثيقاتهم.',
+        title: t('feature_leaderboard_title'),
+        description: t('feature_leaderboard_description'),
         link: '/leaderboard',
-        cta: 'عرض لوحة الشرف',
+        cta: t('feature_leaderboard_cta'),
     },
   ];
 
@@ -53,14 +58,14 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50 -z-10" />
         <div className="container px-4 md:px-6">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none uppercase">
-            الأمل والمساعدة لغزة
+            {t('hero_title')}
           </h1>
           <p className="mx-auto max-w-[700px] text-gray-200 md:text-xl mt-4">
-            منصة للمعلومات الفورية عن الأزمات والدعم الإنساني المباشر.
+            {t('hero_subtitle')}
           </p>
           <div className="mt-8 flex justify-center items-center gap-4">
             <Button asChild size="lg">
-              <Link href="/aid">تبرع الآن</Link>
+              <Link href="/aid">{t('donate_now_button')}</Link>
             </Button>
             <TutorialDialog />
           </div>

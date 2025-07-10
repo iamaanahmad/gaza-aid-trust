@@ -23,6 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Crown, Medal, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
+import { useTranslation } from '@/hooks/use-translation';
 
 const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="h-5 w-5 text-yellow-400" />;
@@ -32,10 +33,11 @@ const getRankIcon = (rank: number) => {
 }
 
 const ContributorRow = ({ contributor }: { contributor: Contributor }) => {
+    const { t } = useTranslation();
     
     const typeTranslations: { [key in Contributor['type']]: string } = {
-        Donor: 'مانح',
-        Reporter: 'مراسل',
+        Donor: t('contributor_type_donor'),
+        Reporter: t('contributor_type_reporter'),
     }
 
     return (
@@ -58,39 +60,43 @@ const ContributorRow = ({ contributor }: { contributor: Contributor }) => {
     )
 };
 
-const LeaderboardSkeleton = () => (
-    <Table>
-        <TableHeader>
-            <TableRow>
-              <TableHead className="w-16 text-center">الترتيب</TableHead>
-              <TableHead>المساهم</TableHead>
-              <TableHead className="text-left">المساهمات</TableHead>
-            </TableRow>
-        </TableHeader>
-        <TableBody>
-            {Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                    <TableCell className="w-16 text-center"><Skeleton className="h-5 w-5 rounded-full mx-auto" /></TableCell>
-                    <TableCell>
-                        <div className="flex items-center gap-4">
-                            <Skeleton className="h-10 w-10 rounded-full" />
-                            <div>
-                                <Skeleton className="h-4 w-32" />
-                                <Skeleton className="h-3 w-16 mt-1" />
-                            </div>
-                        </div>
-                    </TableCell>
-                    <TableCell className="text-left"><Skeleton className="h-5 w-8 mr-auto" /></TableCell>
+const LeaderboardSkeleton = () => {
+    const { t } = useTranslation();
+    return (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16 text-center">{t('leaderboard_col_rank')}</TableHead>
+                  <TableHead>{t('leaderboard_col_contributor')}</TableHead>
+                  <TableHead className="text-left">{t('leaderboard_col_contributions')}</TableHead>
                 </TableRow>
-            ))}
-        </TableBody>
-    </Table>
-)
+            </TableHeader>
+            <TableBody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell className="w-16 text-center"><Skeleton className="h-5 w-5 rounded-full mx-auto" /></TableCell>
+                        <TableCell>
+                            <div className="flex items-center gap-4">
+                                <Skeleton className="h-10 w-10 rounded-full" />
+                                <div>
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-3 w-16 mt-1" />
+                                </div>
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-left"><Skeleton className="h-5 w-8 ltr:ml-auto rtl:mr-auto" /></TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    )
+}
 
 export function Leaderboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const q = query(contributorsCollection, orderBy('rank'));
@@ -104,22 +110,22 @@ export function Leaderboard() {
         console.error("Error fetching contributors:", error);
         toast({
             variant: "destructive",
-            title: "خطأ",
-            description: "تعذر جلب لوحة الشرف. قد تكون البيانات المعروضة قديمة."
+            title: t('toast_error_title'),
+            description: t('toast_fetch_leaderboard_error')
         })
         setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [toast, t]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>أبرز المساهمين</CardTitle>
+        <CardTitle>{t('leaderboard_card_title')}</CardTitle>
         <CardDescription>
-          تكريم لأبرز المساهمين في رفاهية مجتمعنا.
+          {t('leaderboard_card_description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -129,9 +135,9 @@ export function Leaderboard() {
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead className="w-16 text-center">الترتيب</TableHead>
-                <TableHead>المساهم</TableHead>
-                <TableHead className="text-left">المساهمات</TableHead>
+                <TableHead className="w-16 text-center">{t('leaderboard_col_rank')}</TableHead>
+                <TableHead>{t('leaderboard_col_contributor')}</TableHead>
+                <TableHead className="text-left">{t('leaderboard_col_contributions')}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
