@@ -385,6 +385,10 @@ export const translations = {
     en: 'Trust Score',
     ar: 'درجة الثقة',
   },
+  trust_score_tooltip: {
+    en: 'This score is calculated by our AI based on community confirmations and disputes. Your feedback makes it more accurate.',
+    ar: 'يتم حساب هذه النتيجة بواسطة الذكاء الاصطناعي بناءً على تأكيدات المجتمع ونزاعاته. ملاحظاتك تجعلها أكثر دقة.',
+  },
   is_info_accurate: {
     en: 'Is this info accurate?',
     ar: 'هل هذه المعلومة دقيقة؟',

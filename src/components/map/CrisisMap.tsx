@@ -7,7 +7,7 @@ import type { Alert } from '@/lib/types';
 import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ThumbsUp, ThumbsDown, RadioTower, Clock, X } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, RadioTower, Clock, X, Info } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
@@ -15,6 +15,9 @@ import Map, { Marker, Popup } from 'react-map-gl';
 import { Skeleton } from '../ui/skeleton';
 import { mockAlerts } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+const ALERTS_CACHE_KEY = 'gaza-aid-trust-alerts';
 
 function getPinColor(score: number) {
   if (score > 75) return '#22c55e'; // green-500
@@ -103,7 +106,19 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
                 <p className="text-sm">{alert.description}</p>
                 
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{t('trust_score_label')}: {alert.trustScore}%</label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <label className="text-xs font-medium text-muted-foreground flex items-center gap-1 cursor-help">
+                          <span>{t('trust_score_label')}: {alert.trustScore}%</span>
+                          <Info className="h-3 w-3" />
+                        </label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{t('trust_score_tooltip')}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <Progress value={alert.trustScore} className="mt-1 h-2" />
                 </div>
 
@@ -154,6 +169,17 @@ export function CrisisMap() {
   useEffect(() => {
     let isSubscribed = true;
 
+    // Try to load from cache first
+    try {
+      const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
+      if (cachedAlerts) {
+        setAlerts(JSON.parse(cachedAlerts));
+        setLoading(false);
+      }
+    } catch (e) {
+      console.error("Failed to read from localStorage", e);
+    }
+
     const handleFirestoreError = (error: Error) => {
         console.error("Error fetching alerts:", error);
         toast({
@@ -161,8 +187,7 @@ export function CrisisMap() {
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
         });
-        // Fallback to mock data immediately on error
-        if (isSubscribed) {
+        if (isSubscribed && alerts.length === 0) {
           setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
           setLoading(false);
         }
@@ -174,12 +199,19 @@ export function CrisisMap() {
             if (!isSubscribed) return;
 
             let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
-            if (alertsData.length === 0) {
+            if (alertsData.length === 0 && alerts.length === 0) {
                 console.log("Firestore is empty, falling back to mock alerts.");
                 alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
             }
+            
             setAlerts(alertsData);
             setLoading(false);
+
+            try {
+              localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+            } catch (e) {
+              console.error("Failed to write to localStorage", e);
+            }
           }, 
           (error) => {
             if (isSubscribed) {
@@ -209,7 +241,7 @@ export function CrisisMap() {
       zoom: 10
   }
 
-  if (loading) {
+  if (loading && alerts.length === 0) {
       return <MapSkeleton />;
   }
 

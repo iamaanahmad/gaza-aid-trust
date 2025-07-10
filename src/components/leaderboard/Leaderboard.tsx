@@ -98,7 +98,7 @@ const LeaderboardSkeleton = () => {
 export function Leaderboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useTranslation();
+  const { toast } = useToast();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export function Leaderboard() {
             const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
             if (contributorData.length === 0) {
               console.log("Firestore is empty, falling back to mock contributors.");
-              setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
+              setContributors(mockContributors);
             } else {
               setContributors(contributorData);
             }

@@ -169,10 +169,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
       const currentDescription = form.getValues('description');
       startListening();
       if(currentDescription) {
-        // To allow appending
-        setTimeout(() => {
-          form.setValue('description', currentDescription, { shouldDirty: true });
-        }, 100);
+        finalTranscriptRef.current = currentDescription + ' ';
       }
     }
   }

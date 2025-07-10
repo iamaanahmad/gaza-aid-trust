@@ -69,6 +69,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
 
 export const mockContributors: Omit<Contributor, 'id'>[] = [
   {
+    id: 'contrib-1',
     rank: 1,
     name: 'Fatima A.',
     contributions: 28,
@@ -76,6 +77,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
+    id: 'contrib-2',
     rank: 2,
     name: 'Ahmed K.',
     contributions: 21,
@@ -83,12 +85,14 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
+    id: 'contrib-3',
     rank: 3,
     name: 'Anonymous Giver',
     contributions: 19,
     type: 'Donor',
   },
   {
+    id: 'contrib-4',
     rank: 4,
     name: 'Layla M.',
     contributions: 15,
@@ -96,6 +100,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
+    id: 'contrib-5',
     rank: 5,
     name: 'Yusuf I.',
     contributions: 11,
@@ -103,6 +108,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://placehold.co/40x40.png',
   },
   {
+    id: 'contrib-6',
     rank: 6,
     name: 'Community Watcher',
     contributions: 9,
