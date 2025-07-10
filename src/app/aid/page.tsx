@@ -16,23 +16,23 @@ export default function AidPage() {
     <div className="container mx-auto py-12 px-4">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="text-center md:text-left">
-          <h1 className="text-4xl font-bold">Aid Connect</h1>
+          <h1 className="text-4xl font-bold">توصيل المساعدات</h1>
           <p className="text-muted-foreground mt-2 text-lg">
-            Connect directly with families in Gaza. Fulfill a need, share a hope.
+            تواصل مباشرة مع الأسر في غزة. لبِّ حاجة، وشارك أملاً.
           </p>
         </div>
         <Dialog>
           <DialogTrigger asChild>
             <Button size="lg">
-              <HandHeart className="mr-2 h-5 w-5" />
-              Request Aid
+              <HandHeart className="ml-2 h-5 w-5" />
+              اطلب مساعدة
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Submit an Aid Request</DialogTitle>
+              <DialogTitle>إرسال طلب مساعدة</DialogTitle>
               <DialogDescription>
-                Please describe your needs clearly. Your request will be visible to donors.
+                يرجى وصف احتياجاتك بوضوح. سيكون طلبك مرئيًا للمانحين.
               </DialogDescription>
             </DialogHeader>
             <RequestAidForm />

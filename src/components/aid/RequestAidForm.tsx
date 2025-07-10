@@ -21,10 +21,10 @@ import type { AidRequest } from '@/lib/types';
 import { useState } from 'react';
 
 const requestAidSchema = z.object({
-  category: z.enum(['Food', 'Medicine', 'Shelter'], { required_error: 'Please select a category.' }),
-  description: z.string().min(10, 'Please provide a detailed description.').max(200),
-  familySize: z.coerce.number().min(1, 'Family size must be at least 1.'),
-  locationName: z.string().min(3, 'Please provide a location.'),
+  category: z.enum(['Food', 'Medicine', 'Shelter'], { required_error: 'يرجى اختيار فئة.' }),
+  description: z.string().min(10, 'يرجى تقديم وصف مفصل.').max(200),
+  familySize: z.coerce.number().min(1, 'يجب أن يكون حجم الأسرة 1 على الأقل.'),
+  locationName: z.string().min(3, 'يرجى تقديم موقع.'),
   photo: z.any().optional(),
 });
 
@@ -60,8 +60,8 @@ export function RequestAidForm() {
         await addDoc(aidRequestsCollection, newRequest);
         
         toast({
-            title: "Request Submitted",
-            description: "Your aid request has been posted. We will notify you of updates.",
+            title: "تم إرسال الطلب",
+            description: "تم نشر طلب المساعدة الخاص بك. سنقوم بإعلامك بالتحديثات.",
         });
         form.reset();
         // Ideally, close the dialog here. This requires state from parent.
@@ -69,8 +69,8 @@ export function RequestAidForm() {
         console.error("Error submitting aid request:", error);
         toast({
             variant: "destructive",
-            title: "Submission Error",
-            description: "Could not submit your request. Please try again.",
+            title: "خطأ في الإرسال",
+            description: "لم نتمكن من إرسال طلبك. يرجى المحاولة مرة أخرى.",
         });
     } finally {
         setIsSubmitting(false);
@@ -85,17 +85,17 @@ export function RequestAidForm() {
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Aid Category</FormLabel>
+              <FormLabel>فئة المساعدة</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder="اختر فئة" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Food">Food</SelectItem>
-                  <SelectItem value="Medicine">Medicine</SelectItem>
-                  <SelectItem value="Shelter">Shelter</SelectItem>
+                  <SelectItem value="Food">طعام</SelectItem>
+                  <SelectItem value="Medicine">دواء</SelectItem>
+                  <SelectItem value="Shelter">مأوى</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -107,9 +107,9 @@ export function RequestAidForm() {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description of Need</FormLabel>
+              <FormLabel>وصف الحاجة</FormLabel>
               <FormControl>
-                <Textarea placeholder="e.g., Need rice and clean water for family..." {...field} />
+                <Textarea placeholder="مثال: بحاجة إلى أرز وماء نظيف للأسرة..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -121,7 +121,7 @@ export function RequestAidForm() {
             name="familySize"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Family Size</FormLabel>
+                <FormLabel>حجم الأسرة</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="5" {...field} />
                 </FormControl>
@@ -134,9 +134,9 @@ export function RequestAidForm() {
             name="locationName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>الموقع</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Khan Younis" {...field} />
+                  <Input placeholder="مثال: خان يونس" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -148,7 +148,7 @@ export function RequestAidForm() {
           name="photo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Optional Photo</FormLabel>
+              <FormLabel>صورة اختيارية</FormLabel>
               <FormControl>
                 <Input type="file" className="flex items-center pt-2" {...field} />
               </FormControl>
@@ -157,7 +157,7 @@ export function RequestAidForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit Request"}
+            {isSubmitting ? "جاري الإرسال..." : "إرسال الطلب"}
         </Button>
       </form>
     </Form>

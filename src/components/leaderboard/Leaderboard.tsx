@@ -31,32 +31,40 @@ const getRankIcon = (rank: number) => {
     return <span className="text-sm font-bold">{rank}</span>;
 }
 
-const ContributorRow = ({ contributor }: { contributor: Contributor }) => (
-  <TableRow>
-    <TableCell className="w-16 text-center font-bold">{getRankIcon(contributor.rank)}</TableCell>
-    <TableCell>
-      <div className="flex items-center gap-4">
-        <Avatar>
-          <AvatarImage src={contributor.avatarUrl} alt={contributor.name} data-ai-hint="person face" />
-          <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div>
-          <p className="font-medium">{contributor.name}</p>
-          <p className="text-xs text-muted-foreground">{contributor.type}</p>
-        </div>
-      </div>
-    </TableCell>
-    <TableCell className="text-right font-semibold text-primary">{contributor.contributions}</TableCell>
-  </TableRow>
-);
+const ContributorRow = ({ contributor }: { contributor: Contributor }) => {
+    
+    const typeTranslations: { [key in Contributor['type']]: string } = {
+        Donor: 'مانح',
+        Reporter: 'مراسل',
+    }
+
+    return (
+        <TableRow>
+            <TableCell className="w-16 text-center font-bold">{getRankIcon(contributor.rank)}</TableCell>
+            <TableCell>
+            <div className="flex items-center gap-4">
+                <Avatar>
+                <AvatarImage src={contributor.avatarUrl} alt={contributor.name} data-ai-hint="person face" />
+                <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                <p className="font-medium">{contributor.name}</p>
+                <p className="text-xs text-muted-foreground">{typeTranslations[contributor.type]}</p>
+                </div>
+            </div>
+            </TableCell>
+            <TableCell className="text-left font-semibold text-primary">{contributor.contributions}</TableCell>
+        </TableRow>
+    )
+};
 
 const LeaderboardSkeleton = () => (
     <Table>
         <TableHeader>
             <TableRow>
-              <TableHead className="w-16 text-center">Rank</TableHead>
-              <TableHead>Contributor</TableHead>
-              <TableHead className="text-right">Contributions</TableHead>
+              <TableHead className="w-16 text-center">الترتيب</TableHead>
+              <TableHead>المساهم</TableHead>
+              <TableHead className="text-left">المساهمات</TableHead>
             </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,7 +80,7 @@ const LeaderboardSkeleton = () => (
                             </div>
                         </div>
                     </TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-5 w-8 ml-auto" /></TableCell>
+                    <TableCell className="text-left"><Skeleton className="h-5 w-8 mr-auto" /></TableCell>
                 </TableRow>
             ))}
         </TableBody>
@@ -96,8 +104,8 @@ export function Leaderboard() {
         console.error("Error fetching contributors:", error);
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Could not fetch leaderboard. You may be viewing stale data."
+            title: "خطأ",
+            description: "تعذر جلب لوحة الشرف. قد تكون البيانات المعروضة قديمة."
         })
         setLoading(false);
       }
@@ -109,9 +117,9 @@ export function Leaderboard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Contributors</CardTitle>
+        <CardTitle>أبرز المساهمين</CardTitle>
         <CardDescription>
-          Recognizing the top contributors to our community's well-being.
+          تكريم لأبرز المساهمين في رفاهية مجتمعنا.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -121,9 +129,9 @@ export function Leaderboard() {
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead className="w-16 text-center">Rank</TableHead>
-                <TableHead>Contributor</TableHead>
-                <TableHead className="text-right">Contributions</TableHead>
+                <TableHead className="w-16 text-center">الترتيب</TableHead>
+                <TableHead>المساهم</TableHead>
+                <TableHead className="text-left">المساهمات</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

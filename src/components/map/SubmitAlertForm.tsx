@@ -16,8 +16,8 @@ import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
 
 const alertSchema = z.object({
-  description: z.string().min(10, 'Please provide more details.').max(200),
-  locationName: z.string().min(3, 'Please provide a location name.'),
+  description: z.string().min(10, 'يرجى تقديم تفاصيل أكثر.').max(200),
+  locationName: z.string().min(3, 'يرجى تقديم اسم الموقع.'),
 });
 
 type AlertFormValues = z.infer<typeof alertSchema>;
@@ -58,8 +58,8 @@ const useSpeechRecognition = () => {
                 console.error('Speech recognition error:', event.error);
                 toast({
                     variant: 'destructive',
-                    title: 'Voice Error',
-                    description: 'Could not recognize speech. Please try again.',
+                    title: 'خطأ في الصوت',
+                    description: 'لم يتم التعرف على الكلام. يرجى المحاولة مرة أخرى.',
                 });
             };
 
@@ -126,8 +126,8 @@ export function SubmitAlertForm() {
         await addDoc(alertsCollection, newAlert);
 
         toast({
-            title: "Alert Submitted!",
-            description: "Thank you for helping your community. Your alert is now live.",
+            title: "تم إرسال التنبيه!",
+            description: "شكرًا لمساعدتك لمجتمعك. تنبيهك الآن مباشر.",
         });
         form.reset();
         // Here you would typically close the sheet, which needs state management from the parent
@@ -135,8 +135,8 @@ export function SubmitAlertForm() {
         console.error("Error submitting alert:", error);
         toast({
             variant: "destructive",
-            title: "Submission Error",
-            description: "Could not submit your alert. Please try again.",
+            title: "خطأ في الإرسال",
+            description: "لم نتمكن من إرسال تنبيهك. يرجى المحاولة مرة أخرى.",
         });
     } finally {
         setIsSubmitting(false);
@@ -147,8 +147,8 @@ export function SubmitAlertForm() {
     if (!hasSupport) {
         toast({
             variant: 'destructive',
-            title: 'Unsupported Browser',
-            description: 'Your browser does not support voice recognition.',
+            title: 'متصفح غير مدعوم',
+            description: 'متصفحك لا يدعم التعرف على الصوت.',
         });
         return;
     }
@@ -165,12 +165,12 @@ export function SubmitAlertForm() {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>الوصف</FormLabel>
               <FormControl>
                 <div className="relative w-full">
                   <Textarea
-                    placeholder="e.g., Safe route to Rafah open..."
-                    className="pr-12"
+                    placeholder="مثال: طريق آمن إلى رفح مفتوح..."
+                    className="pl-12"
                     {...field}
                   />
                   <Button 
@@ -179,8 +179,8 @@ export function SubmitAlertForm() {
                     variant="ghost"
                     onClick={handleMicClick} 
                     disabled={isListening} 
-                    aria-label="Use voice input"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground"
+                    aria-label="استخدام الإدخال الصوتي"
+                    className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground"
                   >
                     <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse text-red-500' : ''}`} />
                   </Button>
@@ -195,17 +195,17 @@ export function SubmitAlertForm() {
           name="locationName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location Name</FormLabel>
+              <FormLabel>اسم الموقع</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Khan Younis Center" {...field} />
+                <Input placeholder="مثال: وسط خان يونس" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-            <Send className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Posting..." : "Post Alert"}
+            <Send className="ml-2 h-4 w-4" />
+            {isSubmitting ? "جاري النشر..." : "انشر التنبيه"}
         </Button>
       </form>
     </Form>

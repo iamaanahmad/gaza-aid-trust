@@ -51,7 +51,7 @@ export function ZakatCalculator() {
               name="cash"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Cash on Hand & in Bank</FormLabel>
+                  <FormLabel>النقد في اليد وفي البنك</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -64,7 +64,7 @@ export function ZakatCalculator() {
               name="gold"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Value of Gold</FormLabel>
+                  <FormLabel>قيمة الذهب</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -77,7 +77,7 @@ export function ZakatCalculator() {
               name="silver"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Value of Silver</FormLabel>
+                  <FormLabel>قيمة الفضة</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -90,7 +90,7 @@ export function ZakatCalculator() {
               name="investments"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Value of Investments</FormLabel>
+                  <FormLabel>قيمة الاستثمارات</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -103,7 +103,7 @@ export function ZakatCalculator() {
               name="other"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Other Assets</FormLabel>
+                  <FormLabel>أصول أخرى</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0.00" {...field} />
                   </FormControl>
@@ -113,7 +113,7 @@ export function ZakatCalculator() {
             />
           </div>
           <Button type="submit" className="w-full">
-            Calculate Zakat
+            احسب الزكاة
           </Button>
         </form>
       </Form>
@@ -121,16 +121,16 @@ export function ZakatCalculator() {
       {zakatAmount !== null && (
         <Alert className="mt-8 text-center">
             <Calculator className="h-4 w-4" />
-            <AlertTitle className="font-bold text-lg">Your Total Zakat Due</AlertTitle>
+            <AlertTitle className="font-bold text-lg">إجمالي الزكاة المستحقة عليك</AlertTitle>
             <AlertDescription>
                 <p className="text-4xl font-bold text-primary my-2">
                 ${zakatAmount.toFixed(2)}
                 </p>
                 <p className="text-muted-foreground mt-2">
-                You can fulfill this obligation by helping those in need in Gaza.
+                يمكنك أداء هذا الواجب بمساعدة المحتاجين في غزة.
                 </p>
                 <Button asChild className="mt-4">
-                <Link href="/aid">Donate Your Zakat</Link>
+                <Link href="/aid">تبرع بزكاتك</Link>
                 </Button>
             </AlertDescription>
         </Alert>

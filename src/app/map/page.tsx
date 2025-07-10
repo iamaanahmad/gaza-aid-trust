@@ -15,7 +15,7 @@ export default function MapPage() {
   return (
     <div className="relative w-full h-[calc(100vh-3.5rem)]">
         <CrisisMap />
-        <div className="absolute bottom-6 right-6 z-30">
+        <div className="absolute bottom-6 left-6 z-30">
           <Sheet>
             <SheetTrigger asChild>
               <Button size="lg" className="rounded-full h-16 w-16 shadow-lg">
@@ -25,9 +25,9 @@ export default function MapPage() {
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Post a Crisis Alert</SheetTitle>
+                <SheetTitle>نشر تنبيه أزمة</SheetTitle>
                 <SheetDescription>
-                  Share real-time information with your community. Your report can save lives. Use your voice or type.
+                  شارك المعلومات الفورية مع مجتمعك. تقريرك يمكن أن ينقذ حياة. استخدم صوتك أو اكتب.
                 </SheetDescription>
               </SheetHeader>
               <SubmitAlertForm />

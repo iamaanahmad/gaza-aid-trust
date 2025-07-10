@@ -8,9 +8,9 @@ export default function LeaderboardPage() {
             <div className="inline-block bg-primary/10 p-4 rounded-full">
                 <Trophy className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-bold mt-4">Community Leaderboard</h1>
+            <h1 className="text-4xl font-bold mt-4">لوحة الشرف للمجتمع</h1>
             <p className="text-muted-foreground mt-2 text-lg">
-                Celebrating those who power our community with their contributions.
+                نحتفل بأولئك الذين يدعمون مجتمعنا بمساهماتهم.
             </p>
         </div>
       <Leaderboard />

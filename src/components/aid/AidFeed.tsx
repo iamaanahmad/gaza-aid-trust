@@ -33,15 +33,15 @@ function DonateDialog({ request }: { request: AidRequest }) {
       await updateDoc(requestDoc, { status: 'Pledged' });
       setPledged(true);
       toast({
-        title: 'Thank You!',
-        description: 'Your pledge has been recorded. This will bring much needed relief.',
+        title: 'شكرًا لك!',
+        description: 'تم تسجيل تعهدك. هذا سيجلب الإغاثة التي تشتد الحاجة إليها.',
       });
     } catch (error) {
       console.error('Error pledging donation: ', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Could not record your pledge. Please try again.',
+        title: 'خطأ',
+        description: 'لم نتمكن من تسجيل تعهدك. يرجى المحاولة مرة أخرى.',
       });
     }
   };
@@ -49,26 +49,26 @@ function DonateDialog({ request }: { request: AidRequest }) {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Pledge a Donation</DialogTitle>
+        <DialogTitle>التعهد بالتبرع</DialogTitle>
         <DialogDescription>
-          You are about to fulfill the request for "{request.description}".
+          أنت على وشك تلبية الطلب لـ "{request.description}".
         </DialogDescription>
       </DialogHeader>
       {pledged ? (
         <div className="text-center py-8">
-          <h3 className="text-2xl font-bold text-green-600">Thank You!</h3>
-          <p className="text-muted-foreground mt-2">Your pledge has been recorded. This will bring much needed relief.</p>
+          <h3 className="text-2xl font-bold text-green-600">شكرًا لك!</h3>
+          <p className="text-muted-foreground mt-2">تم تسجيل تعهدك. هذا سيجلب الإغاثة التي تشتد الحاجة إليها.</p>
         </div>
       ) : (
         <div className="py-4">
           <p className="mb-4">
-            A local partner will use your donation to purchase and deliver the requested items to the family in {request.locationName}.
+            سيستخدم شريك محلي تبرعك لشراء وتسليم المواد المطلوبة للأسرة في {request.locationName}.
           </p>
-          <p className="font-bold text-lg mb-4">Simulated Donation: $50</p>
+          <p className="font-bold text-lg mb-4">تبرع وهمي: $50</p>
           <Button onClick={handlePledge} className="w-full" size="lg">
-            Confirm Pledge
+            تأكيد التعهد
           </Button>
-          <p className="text-xs text-muted-foreground mt-2 text-center">This is a mock donation flow for the hackathon prototype.</p>
+          <p className="text-xs text-muted-foreground mt-2 text-center">هذا تدفق تبرع وهمي لنموذج الهاكاثون.</p>
         </div>
       )}
     </DialogContent>
@@ -89,6 +89,18 @@ function AidRequestCard({ request }: { request: AidRequest }) {
     }
   };
   
+  const statusTranslations: { [key in AidRequest['status']]: string } = {
+    Needed: 'مطلوب',
+    Pledged: 'تم التعهد',
+    Fulfilled: 'تم التلبية',
+  };
+
+  const categoryTranslations: { [key in AidRequest['category']]: string } = {
+    Food: 'طعام',
+    Medicine: 'دواء',
+    Shelter: 'مأوى',
+  }
+
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
       {request.photoUrl && (
@@ -104,18 +116,18 @@ function AidRequestCard({ request }: { request: AidRequest }) {
       )}
       <CardHeader>
         <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-bold">{request.category} Request</CardTitle>
-            <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
+            <CardTitle className="text-lg font-bold">طلب {categoryTranslations[request.category]}</CardTitle>
+            <Badge variant={getStatusVariant(request.status)}>{statusTranslations[request.status]}</Badge>
         </div>
         <CardDescription className="pt-2">{request.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-3">
         <div className="flex items-center text-sm text-muted-foreground">
-            <Users className="h-4 w-4 mr-2" />
-            <span>Family of {request.familySize}</span>
+            <Users className="h-4 w-4 ml-2" />
+            <span>أسرة مكونة من {request.familySize} أفراد</span>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-2" />
+            <MapPin className="h-4 w-4 ml-2" />
             <span>{request.locationName}</span>
         </div>
       </CardContent>
@@ -123,9 +135,9 @@ function AidRequestCard({ request }: { request: AidRequest }) {
         <div className="px-6 pb-4 pt-0 text-sm">
            <div className="flex items-center gap-2 font-semibold text-muted-foreground mb-2">
             <MessageSquareQuote className="h-4 w-4" />
-            <span>Feedback from Recipient</span>
+            <span>رسالة شكر من المستلم</span>
            </div>
-          <blockquote className="border-l-2 border-primary/50 pl-3 italic text-muted-foreground">
+          <blockquote className="border-r-2 border-primary/50 pr-3 italic text-muted-foreground">
             {request.feedback}
           </blockquote>
         </div>
@@ -139,8 +151,8 @@ function AidRequestCard({ request }: { request: AidRequest }) {
            <Dialog>
              <DialogTrigger asChild>
                 <Button>
-                  <HandHeart className="mr-2 h-4 w-4" />
-                  Donate
+                  <HandHeart className="ml-2 h-4 w-4" />
+                  تبرع
                 </Button>
              </DialogTrigger>
              <DonateDialog request={request} />
@@ -198,8 +210,8 @@ export function AidFeed() {
         console.error("Error fetching aid requests:", error);
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Could not fetch aid requests. Falling back to mock data."
+            title: "خطأ",
+            description: "تعذر جلب طلبات المساعدة. يتم الآن عرض بيانات وهمية."
         })
         // Fallback to mock data on error
         setRequests(mockAidRequests.map((req, index) => ({...req, id: `mock-${index}`})));

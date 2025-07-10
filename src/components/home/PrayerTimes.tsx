@@ -44,6 +44,14 @@ const prayerIcons = {
   Isha: <Moon className="h-6 w-6 text-primary" />,
 };
 
+const prayerNameTranslations = {
+    Fajr: "الفجر",
+    Dhuhr: "الظهر",
+    Asr: "العصر",
+    Maghrib: "المغرب",
+    Isha: "العشاء",
+}
+
 const PrayerTimeSkeleton = () => (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
@@ -73,7 +81,7 @@ export function PrayerTimes() {
           'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
         );
         if (!response.ok) {
-          throw new Error('Failed to fetch prayer times. The service may be unavailable.');
+          throw new Error('فشل جلب أوقات الصلاة. قد تكون الخدمة غير متوفرة.');
         }
         const data = await response.json();
         if (data.code === 200) {
@@ -89,7 +97,7 @@ export function PrayerTimes() {
             date: data.data.date.readable,
           });
         } else {
-          throw new Error(data.data || 'Could not retrieve prayer times.');
+          throw new Error(data.data || 'تعذر استرداد أوقات الصلاة.');
         }
       } catch (err: any) {
         setError(err.message);
@@ -105,8 +113,8 @@ export function PrayerTimes() {
     return (
         <div>
             <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold">Today's Prayer Times</h2>
-                <p className="text-muted-foreground">Loading times for Gaza...</p>
+                <h2 className="text-3xl font-bold">أوقات الصلاة اليوم</h2>
+                <p className="text-muted-foreground">جاري تحميل الأوقات لغزة...</p>
             </div>
             <PrayerTimeSkeleton />
         </div>
@@ -116,7 +124,7 @@ export function PrayerTimes() {
   if (error) {
     return (
         <Alert variant="destructive">
-            <AlertTitle>Error Fetching Prayer Times</AlertTitle>
+            <AlertTitle>خطأ في جلب أوقات الصلاة</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
         </Alert>
     );
@@ -128,9 +136,9 @@ export function PrayerTimes() {
             <div className="inline-block bg-primary/10 p-4 rounded-full mb-4">
                 <MosqueIcon className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-3xl font-bold">Daily Prayer Times</h2>
+            <h2 className="text-3xl font-bold">أوقات الصلاة اليومية</h2>
             <p className="text-muted-foreground">
-                For Gaza, Palestine on {prayerTimes?.date}
+                لغزة، فلسطين في {prayerTimes?.date}
             </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -138,7 +146,7 @@ export function PrayerTimes() {
                 <Card key={name} className="text-center flex flex-col justify-center">
                     <CardHeader className="items-center pb-2">
                         {(prayerIcons as any)[name]}
-                        <CardTitle className="text-lg font-bold mt-2">{name}</CardTitle>
+                        <CardTitle className="text-lg font-bold mt-2">{(prayerNameTranslations as any)[name]}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-2xl font-bold">{time}</p>

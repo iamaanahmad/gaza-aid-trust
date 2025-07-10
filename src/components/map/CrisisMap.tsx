@@ -27,7 +27,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
   if (!alert) return null;
   
   const handleTrustUpdate = async (isConfirm: boolean) => {
-    toast({ title: 'Thank you!', description: 'Your feedback is being recorded.' });
+    toast({ title: 'شكرًا لك!', description: 'يتم تسجيل ملاحظاتك.' });
     const updatedAlert = {
       ...alert,
       confirmations: alert.confirmations + (isConfirm ? 1 : 0),
@@ -56,14 +56,14 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
           trustScore: finalAlert.trustScore
        });
 
-      toast({ title: 'Trust Score Updated', description: `The score is now ${trustScore}%.` });
+      toast({ title: 'تم تحديث درجة الثقة', description: `الدرجة الآن ${trustScore}%.` });
 
     } catch (e) {
         console.error(e);
         toast({
             variant: "destructive",
-            title: "AI Error",
-            description: "Could not update trust score.",
+            title: "خطأ في الذكاء الاصطناعي",
+            description: "لم نتمكن من تحديث درجة الثقة.",
         })
     }
   };
@@ -85,7 +85,7 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
                 <button 
                     onClick={onClose} 
                     className="p-1 rounded-full text-muted-foreground hover:text-foreground bg-transparent hover:bg-muted/50 transition-colors flex-shrink-0"
-                    aria-label="Close popup"
+                    aria-label="أغلق"
                 >
                     <X className="h-5 w-5" />
                 </button>
@@ -93,33 +93,33 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
             
             <div className="px-4 pb-4 space-y-3">
                 <div className="flex items-center text-sm text-muted-foreground">
-                    <RadioTower className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span>Reported by Anonymous</span>
+                    <RadioTower className="h-4 w-4 ml-2 flex-shrink-0" />
+                    <span>تم الإبلاغ بواسطة مجهول</span>
                 </div>
                 
                 <p className="text-sm">{alert.description}</p>
                 
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Trust Score: {alert.trustScore}%</label>
+                  <label className="text-xs font-medium text-muted-foreground">درجة الثقة: {alert.trustScore}%</label>
                   <Progress value={alert.trustScore} className="mt-1 h-2" />
                 </div>
 
                 <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <Clock className="h-4 w-4 ml-2 flex-shrink-0" />
                     <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
                 </div>
             </div>
 
             <div className="px-4 py-3 border-t bg-muted/50 text-center">
-                <p className="text-xs font-semibold text-muted-foreground mb-2">Is this information accurate?</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">هل هذه المعلومة دقيقة؟</p>
                 <div className="grid grid-cols-2 gap-2 w-full">
                     <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="bg-background hover:bg-green-50 hover:border-green-300">
-                        <ThumbsUp className="mr-2 h-4 w-4 text-green-600" />
-                        Confirm ({alert.confirmations})
+                        <ThumbsUp className="ml-2 h-4 w-4 text-green-600" />
+                        تأكيد ({alert.confirmations})
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="bg-background hover:bg-red-50 hover:border-red-300">
-                        <ThumbsDown className="mr-2 h-4 w-4 text-red-600" />
-                        Dispute ({alert.disputes})
+                        <ThumbsDown className="ml-2 h-4 w-4 text-red-600" />
+                        نفي ({alert.disputes})
                     </Button>
                 </div>
             </div>
@@ -132,7 +132,7 @@ const MapSkeleton = () => (
     <div className="w-full h-full bg-muted flex items-center justify-center">
         <div className="text-center">
             <RadioTower className="h-12 w-12 mx-auto text-muted-foreground animate-pulse" />
-            <p className="mt-4 text-muted-foreground">Loading Map and Alerts...</p>
+            <p className="mt-4 text-muted-foreground">جاري تحميل الخريطة والتنبيهات...</p>
         </div>
     </div>
 );
@@ -159,8 +159,8 @@ export function CrisisMap() {
         console.error("Error fetching alerts:", error);
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Could not fetch alerts. Falling back to mock data."
+            title: "خطأ",
+            description: "تعذر جلب التنبيهات. يتم الآن عرض بيانات وهمية."
         })
         // Fallback to mock data on error
         setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
@@ -207,7 +207,7 @@ export function CrisisMap() {
                     e.originalEvent.stopPropagation();
                     setSelectedAlert(alert);
                 }}>
-                    <div className="cursor-pointer" aria-label={`Alert: ${alert.locationName}`}>
+                    <div className="cursor-pointer" aria-label={`تنبيه: ${alert.locationName}`}>
                         <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert.trustScore)}}>
                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         </svg>

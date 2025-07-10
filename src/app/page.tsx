@@ -12,31 +12,31 @@ export default function Home() {
   const features = [
     {
       icon: <Map className="h-10 w-10 text-primary" />,
-      title: 'Crisis Map',
-      description: 'View real-time, verified alerts on aid distribution, safe zones, and critical incidents.',
+      title: 'خريطة الأزمات',
+      description: 'عرض تنبيهات فورية وموثقة حول توزيع المساعدات والمناطق الآمنة والحوادث الحرجة.',
       link: '/map',
-      cta: 'View Map',
+      cta: 'عرض الخريطة',
     },
     {
       icon: <HandHeart className="h-10 w-10 text-primary" />,
-      title: 'Aid Connect',
-      description: 'Request essential aid or donate to directly support families in need.',
+      title: 'توصيل المساعدات',
+      description: 'اطلب المساعدة الأساسية أو تبرع لدعم الأسر المحتاجة مباشرة.',
       link: '/aid',
-      cta: 'Give/Request Aid',
+      cta: 'قدم/اطلب مساعدة',
     },
     {
       icon: <Calculator className="h-10 w-10 text-primary" />,
-      title: 'Zakat Calculator',
-      description: 'Calculate your Zakat and contribute to vital humanitarian efforts.',
+      title: 'حاسبة الزكاة',
+      description: 'احسب زكاتك وساهم في الجهود الإنسانية الحيوية.',
       link: '/zakat',
-      cta: 'Calculate Zakat',
+      cta: 'احسب الزكاة',
     },
     {
         icon: <Trophy className="h-10 w-10 text-primary" />,
-        title: 'Community Leaderboard',
-        description: 'Recognizing top contributors who strengthen our community through action and verification.',
+        title: 'لوحة الشرف للمجتمع',
+        description: 'تكريم أكبر المساهمين الذين يقوون مجتمعنا بأفعالهم وتوثيقاتهم.',
         link: '/leaderboard',
-        cta: 'View Leaderboard',
+        cta: 'عرض لوحة الشرف',
     },
   ];
 
@@ -53,14 +53,14 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50 -z-10" />
         <div className="container px-4 md:px-6">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none uppercase">
-            Hope and Aid for Gaza
+            الأمل والمساعدة لغزة
           </h1>
           <p className="mx-auto max-w-[700px] text-gray-200 md:text-xl mt-4">
-            A platform for real-time crisis information and direct humanitarian support.
+            منصة للمعلومات الفورية عن الأزمات والدعم الإنساني المباشر.
           </p>
           <div className="mt-8 flex justify-center items-center gap-4">
             <Button asChild size="lg">
-              <Link href="/aid">Donate Now</Link>
+              <Link href="/aid">تبرع الآن</Link>
             </Button>
             <TutorialDialog />
           </div>

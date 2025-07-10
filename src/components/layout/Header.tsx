@@ -5,20 +5,20 @@ import { Menu, HeartHandshake } from 'lucide-react';
 
 export function Header() {
   const navLinks = [
-    { href: '/map', label: 'Crisis Map' },
-    { href: '/aid', label: 'Aid Connect' },
-    { href: '/leaderboard', label: 'Leaderboard' },
-    { href: '/zakat', label: 'Zakat Calculator' },
+    { href: '/map', label: 'خريطة الأزمات' },
+    { href: '/aid', label: 'توصيل المساعدات' },
+    { href: '/leaderboard', label: 'لوحة الشرف' },
+    { href: '/zakat', label: 'حاسبة الزكاة' },
   ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
+          <Link href="/" className="ml-6 flex items-center space-x-2">
             <HeartHandshake className="h-6 w-6 text-primary" />
             <span className="font-bold sm:inline-block">
-              Gaza Aid & Trust
+              عون وثقة غزة
             </span>
           </Link>
           <nav className="hidden gap-6 text-sm md:flex">
@@ -46,7 +46,7 @@ export function Header() {
                  <Link href="/" className="mb-4 flex items-center space-x-2">
                     <HeartHandshake className="h-6 w-6 text-primary" />
                     <span className="font-bold text-lg">
-                      Gaza Aid & Trust
+                      عون وثقة غزة
                     </span>
                   </Link>
                 {navLinks.map((link) => (
@@ -62,7 +62,7 @@ export function Header() {
             </SheetContent>
           </Sheet>
           <Button asChild className="hidden md:flex">
-             <Link href="/aid">Donate Now</Link>
+             <Link href="/aid">تبرع الآن</Link>
           </Button>
         </div>
       </div>
