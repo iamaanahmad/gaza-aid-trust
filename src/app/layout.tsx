@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { PT_Sans } from 'next/font/google';
 import { LanguageProvider } from '@/context/language-context';
+import { LanguageWrapper } from '@/components/layout/LanguageWrapper';
 
 export const metadata: Metadata = {
   title: 'Gaza Aid & Trust: Crisis Connect',
@@ -26,14 +27,14 @@ export default function RootLayout({
 }>) {
   return (
     <LanguageProvider>
-        <html lang="en" dir="ltr" suppressHydrationWarning>
-          <body className={`${pt_sans.variable} font-body antialiased min-h-screen bg-background flex flex-col`}>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <Toaster />
-          </body>
-        </html>
+      <LanguageWrapper>
+        <body className={`${pt_sans.variable} font-body antialiased min-h-screen bg-background flex flex-col`}>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Toaster />
+        </body>
+      </LanguageWrapper>
     </LanguageProvider>
   );
 }

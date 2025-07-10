@@ -9,12 +9,13 @@ interface LanguageContextType {
   language: Language;
   direction: Direction;
   setLanguage: (language: Language) => void;
+  isMounted: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('ar'); // Default to Arabic
+  const [language, setLanguageState] = useState<Language>('ar'); // Default to Arabic, can be any default
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -29,27 +30,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', lang);
-      document.documentElement.lang = lang;
+      // We also update the dir attribute here for good measure
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     }
   }, []);
 
-  useEffect(() => {
-    if (isMounted) {
-       document.documentElement.lang = language;
-       document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    }
-  }, [language, isMounted]);
-
+  // The direction is derived from the current language state
   const direction = language === 'ar' ? 'rtl' : 'ltr';
 
-  // Prevent rendering children until the language has been determined from localStorage
-  if (!isMounted) {
-    return null;
-  }
-
+  // We always render the children, but the value of the context will update
+  // on the client-side after hydration. The layout component will use this
+  // `isMounted` flag to set the dir/lang attributes correctly.
   return (
-    <LanguageContext.Provider value={{ language, direction, setLanguage }}>
+    <LanguageContext.Provider value={{ language, direction, setLanguage, isMounted }}>
       {children}
     </LanguageContext.Provider>
   );
