@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -86,7 +87,7 @@ const useSpeechRecognition = (lang: string) => {
     };
 };
 
-export function SubmitAlertForm() {
+export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   const { toast } = useToast();
   const { t, language } = useTranslation();
   const { transcript, isListening, startListening, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
@@ -132,7 +133,7 @@ export function SubmitAlertForm() {
             description: t('toast_alert_submitted_desc'),
         });
         form.reset();
-        // Here you would typically close the sheet, which needs state management from the parent
+        onFormSubmit();
     } catch (error) {
         console.error("Error submitting alert:", error);
         toast({

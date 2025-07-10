@@ -1,3 +1,4 @@
+
 'use client';
 
 import { CrisisMap } from '@/components/map/CrisisMap';
@@ -13,15 +14,17 @@ import {
 } from '@/components/ui/sheet';
 import { useTranslation } from '@/hooks/use-translation';
 import { Megaphone } from 'lucide-react';
+import { useState } from 'react';
 
 export default function MapPage() {
   const { t } = useTranslation();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
     <div className="relative w-full h-[calc(100vh-3.5rem)]">
         <CrisisMap />
         <div className="absolute bottom-6 ltr:left-6 rtl:right-6 z-30">
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button size="lg" className="rounded-full h-16 w-16 shadow-lg">
                 <Megaphone className="h-8 w-8" />
@@ -35,7 +38,7 @@ export default function MapPage() {
                   {t('submit_alert_form_description')}
                 </SheetDescription>
               </SheetHeader>
-              <SubmitAlertForm />
+              <SubmitAlertForm onFormSubmit={() => setIsSheetOpen(false)} />
             </SheetContent>
           </Sheet>
         </div>

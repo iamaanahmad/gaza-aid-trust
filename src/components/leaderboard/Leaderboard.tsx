@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,6 +25,7 @@ import { Crown, Medal, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { useTranslation } from '@/hooks/use-translation';
+import { mockContributors } from '@/lib/mock-data';
 
 const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="h-5 w-5 text-yellow-400" />;
@@ -99,25 +101,44 @@ export function Leaderboard() {
   const { t } = useTranslation();
 
   useEffect(() => {
+    let isSubscribed = true;
     const q = query(contributorsCollection, orderBy('rank'));
-    const unsubscribe = onSnapshot(q,
-      (snapshot) => {
-        const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
-        setContributors(contributorData);
-        setLoading(false);
-      },
-      (error) => {
+    
+    const handleFirestoreError = (error: Error) => {
         console.error("Error fetching contributors:", error);
         toast({
             variant: "destructive",
             title: t('toast_error_title'),
             description: t('toast_fetch_leaderboard_error')
-        })
-        setLoading(false);
-      }
-    );
+        });
+        if(isSubscribed) {
+            setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
+            setLoading(false);
+        }
+    };
 
-    return () => unsubscribe();
+    try {
+        const unsubscribe = onSnapshot(q,
+          (snapshot) => {
+            if (!isSubscribed) return;
+            const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
+            if (contributorData.length === 0) {
+              console.log("Firestore is empty, falling back to mock contributors.");
+              setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
+            } else {
+              setContributors(contributorData);
+            }
+            setLoading(false);
+          },
+          (error) => {
+            if(isSubscribed) handleFirestoreError(error);
+          }
+        );
+        return () => { isSubscribed = false; unsubscribe(); };
+    } catch (error) {
+        handleFirestoreError(error as Error);
+        return () => { isSubscribed = false; };
+    }
   }, [toast, t]);
 
   return (

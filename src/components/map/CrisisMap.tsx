@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -153,52 +154,49 @@ export function CrisisMap() {
   useEffect(() => {
     let isSubscribed = true;
 
-    // Set a timeout to prevent infinitely long load times on connection errors.
-    const timeoutId = setTimeout(() => {
-      if (isSubscribed && loading) {
-        console.warn("Firestore connection timed out. Falling back to mock data.");
-        setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
-        setLoading(false);
-        toast({
-          variant: "destructive",
-          title: t('toast_error_title'),
-          description: "Could not connect to the database. Displaying sample data."
-        });
-      }
-    }, 5000); // 5-second timeout
-
-    const unsubscribe = onSnapshot(alertsCollection, 
-      (snapshot) => {
-        if (!isSubscribed) return;
-        clearTimeout(timeoutId); // Connection successful, clear the timeout.
-
-        let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
-        if (alertsData.length === 0) {
-            alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
-        }
-        setAlerts(alertsData);
-        setLoading(false);
-      }, 
-      (error) => {
-        if (!isSubscribed) return;
-        clearTimeout(timeoutId); // Error occurred, clear the timeout.
+    const handleFirestoreError = (error: Error) => {
         console.error("Error fetching alerts:", error);
         toast({
             variant: "destructive",
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
-        })
-        setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
-        setLoading(false);
-      }
-    );
-    
-    return () => {
-      isSubscribed = false;
-      clearTimeout(timeoutId);
-      unsubscribe();
+        });
+        // Fallback to mock data immediately on error
+        if (isSubscribed) {
+          setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
+          setLoading(false);
+        }
     };
-  }, [toast, t, loading]);
+
+    try {
+        const unsubscribe = onSnapshot(alertsCollection, 
+          (snapshot) => {
+            if (!isSubscribed) return;
+
+            let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+            if (alertsData.length === 0) {
+                console.log("Firestore is empty, falling back to mock alerts.");
+                alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
+            }
+            setAlerts(alertsData);
+            setLoading(false);
+          }, 
+          (error) => {
+            if (isSubscribed) {
+              handleFirestoreError(error);
+            }
+          }
+        );
+        
+        return () => {
+          isSubscribed = false;
+          unsubscribe();
+        };
+    } catch(error) {
+        handleFirestoreError(error as Error);
+        return () => { isSubscribed = false; };
+    }
+  }, [toast, t]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));

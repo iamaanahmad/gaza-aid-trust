@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -8,7 +9,7 @@ import Image from 'next/image';
 import { TutorialDialog } from '@/components/home/TutorialDialog';
 import { PrayerTimes } from '@/components/home/PrayerTimes';
 import { Separator } from '@/components/ui/separator';
-import communityImage from './community.png';
+import communityImage from '@/app/community.png';
 import { useTranslation } from '@/hooks/use-translation';
 
 export default function Home() {
@@ -54,6 +55,7 @@ export default function Home() {
           fill
           priority
           className="object-cover -z-10"
+          data-ai-hint="community support"
         />
         <div className="absolute inset-0 bg-black/50 -z-10" />
         <div className="container px-4 md:px-6">

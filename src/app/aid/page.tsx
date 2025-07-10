@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AidFeed } from '@/components/aid/AidFeed';
@@ -13,9 +14,11 @@ import {
 } from '@/components/ui/dialog';
 import { useTranslation } from '@/hooks/use-translation';
 import { HandHeart } from 'lucide-react';
+import { useState } from 'react';
 
 export default function AidPage() {
   const { t } = useTranslation();
+  const [isRequestFormOpen, setIsRequestFormOpen] = useState(false);
 
   return (
     <div className="container mx-auto py-12 px-4">
@@ -26,7 +29,7 @@ export default function AidPage() {
             {t('aid_subtitle')}
           </p>
         </div>
-        <Dialog>
+        <Dialog open={isRequestFormOpen} onOpenChange={setIsRequestFormOpen}>
           <DialogTrigger asChild>
             <Button size="lg">
               <HandHeart className="rtl:ml-2 ltr:mr-2 h-5 w-5" />
@@ -40,7 +43,7 @@ export default function AidPage() {
                 {t('request_aid_form_description')}
               </DialogDescription>
             </DialogHeader>
-            <RequestAidForm />
+            <RequestAidForm onFormSubmit={() => setIsRequestFormOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>

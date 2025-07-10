@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -21,7 +22,7 @@ import type { AidRequest } from '@/lib/types';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 
-export function RequestAidForm() {
+export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { t } = useTranslation();
@@ -55,7 +56,6 @@ export function RequestAidForm() {
             locationName: data.locationName,
             status: 'Needed',
             timestamp: Date.now(),
-            // For the hackathon, we simulate photo upload with a placeholder
             photoUrl: data.photo ? 'https://placehold.co/600x400.png' : undefined,
         };
 
@@ -66,7 +66,7 @@ export function RequestAidForm() {
             description: t('toast_request_submitted_desc'),
         });
         form.reset();
-        // Ideally, close the dialog here. This requires state from parent.
+        onFormSubmit();
     } catch (error) {
         console.error("Error submitting aid request:", error);
         toast({

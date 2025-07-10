@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,7 +25,7 @@ import { Skeleton } from '../ui/skeleton';
 import { mockAidRequests } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
 
-function DonateDialog({ request }: { request: AidRequest }) {
+function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPledgeSuccess: () => void }) {
   const [pledged, setPledged] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -38,6 +39,9 @@ function DonateDialog({ request }: { request: AidRequest }) {
         title: t('toast_thank_you'),
         description: t('toast_pledge_success'),
       });
+      setTimeout(() => {
+        onPledgeSuccess();
+      }, 1500)
     } catch (error) {
       console.error('Error pledging donation: ', error);
       toast({
@@ -79,6 +83,7 @@ function DonateDialog({ request }: { request: AidRequest }) {
 
 function AidRequestCard({ request }: { request: AidRequest }) {
   const { t } = useTranslation();
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
 
   const getStatusVariant = (status: AidRequest['status']) => {
     switch (status) {
@@ -152,14 +157,14 @@ function AidRequestCard({ request }: { request: AidRequest }) {
           {formatDistanceToNow(new Date(request.timestamp), { addSuffix: true })}
         </p>
         {request.status === 'Needed' && (
-           <Dialog>
+           <Dialog open={isDonateOpen} onOpenChange={setIsDonateOpen}>
              <DialogTrigger asChild>
                 <Button>
                   <HandHeart className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
                   {t('donate_button')}
                 </Button>
              </DialogTrigger>
-             <DonateDialog request={request} />
+             <DonateDialog request={request} onPledgeSuccess={() => setIsDonateOpen(false)} />
            </Dialog>
         )}
       </CardFooter>
@@ -203,54 +208,49 @@ export function AidFeed() {
   useEffect(() => {
     let isSubscribed = true;
 
-    // Set a timeout to prevent infinitely long load times on connection errors.
-    const timeoutId = setTimeout(() => {
-      if (isSubscribed && loading) {
-        console.warn("Firestore connection timed out. Falling back to mock data.");
-        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
-        setLoading(false);
-        toast({
-          variant: "destructive",
-          title: t('toast_error_title'),
-          description: "Could not connect to the database. Displaying sample data."
-        });
-      }
-    }, 5000); // 5-second timeout
-
-    const unsubscribe = onSnapshot(aidRequestsCollection,
-      (snapshot) => {
-        if (!isSubscribed) return;
-        clearTimeout(timeoutId); // Connection successful, clear the timeout.
-
-        let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
-        // Fallback to mock data if Firestore is empty but connection was successful
-        if (aidData.length === 0) {
-          aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
-        }
-        setRequests(aidData);
-        setLoading(false);
-      },
-      (error) => {
-        if (!isSubscribed) return;
-        clearTimeout(timeoutId); // Error occurred, clear the timeout.
-        console.error("Error fetching aid requests:", error);
-        toast({
-          variant: "destructive",
-          title: t('toast_error_title'),
-          description: t('toast_fetch_aid_error')
-        })
-        // Fallback to mock data on error
+    const handleFirestoreError = (error: Error) => {
+      console.error("Error fetching aid requests:", error);
+      toast({
+        variant: "destructive",
+        title: t('toast_error_title'),
+        description: t('toast_fetch_aid_error')
+      });
+      // Fallback to mock data immediately on error
+      if (isSubscribed) {
         setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
         setLoading(false);
       }
-    );
-
-    return () => {
-      isSubscribed = false;
-      clearTimeout(timeoutId);
-      unsubscribe();
     };
-  }, [toast, t, loading]);
+
+    try {
+      const unsubscribe = onSnapshot(aidRequestsCollection,
+        (snapshot) => {
+          if (!isSubscribed) return;
+
+          let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
+          if (aidData.length === 0) {
+            console.log("Firestore is empty, falling back to mock aid requests.");
+            aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
+          }
+          setRequests(aidData);
+          setLoading(false);
+        },
+        (error) => {
+          if (isSubscribed) {
+            handleFirestoreError(error);
+          }
+        }
+      );
+      
+      return () => {
+        isSubscribed = false;
+        unsubscribe();
+      };
+    } catch(error) {
+       handleFirestoreError(error as Error);
+       return () => { isSubscribed = false; };
+    }
+  }, [toast, t]);
 
   if (loading) {
     return <AidFeedSkeleton />;
