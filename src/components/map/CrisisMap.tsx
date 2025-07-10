@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { mockAlerts } from '@/lib/mock-data';
 import type { Alert } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ThumbsUp, ThumbsDown, RadioTower, Clock, X, MapPin } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -19,7 +18,7 @@ function getPinColor(score: number) {
 }
 
 
-function SelectedAlertCard({ alert, onUpdate, onClose }: { alert: Alert | null; onUpdate: (updatedAlert: Alert) => void; onClose: () => void }) {
+function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null; onUpdate: (updatedAlert: Alert) => void; onClose: () => void }) {
   const { toast } = useToast();
 
   if (!alert) return null;
@@ -59,46 +58,45 @@ function SelectedAlertCard({ alert, onUpdate, onClose }: { alert: Alert | null; 
         latitude={alert.location.lat}
         onClose={onClose}
         closeButton={false}
-        offset={25}
+        offset={35}
         anchor="bottom"
+        className="font-body"
     >
-        <Card className="w-80 shadow-2xl z-20 border-none relative">
-             <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-1 right-1 h-7 w-7">
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close alert</span>
-            </Button>
-            <CardHeader className="p-4 pb-2">
-                <CardTitle className="font-headline text-lg pr-6">{alert.locationName}</CardTitle>
-                <CardDescription className="flex items-center pt-1 text-xs">
-                    <RadioTower className="h-3 w-3 mr-1.5" />
-                    Reported by Anonymous
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 pt-2 pb-3">
-                <p className="mb-3 text-sm">{alert.description}</p>
-                <div className="mb-2">
-                    <label className="text-xs font-medium">Trust Score: {alert.trustScore}%</label>
-                    <Progress value={alert.trustScore} className="mt-1 h-1.5" />
-                </div>
-                <div className="flex items-center text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3 mr-1.5" />
-                    <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
-                </div>
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-2 p-4 pt-0">
-                 <p className="text-xs text-muted-foreground mb-1">Is this accurate?</p>
-                <div className="flex gap-2 w-full">
-                    <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1">
-                        <ThumbsUp className="h-4 w-4 mr-2" />
-                        Confirm ({alert.confirmations})
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1">
-                        <ThumbsDown className="h-4 w-4 mr-2" />
-                        Dispute ({alert.disputes})
-                    </Button>
-                </div>
-            </CardFooter>
-        </Card>
+      <div className="w-72 bg-background rounded-lg shadow-lg">
+          <button onClick={onClose} className="absolute top-2 right-2 p-1 text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close alert</span>
+          </button>
+          <div className="p-4 space-y-3">
+            <h3 className="font-bold text-base font-headline pr-6">{alert.locationName}</h3>
+            <div className="flex items-center text-xs text-muted-foreground">
+                <RadioTower className="h-3 w-3 mr-1.5" />
+                Reported by Anonymous
+            </div>
+            <p className="text-sm">{alert.description}</p>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Trust Score: {alert.trustScore}%</label>
+              <Progress value={alert.trustScore} className="mt-1 h-1" />
+            </div>
+            <div className="flex items-center text-xs text-muted-foreground">
+                <Clock className="h-3 w-3 mr-1.5" />
+                <span>{formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}</span>
+            </div>
+          </div>
+          <div className="px-4 pb-4 pt-2 border-t border-border">
+              <p className="text-xs text-muted-foreground mb-2">Is this accurate?</p>
+              <div className="flex gap-2 w-full">
+                  <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(true)} className="flex-1">
+                      <ThumbsUp className="h-4 w-4 mr-2" />
+                      Confirm ({alert.confirmations})
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleTrustUpdate(false)} className="flex-1">
+                      <ThumbsDown className="h-4 w-4 mr-2" />
+                      Dispute ({alert.disputes})
+                  </Button>
+              </div>
+          </div>
+      </div>
     </Popup>
   );
 }
@@ -137,7 +135,7 @@ export function CrisisMap() {
                 </Marker>
             ))}
 
-            <SelectedAlertCard alert={selectedAlert} onUpdate={handleUpdateAlert} onClose={() => setSelectedAlert(null)} />
+            <SelectedAlertPopup alert={selectedAlert} onUpdate={handleUpdateAlert} onClose={() => setSelectedAlert(null)} />
         </Map>
     </div>
   );
