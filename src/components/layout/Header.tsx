@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -6,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Menu, HeartHandshake } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useState } from 'react';
 
 export function Header() {
   const { t } = useTranslation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
     { href: '/map', label: t('nav_map') },
@@ -17,11 +20,15 @@ export function Header() {
     { href: '/zakat', label: t('nav_zakat') },
   ];
 
+  const handleLinkClick = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-auto flex items-center">
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden ltr:mr-2 rtl:ml-2">
                 <Menu className="h-5 w-5" />
@@ -30,7 +37,7 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <nav className="flex flex-col gap-4 pt-6">
-                 <Link href="/" className="mb-4 flex items-center space-x-2 rtl:space-x-reverse">
+                 <Link href="/" onClick={handleLinkClick} className="mb-4 flex items-center space-x-2 rtl:space-x-reverse">
                     <HeartHandshake className="h-6 w-6 text-primary" />
                     <span className="font-bold text-lg">
                       {t('app_title')}
@@ -40,6 +47,7 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={handleLinkClick}
                     className="block px-2 py-1 text-lg"
                   >
                     {link.label}
