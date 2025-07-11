@@ -39,20 +39,25 @@ const useSpeechRecognition = (lang: string) => {
     const { t } = useTranslation();
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
-
-    const startListening = useCallback(() => {
-        if (recognitionRef.current) {
-            recognitionRef.current.start();
-            setIsListening(true);
-        }
-    }, []);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const stopListening = useCallback(() => {
         if (recognitionRef.current) {
             recognitionRef.current.stop();
             setIsListening(false);
+            if(timeoutRef.current) clearTimeout(timeoutRef.current);
         }
     }, []);
+
+    const startListening = useCallback(() => {
+        if (recognitionRef.current) {
+            recognitionRef.current.start();
+            setIsListening(true);
+            timeoutRef.current = setTimeout(() => {
+                if (isListening) stopListening();
+            }, 30000);
+        }
+    }, [isListening, stopListening]);
     
     const initializeRecognition = useCallback((onTranscriptUpdate: (transcript: string, isFinal: boolean) => void) => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -67,7 +72,7 @@ const useSpeechRecognition = (lang: string) => {
 
         recognitionRef.current = new SpeechRecognition();
         const recognition = recognitionRef.current;
-        recognition.continuous = true; // Keep listening even after pauses
+        recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = lang;
 
@@ -93,14 +98,14 @@ const useSpeechRecognition = (lang: string) => {
                     description: event.error === 'not-allowed' ? 'Mic permission denied.' : t('toast_audio_error_desc'),
                 });
             }
-             setIsListening(false);
+             stopListening();
         };
 
         recognition.onend = () => {
              onTranscriptUpdate(finalTranscript, true);
-             setIsListening(false);
+             stopListening();
         };
-    }, [lang, t, toast]);
+    }, [lang, t, toast, stopListening]);
 
     return {
         isListening,
@@ -130,18 +135,24 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
   });
 
   const { isListening, startListening, stopListening, initializeRecognition, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
+  
+  const getPriorityFromTranscript = (transcript: string) => {
+      const lowerTranscript = transcript.toLowerCase();
+      const highPriorityKeywords = ['urgent', 'high', 'عاجل', 'خطير'];
+      const mediumPriorityKeywords = ['medium', 'متوسط'];
+
+      if (highPriorityKeywords.some(kw => lowerTranscript.includes(kw))) return 'High';
+      if (mediumPriorityKeywords.some(kw => lowerTranscript.includes(kw))) return 'Medium';
+      return form.getValues('priority'); // Keep existing if no keyword
+  }
 
   useEffect(() => {
     initializeRecognition((transcript) => {
         form.setValue('description', transcript, { shouldValidate: true });
         
         // Auto-detect priority from transcript
-        const lowerTranscript = transcript.toLowerCase();
-        if (lowerTranscript.includes('urgent') || lowerTranscript.includes('high') || lowerTranscript.includes('عاجل')) {
-            form.setValue('priority', 'High');
-        } else if (lowerTranscript.includes('medium') || lowerTranscript.includes('متوسط')) {
-            form.setValue('priority', 'Medium');
-        }
+        const detectedPriority = getPriorityFromTranscript(transcript);
+        form.setValue('priority', detectedPriority);
     });
   }, [initializeRecognition, form]);
 

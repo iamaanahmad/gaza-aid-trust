@@ -186,6 +186,7 @@ export function CrisisMap() {
 
   useEffect(() => {
     let isSubscribed = true;
+    let unsubscribe: () => void = () => {};
 
     // Try to load from cache first
     try {
@@ -213,7 +214,7 @@ export function CrisisMap() {
     };
 
     try {
-        const unsubscribe = onSnapshot(alertsCollection, 
+        unsubscribe = onSnapshot(alertsCollection, 
           (snapshot) => {
             if (!isSubscribed) return;
 
@@ -233,14 +234,16 @@ export function CrisisMap() {
           }
         );
         
-        return () => {
-          isSubscribed = false;
-          unsubscribe();
-        };
     } catch(error) {
         handleFirestoreError(error as Error);
-        return () => { isSubscribed = false; };
     }
+
+    return () => {
+        isSubscribed = false;
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    };
   }, [toast, t, alerts.length, loadAndCacheAlerts]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
@@ -279,10 +282,13 @@ export function CrisisMap() {
                     e.originalEvent.stopPropagation();
                     setSelectedAlert(alert);
                 }}>
-                    <div className="cursor-pointer" aria-label={t('alert_label', { location: alert.locationName })}>
+                    <div className="cursor-pointer relative" aria-label={t('alert_label', { location: alert.locationName })}>
                         <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert)}}>
                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs -translate-y-1">
+                          {alert.priority.charAt(0)}
+                        </span>
                     </div>
                 </Marker>
             ))}

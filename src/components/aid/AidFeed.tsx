@@ -137,11 +137,11 @@ function AidRequestCard({ request }: { request: AidRequest }) {
         <CardDescription className="pt-2">{request.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-3">
-        <div className="flex items-center text-sm text-muted-foreground">
+        <div className="flex items-center text-sm">
             <span className="font-semibold text-foreground ltr:mr-2 rtl:ml-2">{t('priority_label')}:</span>
-            <span className={request.priority === 'High' ? 'text-destructive font-bold' : ''}>
+            <Badge variant={request.priority === 'High' ? 'destructive' : 'secondary'}>
               {priorityTranslations[request.priority]}
-            </span>
+            </Badge>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
             <Users className="h-4 w-4 rtl:ml-2 ltr:mr-2" />
@@ -219,6 +219,7 @@ export function AidFeed() {
 
   useEffect(() => {
     let isSubscribed = true;
+    let unsubscribe: () => void = () => {};
 
     const handleFirestoreError = (error: Error) => {
       console.error("Error fetching aid requests:", error);
@@ -235,7 +236,7 @@ export function AidFeed() {
     };
 
     try {
-      const unsubscribe = onSnapshot(aidRequestsCollection,
+      unsubscribe = onSnapshot(aidRequestsCollection,
         (snapshot) => {
           if (!isSubscribed) return;
 
@@ -259,15 +260,16 @@ export function AidFeed() {
           }
         }
       );
-      
-      return () => {
-        isSubscribed = false;
-        unsubscribe();
-      };
     } catch(error) {
        handleFirestoreError(error as Error);
-       return () => { isSubscribed = false; };
     }
+
+    return () => {
+      isSubscribed = false;
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [toast, t]);
 
   if (loading) {
