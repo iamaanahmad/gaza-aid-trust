@@ -287,7 +287,7 @@ export function CrisisMap() {
                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         </svg>
                         <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs -translate-y-1">
-                          {alert.priority.charAt(0)}
+                          {(alert.priority || '').charAt(0)}
                         </span>
                     </div>
                 </Marker>
@@ -298,3 +298,4 @@ export function CrisisMap() {
     </div>
   );
 }
+
