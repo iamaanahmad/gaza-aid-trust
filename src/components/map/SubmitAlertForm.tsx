@@ -8,12 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Mic, Send } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { addDoc } from 'firebase/firestore';
 import { alertsCollection } from '@/lib/firebase';
-import type { Alert } from '@/lib/types';
+import type { Alert, AlertPriority } from '@/lib/types';
 import { useTranslation } from '@/hooks/use-translation';
 
 interface SpeechRecognition extends EventTarget {
@@ -27,17 +34,14 @@ interface SpeechRecognition extends EventTarget {
     onend: ((this: SpeechRecognition, ev: Event) => any) | null;
 }
 
-// Custom hook for Web Speech API
 const useSpeechRecognition = (lang: string) => {
     const { toast } = useToast();
     const { t } = useTranslation();
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
-    const finalTranscriptRef = useRef('');
 
     const startListening = useCallback(() => {
         if (recognitionRef.current) {
-            finalTranscriptRef.current = '';
             recognitionRef.current.start();
             setIsListening(true);
         }
@@ -50,7 +54,7 @@ const useSpeechRecognition = (lang: string) => {
         }
     }, []);
     
-    const initializeRecognition = useCallback((onTranscriptUpdate: (transcript: string) => void) => {
+    const initializeRecognition = useCallback((onTranscriptUpdate: (transcript: string, isFinal: boolean) => void) => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognition) {
             toast({
@@ -63,20 +67,21 @@ const useSpeechRecognition = (lang: string) => {
 
         recognitionRef.current = new SpeechRecognition();
         const recognition = recognitionRef.current;
-        recognition.continuous = true;
+        recognition.continuous = true; // Keep listening even after pauses
         recognition.interimResults = true;
         recognition.lang = lang;
 
+        let finalTranscript = '';
         recognition.onresult = (event: any) => {
             let interimTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
-                    finalTranscriptRef.current += event.results[i][0].transcript + '. ';
+                    finalTranscript += event.results[i][0].transcript + '. ';
                 } else {
                     interimTranscript += event.results[i][0].transcript;
                 }
             }
-            onTranscriptUpdate(finalTranscriptRef.current + interimTranscript);
+            onTranscriptUpdate(finalTranscript + interimTranscript, false);
         };
 
         recognition.onerror = (event: any) => {
@@ -85,13 +90,14 @@ const useSpeechRecognition = (lang: string) => {
                 toast({
                     variant: 'destructive',
                     title: t('toast_audio_error'),
-                    description: t('toast_audio_error_desc'),
+                    description: event.error === 'not-allowed' ? 'Mic permission denied.' : t('toast_audio_error_desc'),
                 });
             }
              setIsListening(false);
         };
 
         recognition.onend = () => {
+             onTranscriptUpdate(finalTranscript, true);
              setIsListening(false);
         };
     }, [lang, t, toast]);
@@ -110,12 +116,17 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
   const { t, language } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<{description: string, locationName: string}>({
-      resolver: zodResolver(z.object({
-        description: z.string().min(10, t('validation_description_min_alert')).max(500),
-        locationName: z.string().min(3, t('validation_location_min')),
-      })),
-      defaultValues: { description: '', locationName: '' },
+  const alertFormSchema = z.object({
+    description: z.string().min(10, t('validation_description_min_alert')).max(500),
+    locationName: z.string().min(3, t('validation_location_min')),
+    priority: z.enum(['High', 'Medium', 'Low'], { required_error: t('validation_priority_required') }),
+  })
+  
+  type AlertFormValues = z.infer<typeof alertFormSchema>;
+
+  const form = useForm<AlertFormValues>({
+      resolver: zodResolver(alertFormSchema),
+      defaultValues: { description: '', locationName: '', priority: 'Low' },
   });
 
   const { isListening, startListening, stopListening, initializeRecognition, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
@@ -123,17 +134,27 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
   useEffect(() => {
     initializeRecognition((transcript) => {
         form.setValue('description', transcript, { shouldValidate: true });
+        
+        // Auto-detect priority from transcript
+        const lowerTranscript = transcript.toLowerCase();
+        if (lowerTranscript.includes('urgent') || lowerTranscript.includes('high') || lowerTranscript.includes('عاجل')) {
+            form.setValue('priority', 'High');
+        } else if (lowerTranscript.includes('medium') || lowerTranscript.includes('متوسط')) {
+            form.setValue('priority', 'Medium');
+        }
     });
   }, [initializeRecognition, form]);
 
 
-  async function onSubmit(data: {description: string, locationName: string}) {
+  async function onSubmit(data: AlertFormValues) {
     setIsSubmitting(true);
     try {
         const newAlert: Omit<Alert, 'id'> = {
-            location: { lat: 31.5, lng: 34.4667 },
+            location: { lat: 31.5, lng: 34.4667 }, // Placeholder
             locationName: data.locationName,
             description: data.description,
+            priority: data.priority,
+            type: 'triage', // Hardcode as triage for this form
             timestamp: Date.now(),
             reporterId: 'anonymous-user',
             confirmations: 0,
@@ -166,11 +187,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
     if (isListening) {
       stopListening();
     } else {
-      const currentDescription = form.getValues('description');
       startListening();
-      if(currentDescription) {
-        finalTranscriptRef.current = currentDescription + ' ';
-      }
     }
   }
 
@@ -207,19 +224,43 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="locationName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('form_label_location_name')}</FormLabel>
-              <FormControl>
-                <Input placeholder={t('form_placeholder_location_name')} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+            <FormField
+            control={form.control}
+            name="locationName"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>{t('form_label_location_name')}</FormLabel>
+                <FormControl>
+                    <Input placeholder={t('form_placeholder_location_name')} {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+              control={form.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('priority_label')}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('form_placeholder_select_priority')} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Low">{t('priority_low')}</SelectItem>
+                      <SelectItem value="Medium">{t('priority_medium')}</SelectItem>
+                      <SelectItem value="High">{t('priority_high')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        </div>
         <Button type="submit" className="w-full" disabled={isSubmitting}>
             <Send className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
             {isSubmitting ? t('publishing_alert_button') : t('publish_alert_button')}

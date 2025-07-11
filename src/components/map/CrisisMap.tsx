@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
 import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
@@ -19,9 +19,18 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 const ALERTS_CACHE_KEY = 'gaza-aid-trust-alerts';
 
-function getPinColor(score: number) {
-  if (score > 75) return '#22c55e'; // green-500
-  if (score > 50) return '#f59e0b'; // amber-500
+function getPinColor(alert: Alert) {
+  if (alert.type === 'triage') {
+    switch (alert.priority) {
+      case 'High': return '#ef4444'; // red-500
+      case 'Medium': return '#f59e0b'; // amber-500
+      case 'Low': return '#22c55e'; // green-500
+      default: return '#71717a'; // zinc-500
+    }
+  }
+  // Fallback for general alerts based on trust score
+  if (alert.trustScore > 75) return '#22c55e'; // green-500
+  if (alert.trustScore > 50) return '#f59e0b'; // amber-500
   return '#ef4444'; // red-500
 }
 
@@ -166,6 +175,15 @@ export function CrisisMap() {
   const { t } = useTranslation();
 
 
+  const loadAndCacheAlerts = useCallback((alertsData: Alert[]) => {
+    setAlerts(alertsData);
+    try {
+      localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+    } catch (e) {
+      console.error("Failed to write to localStorage", e);
+    }
+  }, []);
+
   useEffect(() => {
     let isSubscribed = true;
 
@@ -188,7 +206,8 @@ export function CrisisMap() {
             description: t('toast_fetch_alerts_error')
         });
         if (isSubscribed && alerts.length === 0) {
-          setAlerts(mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`})));
+          const mockData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}))
+          loadAndCacheAlerts(mockData);
           setLoading(false);
         }
     };
@@ -204,14 +223,8 @@ export function CrisisMap() {
                 alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
             }
             
-            setAlerts(alertsData);
+            loadAndCacheAlerts(alertsData);
             setLoading(false);
-
-            try {
-              localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
-            } catch (e) {
-              console.error("Failed to write to localStorage", e);
-            }
           }, 
           (error) => {
             if (isSubscribed) {
@@ -228,7 +241,7 @@ export function CrisisMap() {
         handleFirestoreError(error as Error);
         return () => { isSubscribed = false; };
     }
-  }, [toast, t]);
+  }, [toast, t, alerts.length, loadAndCacheAlerts]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
@@ -267,7 +280,7 @@ export function CrisisMap() {
                     setSelectedAlert(alert);
                 }}>
                     <div className="cursor-pointer" aria-label={t('alert_label', { location: alert.locationName })}>
-                        <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert.trustScore)}}>
+                        <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert)}}>
                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         </svg>
                     </div>

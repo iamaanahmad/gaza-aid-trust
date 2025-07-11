@@ -1,3 +1,7 @@
+
+export type AlertPriority = 'High' | 'Medium' | 'Low';
+export type AlertType = 'triage' | 'general';
+
 export interface Alert {
   id: string;
   location: {
@@ -12,12 +16,15 @@ export interface Alert {
   disputes: number;
   trustScore: number;
   voiceNoteUrl?: string;
+  type: AlertType;
+  priority: AlertPriority;
 }
 
 export interface AidRequest {
   id: string;
   requesterId: string;
   category: 'Food' | 'Medicine' | 'Shelter';
+  priority: AlertPriority;
   description: string;
   familySize: number;
   photoUrl?: string;

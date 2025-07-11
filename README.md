@@ -1,11 +1,11 @@
 
 # Gaza Aid & Trust: Crisis Connect
 
-**A community-powered crisis map and direct aid platform for Gaza, built with trust and accessibility at its core.**
+**An AI-powered triage and medical aid platform for Gaza, designed to streamline patient intake and connect resources where they're needed most.**
 
 ![Gaza Aid & Trust Hero Image](https://iili.io/FENr48F.md.png)
 
-> This project is built for the **"Hack for Gaza"** hackathon. Its goal is to demonstrate a viable, technology-driven solution to real-world humanitarian challenges by connecting people, verifying information, and delivering aid with dignity and transparency.
+> This project addresses the **"Streamlining On-the-Ground Patient Intake with Efficient Triage System"** challenge for the "Hack for Gaza" hackathon. Its goal is to demonstrate a viable, technology-driven solution that enables medics to post urgent triage alerts via voice, displays them on an offline-capable map with AI-powered trust scores, and connects critical medical aid with donors.
 
 ---
 
@@ -24,44 +24,42 @@
 
 ## The Problem
 
-In times of crisis, access to accurate, real-time information is as vital as food and water. For the people of Gaza, navigating a landscape of uncertainty is a daily struggle. Misinformation can be deadly, and inefficient aid distribution can leave the most vulnerable without support. The core challenges are:
-1.  **Information Vacuum:** A lack of reliable, centralized, and real-time information about safety, resources, and aid.
-2.  **Misinformation:** The rapid spread of unverified claims, creating confusion and danger.
-3.  **Aid Inefficiency:** A disconnect between donors who want to help and families who have specific, urgent needs.
+In a crisis zone like Gaza, the healthcare system is under unimaginable strain. Medics and doctors face a chaotic environment where efficient patient intake and resource allocation can mean the difference between life and death. The core challenges are:
+1.  **Overwhelmed Intake Process:** Manual, paper-based patient intake is slow, error-prone, and impossible to scale during mass casualty events.
+2.  **Lack of Real-Time Visibility:** There is no centralized system for doctors to see which clinics are overwhelmed, what specific supplies are needed, or where the most urgent patients are.
+3.  **Misinformation and Trust:** Unverified reports about clinic capacity or available resources can lead to fatal delays.
 
 ## Our Solution
 
-**Gaza Aid & Trust** is a web platform designed to tackle these challenges by empowering the community. It combines a real-time crisis map with a direct aid system, all underpinned by an AI-powered trust mechanism. Our goal is to create a reliable, transparent, and accessible ecosystem for information sharing and humanitarian support.
+**Gaza Aid & Trust** is a web platform designed for medics on the ground. It combines a real-time **Triage Map** with a **Medical Aid Connection** system, all underpinned by an AI-powered trust mechanism. Our goal is to create a reliable, fast, and accessible tool for streamlining patient triage and resource management.
 
-The platform is fully bilingual (Arabic/English) and built as a Progressive WebApp (PWA) with offline capabilities, ensuring it's accessible even with intermittent internet connectivity.
+The platform is built as a Progressive WebApp (PWA) with **offline-first functionality** and **bilingual voice-to-text input**, ensuring it works in low-connectivity environments and allows for hands-free operation.
 
 ## Project Philosophy
 
 Our approach is guided by three principles:
--   **Trust through Technology**: We use AI not just as a feature, but as a core mechanism to build a self-policing information ecosystem. By analyzing community confirmations and disputes, we generate a dynamic "Trust Score" for every alert, helping users instantly gauge reliability.
--   **Accessibility by Default**: From a fully responsive, bilingual (Arabic RTL) interface to high-contrast modes and voice-to-text input, we've prioritized making the platform usable for everyone, especially in challenging conditions where traditional input methods may be difficult.
--   **Dignity in Aid**: We empower local families by giving them a platform to voice their specific needs. This shifts the paradigm from passive aid reception to active participation, connecting donors directly to the needs on the ground.
+-   **Trust through Technology**: We use AI not just as a feature, but as a core mechanism to build a self-policing information ecosystem. By analyzing community confirmations and disputes, our **AI Trust Score** helps medics instantly gauge the reliability of a triage alert.
+-   **Accessibility for Medics**: From a fully responsive, bilingual (Arabic RTL) interface to **voice-to-text triage notes**, we've prioritized making the platform a seamless tool for doctors working under extreme pressure.
+-   **Dignity in Aid**: We empower clinics by giving them a platform to voice their specific medical needs. This connects donors directly to the front lines, ensuring the right aid gets to the right place at the right time.
 
 ## Key Features
 
--   **Real-Time Crisis Map**: Users can post and view geo-tagged alerts about aid distribution, safe zones, and critical incidents.
--   **AI-Powered Trust Score**: To combat misinformation, each alert has a "Trust Score" that is dynamically calculated by a **Google Gemini** model. The model considers user confirmations and disputes, creating a self-policing information ecosystem.
--   **Voice-to-Text Alerts**: For accessibility and ease of use, users can report alerts simply by speaking in their native language (Arabic or English).
--   **Direct Aid Connection**: A dedicated portal where families in Gaza can request specific aid (e.g., medicine, food, shelter) and donors can browse and directly fund these needs.
--   **Community Leaderboard**: Recognizes and encourages contributions from the most active and trusted reporters and donors, fostering a strong community.
--   **Zakat Calculator**: An integrated tool to help users calculate their Zakat, which can then be donated to aid requests on the platform.
--   **Bilingual & RTL Support**: Full support for both English and Arabic, with a seamless right-to-left (RTL) layout for Arabic users.
--   **Accessibility Focused**: Includes high-contrast mode and font-size adjustments to ensure the platform is usable by everyone.
--   **Offline First (PWA)**: Designed as a Progressive Web App, ensuring that critical data is cached and available even without a stable internet connection.
+-   **Real-Time Triage Map**: Medics can post and view geo-tagged triage alerts with priority levels (High, Medium, Low), allowing for quick assessment of the most critical needs.
+-   **AI-Powered Trust Score**: To combat misinformation, each alert has a "Trust Score" that is dynamically calculated by a **Google Gemini** model. The model considers user confirmations (+1) and disputes (-1), creating a transparent, community-driven reputation system.
+-   **Voice-to-Text Triage Notes**: For speed and accessibility, medics can record triage alerts simply by speaking in Arabic or English. The system can even auto-detect keywords like "urgent" to set the priority.
+-   **Direct Medical Aid Connection**: A dedicated portal where clinics can request specific medical supplies (e.g., insulin, bandages) and donors can fund these needs directly. The feed is prioritized to show high-priority needs first.
+-   **Recipient Feedback Loop**: To close the loop and build trust, the platform includes a prominent feedback field where clinics can confirm receipt of aid, turning a transaction into a human connection.
+-   **Zakat Calculator**: An integrated tool to help users calculate their Zakat, which can then be donated to medical aid requests on the platform, aligning with Islamic principles of charity.
+-   **Offline-First (PWA)**: Designed as a Progressive Web App, ensuring that critical map data and alerts are cached and available even without a stable internet connection.
 
 ## Live Demo & Screenshots
 
 *(This is where you would link to your live demo and add compelling screenshots of the app in action)*
 
 ![Screenshot 1](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-2-1024x464.png)
-**Screenshot 1: The Crisis Map with an active alert.**
+**Screenshot 1: The Triage Map with priority-coded alerts.**
 ![Screenshot 2](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-1-1024x576.png)
-**Screenshot 2: The Aid Connect feed showing various requests.**
+**Screenshot 2: The Medical Aid feed showing prioritized requests.**
 ![Screenshot 3](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-3-1024x646.png)
 **Screenshot 3: The mobile UI in Arabic (RTL).**
 
@@ -77,7 +75,7 @@ Our approach is guided by three principles:
 -   **Framework**: [Next.js](https://nextjs.org/) (with App Router)
 -   **Language**: [TypeScript](https://www.typescriptlang.org/)
 -   **UI**: [React](https://reactjs.org/), [ShadCN UI](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/)
--   **AI**: [Google Gemini](https://deepmind.google/technologies/gemini/) via [Firebase Genkit](https://firebase.google.com/docs/genkit)
+-   **AI**: [Google Gemini](https://deepmind.google.com/technologies/gemini/) via [Firebase Genkit](https://firebase.google.com/docs/genkit)
 -   **Database**: [Cloud Firestore](https://firebase.google.com/docs/firestore)
 -   **Mapping**: [Mapbox](https://www.mapbox.com/)
 -   **Offline Support**: Progressive Web App (PWA) using `next-pwa`
@@ -142,8 +140,8 @@ The application will be available at `http://localhost:9002`.
 ## Future Roadmap
 
 This prototype lays a strong foundation. Future enhancements could include:
--   **Secure User Authentication**: Implementing phone number-based authentication to verify reporters and donors.
--   **End-to-End Encrypted Chat**: A secure communication channel between aid donors and recipients.
--   **Supply Chain Integration**: Partnering with on-the-ground NGOs to track aid delivery from pledge to fulfillment.
+-   **Secure User Authentication**: Implementing phone number-based authentication for medics to verify identity.
+-   **End-to-End Encrypted Chat**: A secure communication channel between medics and donors.
+-   **Supply Chain Integration**: Partnering with on-the-ground NGOs to track medical aid delivery from pledge to fulfillment.
 -   **Expanded AI Capabilities**: Using AI to detect duplicate alerts, analyze satellite imagery for damage assessment, and predict areas of greatest need.
 -   **Wider Language Support**: Adding more languages spoken by international aid workers.

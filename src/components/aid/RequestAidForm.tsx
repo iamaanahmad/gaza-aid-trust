@@ -29,6 +29,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
 
     const requestAidSchema = z.object({
       category: z.enum(['Food', 'Medicine', 'Shelter'], { required_error: t('validation_category_required') }),
+      priority: z.enum(['High', 'Medium', 'Low'], { required_error: t('validation_priority_required') }),
       description: z.string().min(10, t('validation_description_min')).max(200),
       familySize: z.coerce.number().min(1, t('validation_family_size_min')),
       locationName: z.string().min(3, t('validation_location_min')),
@@ -42,6 +43,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
       defaultValues: {
         description: '',
         locationName: '',
+        priority: 'Low',
       }
     });
 
@@ -51,6 +53,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
         const newRequest: Omit<AidRequest, 'id'> = {
             requesterId: 'anonymous-user', // Placeholder
             category: data.category,
+            priority: data.priority,
             description: data.description,
             familySize: data.familySize,
             locationName: data.locationName,
@@ -82,28 +85,52 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('form_label_category')}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('form_placeholder_select_category')} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Food">{t('category_food')}</SelectItem>
-                  <SelectItem value="Medicine">{t('category_medicine')}</SelectItem>
-                  <SelectItem value="Shelter">{t('category_shelter')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+            <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>{t('form_label_category')}</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                    <SelectTrigger>
+                        <SelectValue placeholder={t('form_placeholder_select_category')} />
+                    </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                    <SelectItem value="Food">{t('category_food')}</SelectItem>
+                    <SelectItem value="Medicine">{t('category_medicine')}</SelectItem>
+                    <SelectItem value="Shelter">{t('category_shelter')}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+              control={form.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('priority_label')}</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('form_placeholder_select_priority')} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Low">{t('priority_low')}</SelectItem>
+                      <SelectItem value="Medium">{t('priority_medium')}</SelectItem>
+                      <SelectItem value="High">{t('priority_high')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        </div>
         <FormField
           control={form.control}
           name="description"

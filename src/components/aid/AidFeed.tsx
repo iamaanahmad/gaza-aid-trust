@@ -88,7 +88,7 @@ function AidRequestCard({ request }: { request: AidRequest }) {
   const getStatusVariant = (status: AidRequest['status']) => {
     switch (status) {
       case 'Needed':
-        return 'destructive';
+        return request.priority === 'High' ? 'destructive' : 'default';
       case 'Pledged':
         return 'default';
       case 'Fulfilled':
@@ -110,6 +110,12 @@ function AidRequestCard({ request }: { request: AidRequest }) {
     Shelter: t('category_shelter'),
   }
 
+  const priorityTranslations: { [key in AidRequest['priority']]: string } = {
+    High: t('priority_high'),
+    Medium: t('priority_medium'),
+    Low: t('priority_low'),
+  };
+
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
       {request.photoUrl && (
@@ -119,7 +125,7 @@ function AidRequestCard({ request }: { request: AidRequest }) {
               alt={request.description}
               fill
               className="object-cover"
-              data-ai-hint="aid food package"
+              data-ai-hint="aid medical package"
             />
         </div>
       )}
@@ -131,6 +137,12 @@ function AidRequestCard({ request }: { request: AidRequest }) {
         <CardDescription className="pt-2">{request.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-3">
+        <div className="flex items-center text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground ltr:mr-2 rtl:ml-2">{t('priority_label')}:</span>
+            <span className={request.priority === 'High' ? 'text-destructive font-bold' : ''}>
+              {priorityTranslations[request.priority]}
+            </span>
+        </div>
         <div className="flex items-center text-sm text-muted-foreground">
             <Users className="h-4 w-4 rtl:ml-2 ltr:mr-2" />
             <span>{t('family_size', { count: request.familySize })}</span>
@@ -228,10 +240,16 @@ export function AidFeed() {
           if (!isSubscribed) return;
 
           let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
+          
           if (aidData.length === 0) {
             console.log("Firestore is empty, falling back to mock aid requests.");
             aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
           }
+
+          // Sort by priority: High -> Medium -> Low
+          const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+          aidData.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
           setRequests(aidData);
           setLoading(false);
         },

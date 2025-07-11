@@ -1,3 +1,4 @@
+
 export const translations = {
   // App-wide
   app_title: {
@@ -15,12 +16,12 @@ export const translations = {
 
   // Nav
   nav_map: {
-    en: 'Crisis Map',
-    ar: 'خريطة الأزمات',
+    en: 'Triage Map',
+    ar: 'خريطة الفرز',
   },
   nav_aid: {
-    en: 'Aid Connect',
-    ar: 'توصيل المساعدات',
+    en: 'Medical Aid',
+    ar: 'المساعدات الطبية',
   },
   nav_leaderboard: {
     en: 'Leaderboard',
@@ -45,24 +46,24 @@ export const translations = {
     ar: 'كيف يعمل',
   },
   feature_map_title: {
-    en: 'Crisis Map',
-    ar: 'خريطة الأزمات',
+    en: 'Triage Map',
+    ar: 'خريطة الفرز',
   },
   feature_map_description: {
-    en: 'View real-time, verified alerts on aid distribution, safe zones, and critical incidents.',
-    ar: 'عرض تنبيهات فورية وموثقة حول توزيع المساعدات والمناطق الآمنة والحوادث الحرجة.',
+    en: 'View real-time, verified alerts on patient needs and clinic statuses.',
+    ar: 'عرض تنبيهات فورية وموثقة حول احتياجات المرضى وحالة العيادات.',
   },
   feature_map_cta: {
     en: 'View Map',
     ar: 'عرض الخريطة',
   },
   feature_aid_title: {
-    en: 'Aid Connect',
-    ar: 'توصيل المساعدات',
+    en: 'Medical Aid Connect',
+    ar: 'توصيل المساعدات الطبية',
   },
   feature_aid_description: {
-    en: 'Request essential aid or donate to support a family in need directly.',
-    ar: 'اطلب المساعدة الأساسية أو تبرع لدعم الأسر المحتاجة مباشرة.',
+    en: 'Request essential medical supplies or donate to support a clinic in need.',
+    ar: 'اطلب الإمدادات الطبية الأساسية أو تبرع لدعم عيادة محتاجة.',
   },
   feature_aid_cta: {
     en: 'Give/Request Aid',
@@ -138,20 +139,20 @@ export const translations = {
     ar: 'دليل سريع لاستخدام منصتنا للدعم المجتمعي.',
   },
   tutorial_map_title: {
-    en: 'Crisis Map',
-    ar: 'خريطة الأزمات',
+    en: 'Triage Map',
+    ar: 'خريطة الفرز',
   },
   tutorial_map_desc: {
-    en: 'View and post real-time alerts. Confirm or dispute alerts to help maintain accuracy. Your feedback trains our AI to calculate trust scores.',
-    ar: 'عرض ونشر تنبيهات فورية. قم بتأكيد أو نفي التنبيهات للمساعدة في الحفاظ على دقة المعلومات. ملاحظاتك تدرب الذكاء الاصطناعي لدينا لحساب درجات الثقة.',
+    en: 'Medics post urgent triage alerts via voice. The community confirms alerts to maintain accuracy and train our AI trust score.',
+    ar: 'ينشر المسعفون تنبيهات الفرز العاجلة عبر الصوت. يؤكد المجتمع صحة التنبيهات للحفاظ على الدقة وتدريب درجة ثقة الذكاء الاصطناعي.',
   },
   tutorial_aid_title: {
-    en: 'Aid Connect',
-    ar: 'توصيل المساعدات',
+    en: 'Medical Aid Connect',
+    ar: 'توصيل المساعدات الطبية',
   },
   tutorial_aid_desc: {
-    en: 'Families in Gaza can request essential items. Donors can browse requests and pledge support. Recipient feedback builds trust.',
-    ar: 'يمكن للأسر في غزة طلب المواد الأساسية. يمكن للمانحين تصفح الطلبات والتعهد بالدعم. ملاحظات المستلمين تبني الثقة.',
+    en: 'Clinics can request essential medical supplies. Donors can browse requests and pledge support to fulfill urgent needs.',
+    ar: 'يمكن للعيادات طلب الإمدادات الطبية الأساسية. يمكن للمانحين تصفح الطلبات والتعهد بالدعم لتلبية الاحتياجات العاجلة.',
   },
   tutorial_zakat_title: {
     en: 'Zakat Calculator',
@@ -172,20 +173,20 @@ export const translations = {
 
   // Aid Page
   aid_title: {
-    en: 'Aid Connect',
-    ar: 'توصيل المساعدات',
+    en: 'Medical Aid Connect',
+    ar: 'توصيل المساعدات الطبية',
   },
   aid_subtitle: {
-    en: 'Connect directly with families in Gaza. Fulfill a need, share some hope.',
-    ar: 'تواصل مباشرة مع الأسر في غزة. لبِّ حاجة، وشارك أملاً.',
+    en: 'Connect directly with clinics in Gaza. Fulfill a need, share some hope.',
+    ar: 'تواصل مباشرة مع العيادات في غزة. لبِّ حاجة، وشارك أملاً.',
   },
   request_aid_button: {
-    en: 'Request Aid',
-    ar: 'اطلب مساعدة',
+    en: 'Request Medical Aid',
+    ar: 'اطلب مساعدة طبية',
   },
   request_aid_form_title: {
-    en: 'Submit an Aid Request',
-    ar: 'إرسال طلب مساعدة',
+    en: 'Submit a Medical Aid Request',
+    ar: 'إرسال طلب مساعدة طبية',
   },
   request_aid_form_description: {
     en: 'Please describe your needs clearly. Your request will be visible to donors.',
@@ -194,16 +195,16 @@ export const translations = {
 
   // Map Page
   post_alert_button: {
-    en: 'Post Alert',
-    ar: 'نشر تنبيه',
+    en: 'Post Triage Alert',
+    ar: 'نشر تنبيه فرز',
   },
   submit_alert_form_title: {
-    en: 'Post a Crisis Alert',
-    ar: 'نشر تنبيه أزمة',
+    en: 'Post a Triage Alert',
+    ar: 'نشر تنبيه فرز',
   },
   submit_alert_form_description: {
-    en: 'Share real-time information with your community. Your report could save lives. Use your voice or type.',
-    ar: 'شارك المعلومات الفورية مع مجتمعك. تقريرك يمكن أن ينقذ حياة. استخدم صوتك أو اكتب.',
+    en: 'Share urgent patient or supply needs with other medics. Use your voice or type.',
+    ar: 'شارك احتياجات المرضى أو الإمدادات العاجلة مع المسعفين الآخرين. استخدم صوتك أو اكتب.',
   },
 
   // Leaderboard Page
@@ -366,12 +367,12 @@ export const translations = {
 
   // Crisis Map
   map_loading: {
-    en: 'Loading map & alerts...',
-    ar: 'جاري تحميل الخريطة والتنبيهات...',
+    en: 'Loading Triage Map & Alerts...',
+    ar: 'جاري تحميل خريطة الفرز والتنبيهات...',
   },
   crisis_map_label: {
-    en: 'Crisis Map',
-    ar: 'خريطة الأزمات',
+    en: 'Triage Map',
+    ar: 'خريطة الفرز',
   },
   alert_label: {
     en: 'Alert: {location}',
@@ -386,8 +387,8 @@ export const translations = {
     ar: 'درجة الثقة',
   },
   trust_score_tooltip: {
-    en: 'This score is calculated by our AI based on community confirmations and disputes. Your feedback makes it more accurate.',
-    ar: 'يتم حساب هذه النتيجة بواسطة الذكاء الاصطناعي بناءً على تأكيدات المجتمع ونزاعاته. ملاحظاتك تجعلها أكثر دقة.',
+    en: 'Trust Score = Confirm (+1) or Dispute (-1) votes. This score is calculated by our AI based on community confirmations and disputes. Your feedback makes it more accurate.',
+    ar: 'درجة الثقة = تأكيد (+1) أو نفي (-1). يتم حساب هذه النتيجة بواسطة الذكاء الاصطناعي بناءً على تأكيدات المجتمع ونزاعاته. ملاحظاتك تجعلها أكثر دقة.',
   },
   is_info_accurate: {
     en: 'Is this info accurate?',
@@ -404,24 +405,24 @@ export const translations = {
   
   // Submit Alert Form
   form_label_description: {
-    en: 'Description',
-    ar: 'الوصف',
+    en: 'Description / Triage Note',
+    ar: 'الوصف / ملاحظة الفرز',
   },
   form_placeholder_description_alert: {
-    en: 'e.g., Safe route to Rafah is open...',
-    ar: 'مثال: طريق آمن إلى رفح مفتوح...',
+    en: 'e.g., "Urgent trauma case at Al-Shifa, needs surgical support."',
+    ar: 'مثال: "حالة إصابة عاجلة في مستشفى الشفاء، تحتاج إلى دعم جراحي."',
   },
   use_voice_input_label: {
     en: 'Use voice input',
     ar: 'استخدام الإدخال الصوتي',
   },
   form_label_location_name: {
-    en: 'Location Name',
-    ar: 'اسم الموقع',
+    en: 'Location Name (Clinic/Hospital)',
+    ar: 'اسم الموقع (عيادة/مستشفى)',
   },
   form_placeholder_location_name: {
-    en: 'e.g., Central Khan Younis',
-    ar: 'مثال: وسط خان يونس',
+    en: 'e.g., Al-Shifa Hospital',
+    ar: 'مثال: مستشفى الشفاء',
   },
   publishing_alert_button: {
     en: 'Publishing...',
@@ -430,6 +431,22 @@ export const translations = {
   publish_alert_button: {
     en: 'Publish Alert',
     ar: 'انشر التنبيه',
+  },
+  priority_label: {
+    en: 'Priority',
+    ar: 'الأولوية',
+  },
+  priority_high: {
+    en: 'High',
+    ar: 'عالية',
+  },
+  priority_medium: {
+    en: 'Medium',
+    ar: 'متوسطة',
+  },
+  priority_low: {
+    en: 'Low',
+    ar: 'منخفضة',
   },
 
   // Request Aid Form
@@ -441,13 +458,17 @@ export const translations = {
     en: 'Select a category',
     ar: 'اختر فئة',
   },
+  form_placeholder_select_priority: {
+    en: 'Select priority',
+    ar: 'اختر الأولوية',
+  },
   form_placeholder_description_aid: {
-    en: 'e.g., Need rice and clean water for family...',
-    ar: 'مثال: بحاجة إلى أرز وماء نظيف للأسرة...',
+    en: 'e.g., Need insulin and bandages for clinic...',
+    ar: 'مثال: بحاجة إلى أنسولين وضمادات للعيادة...',
   },
   form_label_family_size: {
-    en: 'Family Size',
-    ar: 'حجم الأسرة',
+    en: 'Patients / Family Size',
+    ar: 'المرضى / حجم الأسرة',
   },
   form_label_location: {
     en: 'Location',
@@ -568,6 +589,10 @@ export const translations = {
   validation_category_required: {
     en: 'Please select a category.',
     ar: 'يرجى اختيار فئة.',
+  },
+  validation_priority_required: {
+    en: 'Please select a priority level.',
+    ar: 'يرجى اختيار مستوى الأولوية.',
   },
   validation_description_min: {
     en: 'Please provide a detailed description.',

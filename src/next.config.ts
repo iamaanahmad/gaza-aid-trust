@@ -14,13 +14,24 @@ const withPWA = withPWAInit({
       urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
       handler: 'CacheFirst',
       options: {
-        cacheName: 'mapbox-tiles',
+        cacheName: 'mapbox-api-cache',
         expiration: {
           maxEntries: 100,
           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
         },
         cacheableResponse: {
           statuses: [0, 200],
+        },
+      },
+    },
+    {
+      urlPattern: /.*\.(?:png|jpg|jpeg|svg|gif)/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'image-cache',
+        expiration: {
+          maxEntries: 60,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
         },
       },
     },
