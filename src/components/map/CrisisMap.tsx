@@ -174,78 +174,73 @@ export function CrisisMap() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-
-  const loadAndCacheAlerts = useCallback((alertsData: Alert[]) => {
-    setAlerts(alertsData);
-    try {
-      localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
-    } catch (e) {
-      console.error("Failed to write to localStorage", e);
-    }
-  }, []);
-
   useEffect(() => {
     let isSubscribed = true;
-    let unsubscribe: () => void = () => {};
 
+    const loadAndCacheAlerts = (alertsData: Alert[]) => {
+      if (!isSubscribed) return;
+      setAlerts(alertsData);
+      try {
+        localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+      } catch (e) {
+        console.error("Failed to write to localStorage", e);
+      }
+    };
+    
+    const handleFirestoreError = (error: Error) => {
+      console.error("Error fetching alerts:", error);
+      toast({
+          variant: "destructive",
+          title: t('toast_error_title'),
+          description: t('toast_fetch_alerts_error')
+      });
+      if (isSubscribed) {
+        const mockData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}))
+        loadAndCacheAlerts(mockData);
+        setLoading(false);
+      }
+    };
+    
+    // Load from cache first
     try {
       const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
       if (cachedAlerts) {
-        setAlerts(JSON.parse(cachedAlerts));
-        setLoading(false);
+        const parsedAlerts = JSON.parse(cachedAlerts);
+        if(parsedAlerts.length > 0) {
+          setAlerts(parsedAlerts);
+          setLoading(false);
+        }
       }
     } catch (e) {
       console.error("Failed to read from localStorage", e);
     }
+    
+    // Subscribe to Firestore
+    const unsubscribe = onSnapshot(alertsCollection, 
+      (snapshot) => {
+        if (!isSubscribed) return;
 
-    const handleFirestoreError = (error: Error) => {
-        console.error("Error fetching alerts:", error);
-        toast({
-            variant: "destructive",
-            title: t('toast_error_title'),
-            description: t('toast_fetch_alerts_error')
-        });
-        if (isSubscribed) {
-          const mockData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}))
-          loadAndCacheAlerts(mockData);
-          if (alerts.length === 0) {
-            setLoading(false);
-          }
+        let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+        if (alertsData.length === 0) {
+            console.log("Firestore is empty, falling back to mock alerts.");
+            alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
         }
-    };
-
-    try {
-        unsubscribe = onSnapshot(alertsCollection, 
-          (snapshot) => {
-            if (!isSubscribed) return;
-
-            let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
-            if (alertsData.length === 0 && alerts.length === 0) {
-                console.log("Firestore is empty, falling back to mock alerts.");
-                alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
-            }
-            
-            loadAndCacheAlerts(alertsData);
-            setLoading(false);
-          }, 
-          (error) => {
-            if (isSubscribed) {
-              handleFirestoreError(error);
-            }
-          }
-        );
         
-    } catch(error) {
-        handleFirestoreError(error as Error);
-    }
+        loadAndCacheAlerts(alertsData);
+        setLoading(false);
+      }, 
+      (error) => {
+        if (isSubscribed) {
+          handleFirestoreError(error);
+        }
+      }
+    );
 
     return () => {
-        isSubscribed = false;
-        if (unsubscribe) {
-            unsubscribe();
-        }
+      isSubscribed = false;
+      unsubscribe();
     };
-  }, [toast, t, loadAndCacheAlerts]);
+  }, [t, toast]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
@@ -258,7 +253,7 @@ export function CrisisMap() {
       zoom: 10
   }
 
-  if (loading && alerts.length === 0) {
+  if (loading) {
       return <MapSkeleton />;
   }
 
@@ -299,5 +294,3 @@ export function CrisisMap() {
     </div>
   );
 }
-
-    
