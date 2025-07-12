@@ -206,10 +206,12 @@ export function CrisisMap() {
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
         });
-        if (isSubscribed && alerts.length === 0) {
+        if (isSubscribed) {
           const mockData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}))
           loadAndCacheAlerts(mockData);
-          setLoading(false);
+          if (alerts.length === 0) {
+            setLoading(false);
+          }
         }
     };
 
@@ -244,7 +246,7 @@ export function CrisisMap() {
             unsubscribe();
         }
     };
-  }, [toast, t, alerts.length, loadAndCacheAlerts]);
+  }, [toast, t, loadAndCacheAlerts]);
 
   const handleUpdateAlert = (updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
@@ -298,4 +300,3 @@ export function CrisisMap() {
     </div>
   );
 }
-
