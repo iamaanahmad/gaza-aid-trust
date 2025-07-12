@@ -188,7 +188,6 @@ export function CrisisMap() {
     let isSubscribed = true;
     let unsubscribe: () => void = () => {};
 
-    // Try to load from cache first
     try {
       const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
       if (cachedAlerts) {
@@ -300,3 +299,5 @@ export function CrisisMap() {
     </div>
   );
 }
+
+    
