@@ -219,7 +219,6 @@ export function AidFeed() {
 
   useEffect(() => {
     let isSubscribed = true;
-    let unsubscribe: () => void = () => {};
 
     const handleFirestoreError = (error: Error) => {
       console.error("Error fetching aid requests:", error);
@@ -235,42 +234,36 @@ export function AidFeed() {
       }
     };
 
-    try {
-      unsubscribe = onSnapshot(aidRequestsCollection,
-        (snapshot) => {
-          if (!isSubscribed) return;
+    const unsubscribe = onSnapshot(aidRequestsCollection,
+      (snapshot) => {
+        if (!isSubscribed) return;
 
-          let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
-          
-          if (aidData.length === 0) {
-            console.log("Firestore is empty, falling back to mock aid requests.");
-            aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
-          }
-
-          // Sort by priority: High -> Medium -> Low
-          const priorityOrder = { High: 0, Medium: 1, Low: 2 };
-          aidData.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-
-          setRequests(aidData);
-          setLoading(false);
-        },
-        (error) => {
-          if (isSubscribed) {
-            handleFirestoreError(error);
-          }
+        let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
+        
+        if (aidData.length === 0) {
+          console.log("Firestore is empty, falling back to mock aid requests.");
+          aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
         }
-      );
-    } catch(error) {
-       handleFirestoreError(error as Error);
-    }
+
+        // Sort by priority: High -> Medium -> Low
+        const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+        aidData.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+        setRequests(aidData);
+        setLoading(false);
+      },
+      (error) => {
+        if (isSubscribed) {
+          handleFirestoreError(error);
+        }
+      }
+    );
 
     return () => {
       isSubscribed = false;
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      unsubscribe();
     };
-  }, [toast, t]);
+  }, []);
 
   if (loading) {
     return <AidFeedSkeleton />;

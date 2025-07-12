@@ -118,29 +118,25 @@ export function Leaderboard() {
         }
     };
 
-    try {
-        const unsubscribe = onSnapshot(q,
-          (snapshot) => {
-            if (!isSubscribed) return;
-            const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
-            if (contributorData.length === 0) {
-              console.log("Firestore is empty, falling back to mock contributors.");
-              setContributors(mockContributors);
-            } else {
-              setContributors(contributorData);
-            }
-            setLoading(false);
-          },
-          (error) => {
-            if(isSubscribed) handleFirestoreError(error);
-          }
-        );
-        return () => { isSubscribed = false; unsubscribe(); };
-    } catch (error) {
-        handleFirestoreError(error as Error);
-        return () => { isSubscribed = false; };
-    }
-  }, [toast, t]);
+    const unsubscribe = onSnapshot(q,
+      (snapshot) => {
+        if (!isSubscribed) return;
+        const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
+        if (contributorData.length === 0) {
+          console.log("Firestore is empty, falling back to mock contributors.");
+          setContributors(mockContributors);
+        } else {
+          setContributors(contributorData);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        if(isSubscribed) handleFirestoreError(error);
+      }
+    );
+    
+    return () => { isSubscribed = false; unsubscribe(); };
+  }, []);
 
   return (
     <Card>
