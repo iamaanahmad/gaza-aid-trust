@@ -173,6 +173,17 @@ export function CrisisMap() {
     setSelectedAlert(updatedAlert);
   }, []);
   
+  const handleFirestoreError = useCallback((error: Error) => {
+    console.error("Error fetching alerts:", error);
+    toast({
+        variant: "destructive",
+        title: t('toast_error_title'),
+        description: t('toast_fetch_alerts_error')
+    });
+    setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
+    setLoading(false);
+  }, [t, toast]);
+
   useEffect(() => {
     let isSubscribed = true;
 
@@ -180,7 +191,7 @@ export function CrisisMap() {
       try {
         const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
         if (cachedAlerts) {
-          const parsedAlerts = JSON.parse(cachedAlerts);
+          const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
           if (parsedAlerts.length > 0 && isSubscribed) {
             setAlerts(parsedAlerts);
             setLoading(false);
@@ -213,15 +224,7 @@ export function CrisisMap() {
       }, 
       (error) => {
         if (!isSubscribed) return;
-        console.error("Error fetching alerts:", error);
-        toast({
-            variant: "destructive",
-            title: t('toast_error_title'),
-            description: t('toast_fetch_alerts_error')
-        });
-        const mockData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}))
-        setAlerts(mockData);
-        setLoading(false);
+        handleFirestoreError(error);
       }
     );
 
@@ -229,7 +232,7 @@ export function CrisisMap() {
       isSubscribed = false;
       unsubscribe();
     };
-  }, [t, toast]);
+  }, [handleFirestoreError]);
 
   const initialViewState = {
       longitude: 34.4,
