@@ -12,7 +12,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { calculateTrustScore } from '@/ai/flows/calculate-trust-score';
 import Map, { Marker, Popup } from 'react-map-gl';
-import { Skeleton } from '../ui/skeleton';
 import { mockAlerts } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,10 +27,9 @@ function getPinColor(alert: Alert) {
       default: return '#71717a'; // zinc-500
     }
   }
-  // Fallback for general alerts based on trust score
-  if (alert.trustScore > 75) return '#22c55e'; // green-500
-  if (alert.trustScore > 50) return '#f59e0b'; // amber-500
-  return '#ef4444'; // red-500
+  if (alert.trustScore > 75) return '#22c55e';
+  if (alert.trustScore > 50) return '#f59e0b';
+  return '#ef4444';
 }
 
 function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null; onUpdate: (updatedAlert: Alert) => void; onClose: () => void }) {
@@ -48,21 +46,18 @@ function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null;
       disputes: alert.disputes + (isConfirm ? 0 : 1),
     };
     
-    // Optimistic UI update
     onUpdate(updatedAlert);
 
     try {
       const { trustScore } = await calculateTrustScore({
         confirmations: updatedAlert.confirmations,
         disputes: updatedAlert.disputes,
-        initialScore: 50, // Base score for a new alert
+        initialScore: 50,
       });
 
       const finalAlert = {...updatedAlert, trustScore};
-      // Final update with AI score
       onUpdate(finalAlert);
 
-      // Update Firestore document
       const alertDoc = doc(alertsCollection, alert.id);
       await updateDoc(alertDoc, { 
           confirmations: finalAlert.confirmations,
@@ -181,46 +176,23 @@ export function CrisisMap() {
   useEffect(() => {
     let isSubscribed = true;
 
-    const loadAndCacheAlerts = (alertsData: Alert[]) => {
-      if (isSubscribed) {
-        setAlerts(alertsData);
-        try {
-          localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
-        } catch (e) {
-          console.error("Failed to write to localStorage", e);
+    const loadFromCache = () => {
+      try {
+        const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
+        if (cachedAlerts) {
+          const parsedAlerts = JSON.parse(cachedAlerts);
+          if (parsedAlerts.length > 0 && isSubscribed) {
+            setAlerts(parsedAlerts);
+            setLoading(false);
+          }
         }
+      } catch (e) {
+        console.error("Failed to read from localStorage", e);
       }
     };
     
-    const handleFirestoreError = (error: Error) => {
-      console.error("Error fetching alerts:", error);
-      toast({
-          variant: "destructive",
-          title: t('toast_error_title'),
-          description: t('toast_fetch_alerts_error')
-      });
-      if (isSubscribed) {
-        const mockData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}))
-        loadAndCacheAlerts(mockData);
-        setLoading(false);
-      }
-    };
-    
-    // Load from cache first
-    try {
-      const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
-      if (cachedAlerts) {
-        const parsedAlerts = JSON.parse(cachedAlerts);
-        if(parsedAlerts.length > 0) {
-          setAlerts(parsedAlerts);
-          setLoading(false);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to read from localStorage", e);
-    }
-    
-    // Subscribe to Firestore
+    loadFromCache();
+
     const unsubscribe = onSnapshot(alertsCollection, 
       (snapshot) => {
         if (!isSubscribed) return;
@@ -231,13 +203,25 @@ export function CrisisMap() {
             alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
         }
         
-        loadAndCacheAlerts(alertsData);
+        setAlerts(alertsData);
+        try {
+          localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+        } catch (e) {
+          console.error("Failed to write to localStorage", e);
+        }
         setLoading(false);
       }, 
       (error) => {
-        if (isSubscribed) {
-          handleFirestoreError(error);
-        }
+        if (!isSubscribed) return;
+        console.error("Error fetching alerts:", error);
+        toast({
+            variant: "destructive",
+            title: t('toast_error_title'),
+            description: t('toast_fetch_alerts_error')
+        });
+        const mockData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}))
+        setAlerts(mockData);
+        setLoading(false);
       }
     );
 
@@ -247,7 +231,6 @@ export function CrisisMap() {
     };
   }, [t, toast]);
 
-  
   const initialViewState = {
       longitude: 34.4,
       latitude: 31.4,
