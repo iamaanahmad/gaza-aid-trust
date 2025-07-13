@@ -34,7 +34,6 @@ function getPinColor(alert: Alert) {
   return '#ef4444'; // red-500
 }
 
-
 function SelectedAlertPopup({ alert, onUpdate, onClose }: { alert: Alert | null; onUpdate: (updatedAlert: Alert) => void; onClose: () => void }) {
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -174,16 +173,22 @@ export function CrisisMap() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  const handleUpdateAlert = useCallback((updatedAlert: Alert) => {
+    setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
+    setSelectedAlert(updatedAlert);
+  }, []);
+  
   useEffect(() => {
     let isSubscribed = true;
 
     const loadAndCacheAlerts = (alertsData: Alert[]) => {
-      if (!isSubscribed) return;
-      setAlerts(alertsData);
-      try {
-        localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
-      } catch (e) {
-        console.error("Failed to write to localStorage", e);
+      if (isSubscribed) {
+        setAlerts(alertsData);
+        try {
+          localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+        } catch (e) {
+          console.error("Failed to write to localStorage", e);
+        }
       }
     };
     
@@ -242,10 +247,6 @@ export function CrisisMap() {
     };
   }, [t, toast]);
 
-  const handleUpdateAlert = (updatedAlert: Alert) => {
-    setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
-    setSelectedAlert(updatedAlert);
-  };
   
   const initialViewState = {
       longitude: 34.4,
@@ -282,9 +283,6 @@ export function CrisisMap() {
                         <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert)}}>
                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs -translate-y-1">
-                          {(alert.priority || '').charAt(0)}
-                        </span>
                     </div>
                 </Marker>
             ))}
