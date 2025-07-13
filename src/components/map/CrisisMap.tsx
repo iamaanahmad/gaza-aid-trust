@@ -182,32 +182,24 @@ export function CrisisMap() {
     });
     setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
     setLoading(false);
-  }, [t, toast]);
+  }, []);
 
   useEffect(() => {
-    let isSubscribed = true;
-
-    const loadFromCache = () => {
-      try {
-        const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
-        if (cachedAlerts) {
-          const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
-          if (parsedAlerts.length > 0 && isSubscribed) {
-            setAlerts(parsedAlerts);
-            setLoading(false);
-          }
+    try {
+      const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
+      if (cachedAlerts) {
+        const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
+        if (parsedAlerts.length > 0) {
+          setAlerts(parsedAlerts);
+          setLoading(false);
         }
-      } catch (e) {
-        console.error("Failed to read from localStorage", e);
       }
-    };
-    
-    loadFromCache();
+    } catch (e) {
+      console.error("Failed to read from localStorage", e);
+    }
 
     const unsubscribe = onSnapshot(alertsCollection, 
       (snapshot) => {
-        if (!isSubscribed) return;
-
         let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
         if (alertsData.length === 0) {
             console.log("Firestore is empty, falling back to mock alerts.");
@@ -223,13 +215,11 @@ export function CrisisMap() {
         setLoading(false);
       }, 
       (error) => {
-        if (!isSubscribed) return;
         handleFirestoreError(error);
       }
     );
 
     return () => {
-      isSubscribed = false;
       unsubscribe();
     };
   }, [handleFirestoreError]);

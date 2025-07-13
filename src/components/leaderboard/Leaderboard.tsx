@@ -110,15 +110,13 @@ export function Leaderboard() {
       });
       setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
       setLoading(false);
-  }, [t, toast]);
+  }, []);
 
   useEffect(() => {
-    let isSubscribed = true;
     const q = query(contributorsCollection, orderBy('rank'));
     
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
-        if (!isSubscribed) return;
         const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
         if (contributorData.length === 0) {
           console.log("Firestore is empty, falling back to mock contributors.");
@@ -129,11 +127,11 @@ export function Leaderboard() {
         setLoading(false);
       },
       (error) => {
-        if(isSubscribed) handleFirestoreError(error);
+        handleFirestoreError(error);
       }
     );
     
-    return () => { isSubscribed = false; unsubscribe(); };
+    return () => unsubscribe();
   }, [handleFirestoreError]);
 
   return (

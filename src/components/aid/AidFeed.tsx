@@ -229,37 +229,24 @@ export function AidFeed() {
   }, [t, toast]);
 
   useEffect(() => {
-    let isSubscribed = true;
-
     const q = query(aidRequestsCollection, orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
-
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
-        if (!isSubscribed) return;
-
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
-        
         if (aidData.length === 0) {
           console.log("Firestore is empty, falling back to mock aid requests.");
           aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
           const priorityOrder = { High: 0, Medium: 1, Low: 2 };
           aidData.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
         }
-
         setRequests(aidData);
         setLoading(false);
       },
       (error) => {
-        if (isSubscribed) {
-          handleFirestoreError(error);
-        }
+        handleFirestoreError(error);
       }
     );
-
-    return () => {
-      isSubscribed = false;
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [handleFirestoreError]);
 
   if (loading) {
