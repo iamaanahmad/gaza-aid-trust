@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { PrayerTimesData } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -75,40 +76,41 @@ export function PrayerTimes() {
     Isha: t('prayer_isha'),
   }
 
-  useEffect(() => {
-    async function fetchPrayerTimes() {
-      try {
-        const response = await fetch(
-          'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
-        );
-        if (!response.ok) {
-          throw new Error(t('prayer_times_fetch_error_service'));
-        }
-        const data = await response.json();
-        if (data.code === 200) {
-          const relevantTimes = {
-            Fajr: data.data.timings.Fajr,
-            Dhuhr: data.data.timings.Dhuhr,
-            Asr: data.data.timings.Asr,
-            Maghrib: data.data.timings.Maghrib,
-            Isha: data.data.timings.Isha,
-          };
-          setPrayerTimes({
-            timings: relevantTimes,
-            date: data.data.date.readable,
-          });
-        } else {
-          throw new Error(data.data || t('prayer_times_fetch_error_generic'));
-        }
-      } catch (err: any) {
-        setError(err.message);
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchPrayerTimes = useCallback(async () => {
+    try {
+      const response = await fetch(
+        'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
+      );
+      if (!response.ok) {
+        throw new Error(t('prayer_times_fetch_error_service'));
       }
+      const data = await response.json();
+      if (data.code === 200) {
+        const relevantTimes = {
+          Fajr: data.data.timings.Fajr,
+          Dhuhr: data.data.timings.Dhuhr,
+          Asr: data.data.timings.Asr,
+          Maghrib: data.data.timings.Maghrib,
+          Isha: data.data.timings.Isha,
+        };
+        setPrayerTimes({
+          timings: relevantTimes,
+          date: data.data.date.readable,
+        });
+      } else {
+        throw new Error(data.data || t('prayer_times_fetch_error_generic'));
+      }
+    } catch (err: any) {
+      setError(err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    fetchPrayerTimes();
   }, [t]);
+
+  useEffect(() => {
+    fetchPrayerTimes();
+  }, [fetchPrayerTimes]);
 
   if (loading) {
     return (

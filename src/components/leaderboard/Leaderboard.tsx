@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Contributor } from '@/lib/types';
 import { contributorsCollection } from '@/lib/firebase';
 import { onSnapshot, query, orderBy } from 'firebase/firestore';
@@ -101,23 +101,21 @@ export function Leaderboard() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  const handleFirestoreError = useCallback((error: Error) => {
+      console.error("Error fetching contributors:", error);
+      toast({
+          variant: "destructive",
+          title: t('toast_error_title'),
+          description: t('toast_fetch_leaderboard_error')
+      });
+      setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
+      setLoading(false);
+  }, [t, toast]);
+
   useEffect(() => {
     let isSubscribed = true;
     const q = query(contributorsCollection, orderBy('rank'));
     
-    const handleFirestoreError = (error: Error) => {
-        console.error("Error fetching contributors:", error);
-        toast({
-            variant: "destructive",
-            title: t('toast_error_title'),
-            description: t('toast_fetch_leaderboard_error')
-        });
-        if(isSubscribed) {
-            setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
-            setLoading(false);
-        }
-    };
-
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
         if (!isSubscribed) return;
@@ -136,7 +134,7 @@ export function Leaderboard() {
     );
     
     return () => { isSubscribed = false; unsubscribe(); };
-  }, []);
+  }, [handleFirestoreError]);
 
   return (
     <Card>

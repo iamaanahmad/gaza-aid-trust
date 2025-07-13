@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { AidRequest } from '@/lib/types';
 import { aidRequestsCollection } from '@/lib/firebase';
-import { doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -166,7 +166,7 @@ function AidRequestCard({ request }: { request: AidRequest }) {
       <Separator />
       <CardFooter className="pt-4 flex justify-between items-center">
         <p className="text-xs text-muted-foreground">
-          {formatDistanceToNow(new Date(request.timestamp), { addSuffix: true })}
+          {request.timestamp ? formatDistanceToNow(new Date(request.timestamp), { addSuffix: true }) : ''}
         </p>
         {request.status === 'Needed' && (
            <Dialog open={isDonateOpen} onOpenChange={setIsDonateOpen}>
@@ -217,24 +217,23 @@ export function AidFeed() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  const handleFirestoreError = useCallback((error: Error) => {
+    console.error("Error fetching aid requests:", error);
+    toast({
+      variant: "destructive",
+      title: t('toast_error_title'),
+      description: t('toast_fetch_aid_error')
+    });
+    setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
+    setLoading(false);
+  }, [t, toast]);
+
   useEffect(() => {
     let isSubscribed = true;
 
-    const handleFirestoreError = (error: Error) => {
-      console.error("Error fetching aid requests:", error);
-      toast({
-        variant: "destructive",
-        title: t('toast_error_title'),
-        description: t('toast_fetch_aid_error')
-      });
-      // Fallback to mock data immediately on error
-      if (isSubscribed) {
-        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
-        setLoading(false);
-      }
-    };
+    const q = query(aidRequestsCollection, orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
 
-    const unsubscribe = onSnapshot(aidRequestsCollection,
+    const unsubscribe = onSnapshot(q,
       (snapshot) => {
         if (!isSubscribed) return;
 
@@ -243,11 +242,9 @@ export function AidFeed() {
         if (aidData.length === 0) {
           console.log("Firestore is empty, falling back to mock aid requests.");
           aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
+          const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+          aidData.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
         }
-
-        // Sort by priority: High -> Medium -> Low
-        const priorityOrder = { High: 0, Medium: 1, Low: 2 };
-        aidData.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
         setRequests(aidData);
         setLoading(false);
@@ -263,7 +260,7 @@ export function AidFeed() {
       isSubscribed = false;
       unsubscribe();
     };
-  }, []);
+  }, [handleFirestoreError]);
 
   if (loading) {
     return <AidFeedSkeleton />;
