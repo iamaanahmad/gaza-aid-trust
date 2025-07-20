@@ -218,7 +218,7 @@ export function CrisisMap() {
     return () => {
       unsubscribe();
     };
-  }, [t, toast]);
+  }, []);
 
   const initialViewState = {
       longitude: 34.4,

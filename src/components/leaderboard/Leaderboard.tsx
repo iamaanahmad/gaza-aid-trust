@@ -150,7 +150,7 @@ export function Leaderboard() {
     );
     
     return () => unsubscribe();
-  }, [t, toast]);
+  }, []);
 
   if (loading && contributors.length === 0) {
     return <LeaderboardSkeleton />

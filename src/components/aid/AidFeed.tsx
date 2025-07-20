@@ -250,7 +250,6 @@ export function AidFeed() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    // 1. Try to load from cache first for instant UI
     try {
       const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
       if (cachedData) {
@@ -264,7 +263,6 @@ export function AidFeed() {
         console.error("Failed to read aid requests from localStorage", e);
     }
     
-    // 2. Set up the real-time Firestore listener.
     const q = query(aidRequestsCollection, orderBy('status', 'asc'), orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
     
     const unsubscribe = onSnapshot(q,
@@ -299,12 +297,10 @@ export function AidFeed() {
       }
     );
 
-    // 3. Return the cleanup function to unsubscribe on unmount.
     return () => {
       unsubscribe();
     };
-  // The empty dependency array [] ensures this effect runs only once on mount.
-  }, [t, toast]); 
+  }, []); 
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
