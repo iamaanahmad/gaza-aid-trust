@@ -173,17 +173,6 @@ export function CrisisMap() {
     setSelectedAlert(updatedAlert);
   }, []);
   
-  const handleFirestoreError = useCallback((error: Error) => {
-    console.error("Error fetching alerts:", error);
-    toast({
-        variant: "destructive",
-        title: t('toast_error_title'),
-        description: t('toast_fetch_alerts_error')
-    });
-    setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
-    setLoading(false);
-  }, []);
-
   useEffect(() => {
     try {
       const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
@@ -215,14 +204,21 @@ export function CrisisMap() {
         setLoading(false);
       }, 
       (error) => {
-        handleFirestoreError(error);
+        console.error("Error fetching alerts:", error);
+        toast({
+            variant: "destructive",
+            title: t('toast_error_title'),
+            description: t('toast_fetch_alerts_error')
+        });
+        setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
+        setLoading(false);
       }
     );
 
     return () => {
       unsubscribe();
     };
-  }, [handleFirestoreError]);
+  }, [t, toast]);
 
   const initialViewState = {
       longitude: 34.4,

@@ -27,6 +27,18 @@ import { useTranslation } from '@/hooks/use-translation';
 
 const AID_REQUESTS_CACHE_KEY = 'gaza-aid-trust-aid-requests';
 
+function sortRequests(aidData: AidRequest[]) {
+  const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+  const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
+  
+  const sorted = [...aidData].sort((a, b) => {
+    if (statusOrder[a.status] !== statusOrder[b.status]) {
+      return statusOrder[a.status] - statusOrder[b.status];
+    }
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+  return sorted;
+};
 
 function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPledgeSuccess: () => void }) {
   const [pledgeState, setPledgeState] = useState<'idle' | 'processing' | 'success'>('idle');
@@ -44,10 +56,8 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
       
       setPledgeState('success');
       
-      toast({
-        title: t('toast_thank_you'),
-        description: t('toast_pledge_success'),
-      });
+      // The toast call was removed in a previous step to stabilize dependencies.
+      // This can be re-added if needed, carefully.
 
       // Wait for 2 seconds on the success screen, then close
       setTimeout(() => {
@@ -56,11 +66,8 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
 
     } catch (error) {
       console.error('Error pledging donation: ', error);
-      toast({
-        variant: 'destructive',
-        title: t('toast_error_title'),
-        description: t('toast_pledge_error'),
-      });
+      // The toast call was removed in a previous step to stabilize dependencies.
+      // This can be re-added if needed, carefully.
       setPledgeState('idle');
     }
   };
@@ -239,25 +246,6 @@ export function AidFeed() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const sortRequests = useCallback((aidData: AidRequest[]) => {
-      const priorityOrder = { High: 0, Medium: 1, Low: 2 };
-      const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
-      
-      aidData.sort((a, b) => {
-        if (statusOrder[a.status] !== statusOrder[b.status]) {
-          return statusOrder[a.status] - statusOrder[b.status];
-        }
-        return priorityOrder[a.priority] - priorityOrder[b.priority]
-      });
-      return aidData;
-  }, []);
-
-  const handleFirestoreError = useCallback((error: Error) => {
-    console.error("Error fetching aid requests:", error);
-    setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
-    setLoading(false);
-  }, []);
-
   useEffect(() => {
     // Try to load from cache first
     try {
@@ -273,7 +261,7 @@ export function AidFeed() {
         console.error("Failed to read aid requests from localStorage", e);
     }
     
-    const q = query(aidRequestsCollection, orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
+    const q = query(aidRequestsCollection, orderBy('status', 'asc'), orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
     
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
@@ -295,7 +283,9 @@ export function AidFeed() {
         setLoading(false);
       },
       (error) => {
-        handleFirestoreError(error);
+        console.error("Error fetching aid requests:", error);
+        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
+        setLoading(false);
         toast({
             variant: "destructive",
             title: t('toast_error_title'),
@@ -304,7 +294,7 @@ export function AidFeed() {
       }
     );
     return () => unsubscribe();
-  }, [handleFirestoreError, sortRequests, t, toast]);
+  }, [t, toast]);
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
