@@ -62,7 +62,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     priority: 'High',
     timestamp: Date.now() - 1000 * 60 * 60 * 2,
     locationName: 'Al-Amal Hospital, Khan Younis',
-    photoUrl: 'https://i.ibb.co/cKyvbpKN/231106231737-01-gaza-children-110623.jpg',
+    photoUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop',
   },
   {
     requesterId: 'clinic-2',
@@ -73,7 +73,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     priority: 'Medium',
     timestamp: Date.now() - 1000 * 60 * 60 * 24,
     locationName: 'Deir al-Balah Clinic',
-    photoUrl: 'https://i.ibb.co/cKyvbpKN/231106231737-01-gaza-children-110623.jpg',
+    photoUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop',
   },
   {
     requesterId: 'family-1',
@@ -84,7 +84,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     priority: 'Low',
     timestamp: Date.now() - 1000 * 60 * 60 * 12,
     locationName: 'Jabalia Camp',
-    photoUrl: 'https://i.ibb.co/cKyvbpKN/231106231737-01-gaza-children-110623.jpg',
+    photoUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop',
   },
   {
     requesterId: 'shelter-1',
@@ -96,7 +96,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     timestamp: Date.now() - 1000 * 60 * 60 * 48,
     locationName: 'Nuseirat Camp',
     feedback: 'Alhamdulillah, we received the new tarp and blankets. Your help kept my children warm. Shukran.',
-    photoUrl: 'https://i.ibb.co/cKyvbpKN/231106231737-01-gaza-children-110623.jpg',
+    photoUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop',
   },
 ];
 
