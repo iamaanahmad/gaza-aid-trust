@@ -62,10 +62,7 @@ const PrayerTimeSkeleton = () => (
 );
 
 const fetchPrayerTimes = async (
-    t: (key: string) => string,
-    setPrayerTimes: (data: PrayerTimesData | null) => void,
-    setError: (error: string | null) => void,
-    setLoading: (loading: boolean) => void
+    t: (key: string) => string
 ) => {
     try {
         const response = await fetch(
@@ -83,18 +80,16 @@ const fetchPrayerTimes = async (
                 Maghrib: data.data.timings.Maghrib,
                 Isha: data.data.timings.Isha,
             };
-            setPrayerTimes({
+            return {
                 timings: relevantTimes,
                 date: data.data.date.readable,
-            });
+            };
         } else {
             throw new Error(data.data || t('prayer_times_fetch_error_generic'));
         }
     } catch (err: any) {
-        setError(err.message);
         console.error(err);
-    } finally {
-        setLoading(false);
+        return err.message;
     }
 };
 
@@ -113,7 +108,16 @@ export function PrayerTimes() {
   }
 
   useEffect(() => {
-    fetchPrayerTimes(t, setPrayerTimes, setError, setLoading);
+    const getTimes = async () => {
+        const result = await fetchPrayerTimes(t);
+        if (typeof result === 'string') {
+            setError(result);
+        } else {
+            setPrayerTimes(result);
+        }
+        setLoading(false);
+    }
+    getTimes();
   }, [t]);
 
   if (loading) {
