@@ -62,7 +62,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     priority: 'High',
     timestamp: Date.now() - 1000 * 60 * 60 * 2,
     locationName: 'Al-Amal Hospital, Khan Younis',
-    photoUrl: 'https://placehold.co/600x400.png',
+    photoUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop',
   },
   {
     requesterId: 'clinic-2',
@@ -73,7 +73,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     priority: 'Medium',
     timestamp: Date.now() - 1000 * 60 * 60 * 24,
     locationName: 'Deir al-Balah Clinic',
-    photoUrl: 'https://placehold.co/600x400.png',
+    photoUrl: 'https://images.unsplash.com/photo-1588776814546-da621277443f?q=80&w=2070&auto=format&fit=crop',
   },
   {
     requesterId: 'family-1',
@@ -84,7 +84,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     priority: 'Low',
     timestamp: Date.now() - 1000 * 60 * 60 * 12,
     locationName: 'Jabalia Camp',
-    photoUrl: 'https://placehold.co/600x400.png',
+    photoUrl: 'https://images.unsplash.com/photo-1599059813005-728276e84350?q=80&w=1932&auto=format&fit=crop',
   },
   {
     requesterId: 'shelter-1',
@@ -96,7 +96,7 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
     timestamp: Date.now() - 1000 * 60 * 60 * 48,
     locationName: 'Nuseirat Camp',
     feedback: 'Alhamdulillah, we received the new tarp and blankets. Your help kept my children warm. Shukran.',
-    photoUrl: 'https://placehold.co/600x400.png',
+    photoUrl: 'https://images.unsplash.com/photo-1628244241628-b829634b8e61?q=80&w=1974&auto=format&fit=crop',
   },
 ];
 
@@ -107,7 +107,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     name: 'Fatima A.',
     contributions: 28,
     type: 'Donor',
-    avatarUrl: 'https://placehold.co/40x40.png',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop',
   },
   {
     id: 'contrib-2',
@@ -115,7 +115,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     name: 'Dr. Ahmed K.',
     contributions: 21,
     type: 'Reporter',
-    avatarUrl: 'https://placehold.co/40x40.png',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop',
   },
   {
     id: 'contrib-3',
@@ -130,7 +130,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     name: 'Layla M.',
     contributions: 15,
     type: 'Reporter',
-    avatarUrl: 'https://placehold.co/40x40.png',
+    avatarUrl: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=1886&auto=format&fit=crop',
   },
   {
     id: 'contrib-5',
@@ -138,7 +138,7 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     name: 'Yusuf I.',
     contributions: 11,
     type: 'Donor',
-    avatarUrl: 'https://placehold.co/40x40.png',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1887&auto=format&fit=crop',
   },
   {
     id: 'contrib-6',
