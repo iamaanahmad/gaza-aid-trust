@@ -48,7 +48,6 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
   const handlePledge = async () => {
     setPledgeState('processing');
     try {
-      // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       const requestDoc = doc(aidRequestsCollection, request.id);
@@ -56,18 +55,22 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
       
       setPledgeState('success');
       
-      // The toast call was removed in a previous step to stabilize dependencies.
-      // This can be re-added if needed, carefully.
+      toast({
+          title: t('toast_thank_you'),
+          description: t('toast_pledge_success'),
+      });
 
-      // Wait for 2 seconds on the success screen, then close
       setTimeout(() => {
         onPledgeSuccess();
       }, 2000);
 
     } catch (error) {
       console.error('Error pledging donation: ', error);
-      // The toast call was removed in a previous step to stabilize dependencies.
-      // This can be re-added if needed, carefully.
+      toast({
+          variant: "destructive",
+          title: t('toast_error_title'),
+          description: t('toast_pledge_error'),
+      });
       setPledgeState('idle');
     }
   };
@@ -247,7 +250,6 @@ export function AidFeed() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    // Try to load from cache first
     try {
       const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
       if (cachedData) {
@@ -288,8 +290,8 @@ export function AidFeed() {
         setLoading(false);
         toast({
             variant: "destructive",
-            title: t('toast_error_title'),
-            description: t('toast_fetch_aid_error')
+            title: "Error",
+            description: "Failed to fetch aid requests. Displaying mock data."
         });
       }
     );
