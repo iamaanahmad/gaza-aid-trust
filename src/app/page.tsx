@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { TutorialDialog } from '@/components/home/TutorialDialog';
 import { PrayerTimes } from '@/components/home/PrayerTimes';
 import { Separator } from '@/components/ui/separator';
+import communityImage from '@/app/community.png';
 import { useTranslation } from '@/hooks/use-translation';
 
 export default function Home() {
@@ -49,7 +50,7 @@ export default function Home() {
     <div className="flex flex-col">
       <section className="relative w-full h-[60vh] min-h-[400px] flex items-center justify-center text-center text-white">
         <Image
-          src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=2070&auto=format&fit=crop"
+          src={communityImage}
           alt="A supportive community in Gaza"
           fill
           priority
