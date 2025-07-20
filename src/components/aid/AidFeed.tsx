@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import { HandHeart, Users, MapPin, MessageSquareQuote } from 'lucide-react';
+import { HandHeart, Users, MapPin, MessageSquareQuote, CircleCheck, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -26,24 +26,34 @@ import { mockAidRequests } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
 
 function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPledgeSuccess: () => void }) {
-  const [pledged, setPledged] = useState(false);
+  const [pledgeState, setPledgeState] = useState<'idle' | 'processing' | 'success'>('idle');
   const { toast } = useToast();
   const { t } = useTranslation();
 
   const handlePledge = async () => {
+    setPledgeState('processing');
     try {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
       const requestDoc = doc(aidRequestsCollection, request.id);
       await updateDoc(requestDoc, { status: 'Pledged' });
-      setPledged(true);
+      
+      setPledgeState('success');
+      
       toast({
         title: t('toast_thank_you'),
         description: t('toast_pledge_success'),
       });
+
+      // Wait for 2 seconds on the success screen, then close
       setTimeout(() => {
         onPledgeSuccess();
-      }, 1500)
+      }, 2000);
+
     } catch (error) {
       console.error('Error pledging donation: ', error);
+      setPledgeState('idle');
       toast({
         variant: 'destructive',
         title: t('toast_error_title'),
@@ -60,10 +70,12 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
           {t('donate_dialog_description', { description: request.description })}
         </DialogDescription>
       </DialogHeader>
-      {pledged ? (
-        <div className="text-center py-8">
-          <h3 className="text-2xl font-bold text-green-600">{t('toast_thank_you')}</h3>
-          <p className="text-muted-foreground mt-2">{t('toast_pledge_success')}</p>
+
+      {pledgeState === 'success' ? (
+        <div className="text-center py-8 flex flex-col items-center justify-center transition-all duration-300 ease-in-out">
+            <CircleCheck className="h-16 w-16 text-green-500 mb-4" />
+            <h3 className="text-2xl font-bold text-green-600">{t('toast_thank_you')}</h3>
+            <p className="text-muted-foreground mt-2">{t('toast_pledge_success')}</p>
         </div>
       ) : (
         <div className="py-4">
@@ -71,8 +83,15 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
             {t('donate_dialog_body', { location: request.locationName })}
           </p>
           <p className="font-bold text-lg mb-4">{t('donate_dialog_mock_amount')}</p>
-          <Button onClick={handlePledge} className="w-full" size="lg">
-            {t('confirm_pledge_button')}
+          <Button onClick={handlePledge} className="w-full" size="lg" disabled={pledgeState === 'processing'}>
+            {pledgeState === 'processing' ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t('submitting_button')}
+              </>
+            ) : (
+              t('confirm_pledge_button')
+            )}
           </Button>
           <p className="text-xs text-muted-foreground mt-2 text-center">{t('donate_dialog_mock_notice')}</p>
         </div>
@@ -226,7 +245,7 @@ export function AidFeed() {
     });
     setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
     setLoading(false);
-  }, [t, toast]);
+  }, []);
 
   useEffect(() => {
     const q = query(aidRequestsCollection, orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
@@ -236,9 +255,17 @@ export function AidFeed() {
         if (aidData.length === 0) {
           console.log("Firestore is empty, falling back to mock aid requests.");
           aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
-          const priorityOrder = { High: 0, Medium: 1, Low: 2 };
-          aidData.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
         }
+        
+        const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+        const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
+        aidData.sort((a, b) => {
+          if (statusOrder[a.status] !== statusOrder[b.status]) {
+            return statusOrder[a.status] - statusOrder[b.status];
+          }
+          return priorityOrder[a.priority] - priorityOrder[b.priority]
+        });
+
         setRequests(aidData);
         setLoading(false);
       },
