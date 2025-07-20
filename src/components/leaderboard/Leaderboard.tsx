@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import type { Contributor } from '@/lib/types';
 import { contributorsCollection } from '@/lib/firebase';
-import { onSnapshot, query, orderBy } from 'firebase/firestore';
+import { getDocs, query, orderBy } from 'firebase/firestore';
 import {
   Card,
   CardContent,
@@ -104,23 +104,26 @@ export function Leaderboard() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    try {
+    const fetchContributors = async () => {
+      // 1. Try to load from cache first
+      try {
         const cachedData = localStorage.getItem(CONTRIBUTORS_CACHE_KEY);
         if (cachedData) {
-            const parsedData = JSON.parse(cachedData) as Contributor[];
-            if (parsedData.length > 0) {
-                setContributors(parsedData);
-                setLoading(false);
-            }
+          const parsedData = JSON.parse(cachedData) as Contributor[];
+          if (parsedData.length > 0) {
+            setContributors(parsedData);
+            setLoading(false);
+          }
         }
-    } catch (e) {
+      } catch (e) {
         console.error("Failed to read contributors from localStorage", e);
-    }
+      }
       
-    const q = query(contributorsCollection, orderBy('rank'));
-    
-    const unsubscribe = onSnapshot(q,
-      (snapshot) => {
+      // 2. Fetch fresh data
+      try {
+        const q = query(contributorsCollection, orderBy('rank'));
+        const snapshot = await getDocs(q);
+
         let contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
         if (contributorData.length === 0) {
           console.log("Firestore is empty, falling back to mock contributors.");
@@ -129,28 +132,29 @@ export function Leaderboard() {
         
         setContributors(contributorData);
 
+        // 3. Update cache
         try {
-            localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
+          localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
         } catch (e) {
-            console.error("Failed to write contributors to localStorage", e);
+          console.error("Failed to write contributors to localStorage", e);
         }
-        
-        setLoading(false);
-      },
-      (error) => {
+      } catch (error) {
         console.error("Error fetching contributors:", error);
-        setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
-        setLoading(false);
         toast({
-            variant: "destructive",
-            title: t('toast_error_title'),
-            description: t('toast_fetch_leaderboard_error')
+          variant: "destructive",
+          title: t('toast_error_title'),
+          description: t('toast_fetch_leaderboard_error')
         });
+        if (contributors.length === 0) {
+            setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
+        }
+      } finally {
+        setLoading(false);
       }
-    );
-    
-    return () => unsubscribe();
-  }, []);
+    };
+
+    fetchContributors();
+  }, [t, toast]);
 
   if (loading && contributors.length === 0) {
     return <LeaderboardSkeleton />

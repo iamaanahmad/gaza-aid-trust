@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import type { AidRequest } from '@/lib/types';
 import { aidRequestsCollection } from '@/lib/firebase';
-import { doc, updateDoc, onSnapshot, query, orderBy, FirestoreError } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, query, orderBy, FirestoreError, getDocs } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -250,23 +250,26 @@ export function AidFeed() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    try {
-      const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
-      if (cachedData) {
-        const parsedData = JSON.parse(cachedData) as AidRequest[];
-        if (parsedData.length > 0) {
-          setRequests(sortRequests(parsedData));
-          setLoading(false);
+    const fetchRequests = async () => {
+      // 1. Try to load from cache first
+      try {
+        const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
+        if (cachedData) {
+          const parsedData = JSON.parse(cachedData) as AidRequest[];
+          if (parsedData.length > 0) {
+            setRequests(sortRequests(parsedData));
+            setLoading(false);
+          }
         }
+      } catch (e) {
+          console.error("Failed to read aid requests from localStorage", e);
       }
-    } catch (e) {
-        console.error("Failed to read aid requests from localStorage", e);
-    }
-    
-    const q = query(aidRequestsCollection, orderBy('status', 'asc'), orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
-    
-    const unsubscribe = onSnapshot(q,
-      (snapshot) => {
+      
+      // 2. Fetch fresh data from Firestore
+      try {
+        const q = query(aidRequestsCollection, orderBy('status', 'asc'), orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
+        const snapshot = await getDocs(q);
+
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
         
         if (aidData.length === 0) {
@@ -277,30 +280,30 @@ export function AidFeed() {
         const sortedData = sortRequests(aidData);
         setRequests(sortedData);
         
+        // 3. Update cache
         try {
           localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
         } catch (e) {
            console.error("Failed to write aid requests to localStorage", e);
         }
 
-        setLoading(false);
-      },
-      (error: FirestoreError) => {
+      } catch (error) {
         console.error("Error fetching aid requests:", error);
         toast({
             variant: "destructive",
             title: t('toast_error_title'),
             description: t('toast_fetch_aid_error')
         });
-        setRequests(sortRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }))));
+        if (requests.length === 0) {
+          setRequests(sortRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }))));
+        }
+      } finally {
         setLoading(false);
       }
-    );
-
-    return () => {
-      unsubscribe();
     };
-  }, []); 
+
+    fetchRequests();
+  }, [t, toast]); 
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
@@ -314,4 +317,3 @@ export function AidFeed() {
     </div>
   );
 }
-

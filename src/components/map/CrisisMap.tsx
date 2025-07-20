@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
-import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { onSnapshot, doc, updateDoc, getDocs } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ThumbsUp, ThumbsDown, RadioTower, Clock, X, Info } from 'lucide-react';
@@ -174,51 +174,67 @@ export function CrisisMap() {
   }, []);
   
   useEffect(() => {
-    try {
-      const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
-      if (cachedAlerts) {
-        const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
-        if (parsedAlerts.length > 0) {
-          setAlerts(parsedAlerts);
-          setLoading(false);
+    const fetchAlerts = async () => {
+      // 1. Try to load from cache first
+      try {
+        const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
+        if (cachedAlerts) {
+          const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
+          if (parsedAlerts.length > 0) {
+            setAlerts(parsedAlerts);
+            setLoading(false);
+          }
         }
+      } catch (e) {
+        console.error("Failed to read from localStorage", e);
       }
-    } catch (e) {
-      console.error("Failed to read from localStorage", e);
-    }
-
-    const unsubscribe = onSnapshot(alertsCollection, 
-      (snapshot) => {
+      
+      // 2. Fetch fresh data
+      try {
+        const snapshot = await getDocs(alertsCollection);
         let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+        
         if (alertsData.length === 0) {
             console.log("Firestore is empty, falling back to mock alerts.");
             alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
         }
         
         setAlerts(alertsData);
+        // 3. Update cache
         try {
           localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
         } catch (e) {
           console.error("Failed to write to localStorage", e);
         }
-        setLoading(false);
-      }, 
-      (error) => {
+      } catch (error) {
         console.error("Error fetching alerts:", error);
         toast({
             variant: "destructive",
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
         });
-        setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
+        if (alerts.length === 0) {
+            setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
+        }
+      } finally {
         setLoading(false);
       }
-    );
+    };
+    
+    fetchAlerts();
+
+    // Keep real-time listener for map for live updates, but don't let it control initial load.
+    const unsubscribe = onSnapshot(alertsCollection, (snapshot) => {
+        const alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+         if (alertsData.length > 0) {
+            setAlerts(alertsData);
+         }
+    });
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [t, toast]);
 
   const initialViewState = {
       longitude: 34.4,
