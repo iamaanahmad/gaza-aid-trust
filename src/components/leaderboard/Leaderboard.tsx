@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { Contributor } from '@/lib/types';
 import { contributorsCollection } from '@/lib/firebase';
 import { onSnapshot, query, orderBy } from 'firebase/firestore';
