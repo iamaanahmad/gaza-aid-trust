@@ -105,14 +105,11 @@ export function Leaderboard() {
 
   const handleFirestoreError = useCallback((error: Error) => {
       console.error("Error fetching contributors:", error);
-      toast({
-          variant: "destructive",
-          title: t('toast_error_title'),
-          description: t('toast_fetch_leaderboard_error')
-      });
+      // This function is memoized and does not have access to fresh `t` or `toast`
+      // We'll set the fallback data directly. The toast will be shown in the effect.
       setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
       setLoading(false);
-  }, [t, toast]);
+  }, []);
 
   useEffect(() => {
     // Try to load from cache first
@@ -151,11 +148,20 @@ export function Leaderboard() {
       },
       (error) => {
         handleFirestoreError(error);
+        toast({
+            variant: "destructive",
+            title: t('toast_error_title'),
+            description: t('toast_fetch_leaderboard_error')
+        });
       }
     );
     
     return () => unsubscribe();
-  }, [handleFirestoreError]);
+  }, [handleFirestoreError, t, toast]);
+
+  if (loading && contributors.length === 0) {
+    return <LeaderboardSkeleton />
+  }
 
   return (
     <Card>
@@ -166,7 +172,7 @@ export function Leaderboard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {loading ? (
+        {loading && contributors.length === 0 ? (
             <LeaderboardSkeleton />
         ) : (
             <Table>
@@ -193,3 +199,4 @@ export function Leaderboard() {
     </Card>
   );
 }
+

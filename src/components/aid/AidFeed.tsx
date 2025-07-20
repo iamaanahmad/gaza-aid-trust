@@ -56,12 +56,12 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
 
     } catch (error) {
       console.error('Error pledging donation: ', error);
-      setPledgeState('idle'); // Reset state on error
       toast({
         variant: 'destructive',
         title: t('toast_error_title'),
         description: t('toast_pledge_error'),
       });
+      setPledgeState('idle'); // Reset state on error
     }
   };
 
@@ -239,18 +239,7 @@ export function AidFeed() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const handleFirestoreError = useCallback((error: Error) => {
-    console.error("Error fetching aid requests:", error);
-    toast({
-      variant: "destructive",
-      title: t('toast_error_title'),
-      description: t('toast_fetch_aid_error')
-    });
-    setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
-    setLoading(false);
-  }, [t, toast]);
-  
-  const sortRequests = (aidData: AidRequest[]) => {
+  const sortRequests = useCallback((aidData: AidRequest[]) => {
       const priorityOrder = { High: 0, Medium: 1, Low: 2 };
       const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
       
@@ -261,7 +250,16 @@ export function AidFeed() {
         return priorityOrder[a.priority] - priorityOrder[b.priority]
       });
       return aidData;
-  }
+  }, []);
+
+  const handleFirestoreError = useCallback((error: Error) => {
+    console.error("Error fetching aid requests:", error);
+    // Note: We cannot use toast or t here as they would be stale.
+    // This function is memoized and doesn't re-capture them.
+    // A more advanced implementation might use a context or a ref to get the latest functions.
+    setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     // Try to load from cache first
@@ -300,12 +298,17 @@ export function AidFeed() {
       },
       (error) => {
         handleFirestoreError(error);
+        toast({
+            variant: "destructive",
+            title: t('toast_error_title'),
+            description: t('toast_fetch_aid_error')
+        });
       }
     );
     return () => unsubscribe();
-  }, [handleFirestoreError]);
+  }, [handleFirestoreError, sortRequests, t, toast]);
 
-  if (loading) {
+  if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
   }
   
@@ -317,3 +320,4 @@ export function AidFeed() {
     </div>
   );
 }
+
