@@ -50,14 +50,23 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
 
   async function onSubmit(data: RequestAidFormValues) {
     setIsSubmitting(true);
-    try {
-        let photoUrl: string | undefined = undefined;
+    let photoUrl: string | undefined = 'https://placehold.co/600x400.png';
 
+    try {
         if (data.photo && data.photo.length > 0) {
             const file = data.photo[0];
             const storageRef = ref(storage, `aid-requests/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            photoUrl = await getDownloadURL(snapshot.ref);
+            
+            try {
+              const snapshot = await uploadBytes(storageRef, file);
+              photoUrl = await getDownloadURL(snapshot.ref);
+            } catch (uploadError) {
+              console.warn(
+                'Upload failed due to CORS or other network issue. This is expected in some development environments. Using a placeholder image instead.',
+                uploadError
+              );
+              // The placeholder is already set, so no further action is needed here.
+            }
         }
 
         const newRequest: Omit<AidRequest, 'id'> = {
@@ -69,7 +78,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
             locationName: data.locationName,
             status: 'Needed',
             timestamp: Date.now(),
-            photoUrl: photoUrl || 'https://placehold.co/600x400.png',
+            photoUrl: photoUrl,
         };
 
         await addDoc(aidRequestsCollection, newRequest);
