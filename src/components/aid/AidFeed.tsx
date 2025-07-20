@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { AidRequest } from '@/lib/types';
 import { aidRequestsCollection } from '@/lib/firebase';
-import { doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, query, orderBy, FirestoreError } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -250,6 +250,7 @@ export function AidFeed() {
   const { t } = useTranslation();
 
   useEffect(() => {
+    // 1. Try to load from cache first
     try {
       const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
       if (cachedData) {
@@ -263,6 +264,7 @@ export function AidFeed() {
         console.error("Failed to read aid requests from localStorage", e);
     }
     
+    // 2. Set up the real-time listener
     const q = query(aidRequestsCollection, orderBy('status', 'asc'), orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
     
     const unsubscribe = onSnapshot(q,
@@ -286,17 +288,21 @@ export function AidFeed() {
       },
       (error) => {
         console.error("Error fetching aid requests:", error);
-        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
-        setLoading(false);
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Failed to fetch aid requests. Displaying mock data."
+            title: t('toast_error_title'),
+            description: t('toast_fetch_aid_error')
         });
+        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
+        setLoading(false);
       }
     );
-    return () => unsubscribe();
-  }, [t, toast]);
+
+    // 3. Return the cleanup function
+    return () => {
+      unsubscribe();
+    };
+  }, [t, toast]); // Dependencies are stable hooks.
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
