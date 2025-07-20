@@ -28,6 +28,8 @@ import { Skeleton } from '../ui/skeleton';
 import { useTranslation } from '@/hooks/use-translation';
 import { mockContributors } from '@/lib/mock-data';
 
+const CONTRIBUTORS_CACHE_KEY = 'gaza-aid-trust-contributors';
+
 const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="h-5 w-5 text-yellow-400" />;
     if (rank === 2) return <Medal className="h-5 w-5 text-slate-400" />;
@@ -110,9 +112,23 @@ export function Leaderboard() {
       });
       setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
       setLoading(false);
-  }, []);
+  }, [t, toast]);
 
   useEffect(() => {
+    // Try to load from cache first
+    try {
+        const cachedData = localStorage.getItem(CONTRIBUTORS_CACHE_KEY);
+        if (cachedData) {
+            const parsedData = JSON.parse(cachedData) as Contributor[];
+            if (parsedData.length > 0) {
+                setContributors(parsedData);
+                setLoading(false);
+            }
+        }
+    } catch (e) {
+        console.error("Failed to read contributors from localStorage", e);
+    }
+      
     const q = query(contributorsCollection, orderBy('rank'));
     
     const unsubscribe = onSnapshot(q,
@@ -124,6 +140,13 @@ export function Leaderboard() {
         } else {
           setContributors(contributorData);
         }
+
+        try {
+            localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
+        } catch (e) {
+            console.error("Failed to write contributors to localStorage", e);
+        }
+        
         setLoading(false);
       },
       (error) => {

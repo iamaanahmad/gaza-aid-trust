@@ -25,6 +25,9 @@ import { Skeleton } from '../ui/skeleton';
 import { mockAidRequests } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
 
+const AID_REQUESTS_CACHE_KEY = 'gaza-aid-trust-aid-requests';
+
+
 function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPledgeSuccess: () => void }) {
   const [pledgeState, setPledgeState] = useState<'idle' | 'processing' | 'success'>('idle');
   const { toast } = useToast();
@@ -246,8 +249,35 @@ export function AidFeed() {
     setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
     setLoading(false);
   }, [t, toast]);
+  
+  const sortRequests = (aidData: AidRequest[]) => {
+      const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+      const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
+      
+      aidData.sort((a, b) => {
+        if (statusOrder[a.status] !== statusOrder[b.status]) {
+          return statusOrder[a.status] - statusOrder[b.status];
+        }
+        return priorityOrder[a.priority] - priorityOrder[b.priority]
+      });
+      return aidData;
+  }
 
   useEffect(() => {
+    // Try to load from cache first
+    try {
+      const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData) as AidRequest[];
+        if (parsedData.length > 0) {
+          setRequests(sortRequests(parsedData));
+          setLoading(false);
+        }
+      }
+    } catch (e) {
+        console.error("Failed to read aid requests from localStorage", e);
+    }
+    
     const q = query(aidRequestsCollection, orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
@@ -256,17 +286,16 @@ export function AidFeed() {
           console.log("Firestore is empty, falling back to mock aid requests.");
           aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
         }
-        
-        const priorityOrder = { High: 0, Medium: 1, Low: 2 };
-        const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
-        aidData.sort((a, b) => {
-          if (statusOrder[a.status] !== statusOrder[b.status]) {
-            return statusOrder[a.status] - statusOrder[b.status];
-          }
-          return priorityOrder[a.priority] - priorityOrder[b.priority]
-        });
 
-        setRequests(aidData);
+        const sortedData = sortRequests(aidData);
+        setRequests(sortedData);
+        
+        try {
+          localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
+        } catch (e) {
+           console.error("Failed to write aid requests to localStorage", e);
+        }
+
         setLoading(false);
       },
       (error) => {
