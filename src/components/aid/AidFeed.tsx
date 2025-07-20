@@ -27,6 +27,7 @@ import { useTranslation } from '@/hooks/use-translation';
 
 const AID_REQUESTS_CACHE_KEY = 'gaza-aid-trust-aid-requests';
 
+// This function is now outside the component, so it has a stable reference.
 function sortRequests(aidData: AidRequest[]) {
   const priorityOrder = { High: 0, Medium: 1, Low: 2 };
   const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
@@ -48,6 +49,7 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
   const handlePledge = async () => {
     setPledgeState('processing');
     try {
+      // Simulate network delay for a more realistic feel
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       const requestDoc = doc(aidRequestsCollection, request.id);
@@ -60,6 +62,7 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
           description: t('toast_pledge_success'),
       });
 
+      // Automatically close the dialog after showing success message
       setTimeout(() => {
         onPledgeSuccess();
       }, 2000);
@@ -250,7 +253,7 @@ export function AidFeed() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    // 1. Try to load from cache first
+    // 1. Try to load from cache first for instant UI
     try {
       const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
       if (cachedData) {
@@ -264,7 +267,7 @@ export function AidFeed() {
         console.error("Failed to read aid requests from localStorage", e);
     }
     
-    // 2. Set up the real-time listener
+    // 2. Set up the real-time Firestore listener.
     const q = query(aidRequestsCollection, orderBy('status', 'asc'), orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
     
     const unsubscribe = onSnapshot(q,
@@ -286,7 +289,7 @@ export function AidFeed() {
 
         setLoading(false);
       },
-      (error) => {
+      (error: FirestoreError) => {
         console.error("Error fetching aid requests:", error);
         toast({
             variant: "destructive",
@@ -298,11 +301,12 @@ export function AidFeed() {
       }
     );
 
-    // 3. Return the cleanup function
+    // 3. Return the cleanup function to unsubscribe on unmount.
     return () => {
       unsubscribe();
     };
-  }, [t, toast]); // Dependencies are stable hooks.
+  // The empty dependency array [] ensures this effect runs only once on mount.
+  }, [t, toast]); 
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
