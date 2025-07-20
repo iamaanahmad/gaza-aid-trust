@@ -61,7 +61,7 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
         title: t('toast_error_title'),
         description: t('toast_pledge_error'),
       });
-      setPledgeState('idle'); // Reset state on error
+      setPledgeState('idle');
     }
   };
 
@@ -254,9 +254,6 @@ export function AidFeed() {
 
   const handleFirestoreError = useCallback((error: Error) => {
     console.error("Error fetching aid requests:", error);
-    // Note: We cannot use toast or t here as they would be stale.
-    // This function is memoized and doesn't re-capture them.
-    // A more advanced implementation might use a context or a ref to get the latest functions.
     setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
     setLoading(false);
   }, []);
@@ -277,6 +274,7 @@ export function AidFeed() {
     }
     
     const q = query(aidRequestsCollection, orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
+    
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
@@ -320,4 +318,3 @@ export function AidFeed() {
     </div>
   );
 }
-
