@@ -49,7 +49,6 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
   const handlePledge = async () => {
     setPledgeState('processing');
     try {
-      // Simulate network delay for a more realistic feel
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       const requestDoc = doc(aidRequestsCollection, request.id);
@@ -62,7 +61,6 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
           description: t('toast_pledge_success'),
       });
 
-      // Automatically close the dialog after showing success message
       setTimeout(() => {
         onPledgeSuccess();
       }, 2000);
