@@ -121,13 +121,13 @@ export function Leaderboard() {
     
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
-        const contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
+        let contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
         if (contributorData.length === 0) {
           console.log("Firestore is empty, falling back to mock contributors.");
-          setContributors(mockContributors);
-        } else {
-          setContributors(contributorData);
+          contributorData = mockContributors.map((c, i) => ({...c, id: `mock-${i}`}));
         }
+        
+        setContributors(contributorData);
 
         try {
             localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
