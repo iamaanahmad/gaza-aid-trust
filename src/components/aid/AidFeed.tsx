@@ -53,7 +53,7 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
 
     } catch (error) {
       console.error('Error pledging donation: ', error);
-      setPledgeState('idle');
+      setPledgeState('idle'); // Reset state on error
       toast({
         variant: 'destructive',
         title: t('toast_error_title'),
@@ -245,7 +245,7 @@ export function AidFeed() {
     });
     setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
     setLoading(false);
-  }, []);
+  }, [t, toast]);
 
   useEffect(() => {
     const q = query(aidRequestsCollection, orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));

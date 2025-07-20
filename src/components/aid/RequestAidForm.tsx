@@ -69,7 +69,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
             locationName: data.locationName,
             status: 'Needed',
             timestamp: Date.now(),
-            photoUrl: photoUrl,
+            photoUrl: photoUrl || 'https://placehold.co/600x400.png',
         };
 
         await addDoc(aidRequestsCollection, newRequest);
