@@ -27,8 +27,8 @@ import { useTranslation } from '@/hooks/use-translation';
 
 const AID_REQUESTS_CACHE_KEY = 'gaza-aid-trust-aid-requests';
 
-// This function is now outside the component, so it has a stable reference.
-function sortRequests(aidData: AidRequest[]) {
+// This function is now completely outside the component, so it has a stable reference.
+const sortRequests = (aidData: AidRequest[]) => {
   const priorityOrder = { High: 0, Medium: 1, Low: 2 };
   const statusOrder = { Needed: 0, Pledged: 1, Fulfilled: 2 };
   
@@ -271,6 +271,7 @@ export function AidFeed() {
     const unsubscribe = onSnapshot(q,
       (snapshot) => {
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
+        
         if (aidData.length === 0) {
           console.log("Firestore is empty, falling back to mock aid requests.");
           aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
@@ -294,7 +295,7 @@ export function AidFeed() {
             title: t('toast_error_title'),
             description: t('toast_fetch_aid_error')
         });
-        setRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` })));
+        setRequests(sortRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }))));
         setLoading(false);
       }
     );
