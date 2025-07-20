@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { addDoc } from 'firebase/firestore';
-import { aidRequestsCollection } from '@/lib/firebase';
+import { aidRequestsCollection, storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { AidRequest } from '@/lib/types';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
@@ -33,7 +34,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
       description: z.string().min(10, t('validation_description_min')).max(200),
       familySize: z.coerce.number().min(1, t('validation_family_size_min')),
       locationName: z.string().min(3, t('validation_location_min')),
-      photo: z.any().optional(),
+      photo: z.instanceof(FileList).optional(),
     });
 
     type RequestAidFormValues = z.infer<typeof requestAidSchema>;
@@ -50,6 +51,15 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   async function onSubmit(data: RequestAidFormValues) {
     setIsSubmitting(true);
     try {
+        let photoUrl: string | undefined = undefined;
+
+        if (data.photo && data.photo.length > 0) {
+            const file = data.photo[0];
+            const storageRef = ref(storage, `aid-requests/${Date.now()}_${file.name}`);
+            const snapshot = await uploadBytes(storageRef, file);
+            photoUrl = await getDownloadURL(snapshot.ref);
+        }
+
         const newRequest: Omit<AidRequest, 'id'> = {
             requesterId: 'anonymous-user', // Placeholder
             category: data.category,
@@ -59,7 +69,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
             locationName: data.locationName,
             status: 'Needed',
             timestamp: Date.now(),
-            photoUrl: data.photo ? 'https://placehold.co/600x400.png' : undefined,
+            photoUrl: photoUrl,
         };
 
         await addDoc(aidRequestsCollection, newRequest);
@@ -81,6 +91,8 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
         setIsSubmitting(false);
     }
   }
+  
+  const photoRef = form.register("photo");
 
   return (
     <Form {...form}>
@@ -179,7 +191,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
             <FormItem>
               <FormLabel>{t('form_label_photo')}</FormLabel>
               <FormControl>
-                <Input type="file" className="flex items-center pt-2" {...field} />
+                <Input type="file" className="flex items-center pt-2" {...photoRef} />
               </FormControl>
               <FormMessage />
             </FormItem>
