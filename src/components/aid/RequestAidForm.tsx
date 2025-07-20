@@ -45,6 +45,8 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
         description: '',
         locationName: '',
         priority: 'Low',
+        familySize: 1,
+        category: 'Medicine',
       }
     });
 
