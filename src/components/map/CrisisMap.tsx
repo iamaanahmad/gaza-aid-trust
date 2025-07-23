@@ -175,6 +175,7 @@ export function CrisisMap() {
   
   useEffect(() => {
     const fetchAlerts = async () => {
+      setLoading(true);
       // 1. Try to load from cache first
       try {
         const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
@@ -182,14 +183,14 @@ export function CrisisMap() {
           const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
           if (parsedAlerts.length > 0) {
             setAlerts(parsedAlerts);
-            setLoading(false);
+            setLoading(false); // Stop loading after cache is loaded
           }
         }
       } catch (e) {
         console.error("Failed to read from localStorage", e);
       }
       
-      // 2. Fetch fresh data
+      // 2. Fetch fresh data from Firestore
       try {
         const snapshot = await getDocs(alertsCollection);
         let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
@@ -213,17 +214,20 @@ export function CrisisMap() {
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
         });
+        // Fallback to mock data if fetch fails and cache was empty
         if (alerts.length === 0) {
             setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
         }
       } finally {
-        setLoading(false);
+        if (loading) { // Only set loading to false if it hasn't been set by cache
+          setLoading(false);
+        }
       }
     };
     
     fetchAlerts();
     
-  }, [t, toast]);
+  }, [t, toast]); // Keep stable dependencies
 
   const initialViewState = {
       longitude: 34.4,
