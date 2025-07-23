@@ -9,6 +9,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Sun, Sunrise, Sunset, Moon } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 
+const PRAYER_TIMES_CACHE_KEY = 'gaza-aid-trust-prayer-times';
+
 const MosqueIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -75,50 +77,69 @@ export function PrayerTimes() {
     Isha: t('prayer_isha'),
   }
 
-  const fetchPrayerTimes = useCallback(async () => {
-    try {
-        const response = await fetch(
-            'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
-        );
-        if (!response.ok) {
-            throw new Error(t('prayer_times_fetch_error_service'));
-        }
-        const data = await response.json();
-        if (data.code === 200) {
-            const relevantTimes = {
-                Fajr: data.data.timings.Fajr,
-                Dhuhr: data.data.timings.Dhuhr,
-                Asr: data.data.timings.Asr,
-                Maghrib: data.data.timings.Maghrib,
-                Isha: data.data.timings.Isha,
-            };
-            return {
-                timings: relevantTimes,
-                date: data.data.date.readable,
-            };
-        } else {
-            throw new Error(data.data || t('prayer_times_fetch_error_generic'));
-        }
-    } catch (err: any) {
-        console.error(err);
-        setError(err.message);
-        return null;
-    }
-  }, [t]);
-
   useEffect(() => {
-    const getTimes = async () => {
+    const fetchPrayerTimes = async () => {
+        // 1. Start with loading state
         setLoading(true);
-        const result = await fetchPrayerTimes();
-        if (result) {
-            setPrayerTimes(result);
-        }
-        setLoading(false);
-    }
-    getTimes();
-  }, [fetchPrayerTimes]);
 
-  if (loading) {
+        // 2. Try loading from cache first
+        try {
+            const cachedData = localStorage.getItem(PRAYER_TIMES_CACHE_KEY);
+            if (cachedData) {
+                setPrayerTimes(JSON.parse(cachedData));
+            }
+        } catch (e) {
+            console.error("Failed to read prayer times from localStorage", e);
+        }
+
+        // 3. Fetch fresh data from the API
+        try {
+            const response = await fetch(
+                'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
+            );
+            if (!response.ok) {
+                throw new Error(t('prayer_times_fetch_error_service'));
+            }
+            const data = await response.json();
+            if (data.code === 200) {
+                const relevantTimes = {
+                    Fajr: data.data.timings.Fajr,
+                    Dhuhr: data.data.timings.Dhuhr,
+                    Asr: data.data.timings.Asr,
+                    Maghrib: data.data.timings.Maghrib,
+                    Isha: data.data.timings.Isha,
+                };
+                const result = {
+                    timings: relevantTimes,
+                    date: data.data.date.readable,
+                };
+                setPrayerTimes(result);
+                // 4. Update the cache
+                try {
+                    localStorage.setItem(PRAYER_TIMES_CACHE_KEY, JSON.stringify(result));
+                } catch (e) {
+                    console.error("Failed to write prayer times to localStorage", e);
+                }
+            } else {
+                throw new Error(data.data || t('prayer_times_fetch_error_generic'));
+            }
+        } catch (err: any) {
+            console.error(err);
+            // Only set an error if we don't have cached data to show
+            if (!prayerTimes) {
+              setError(err.message);
+            }
+        } finally {
+            // 5. End loading state
+            setLoading(false);
+        }
+    };
+
+    fetchPrayerTimes();
+    // The empty dependency array ensures this effect runs only once on mount.
+  }, [t, prayerTimes]);
+
+  if (loading && !prayerTimes) {
     return (
         <div>
             <div className="text-center mb-8">
@@ -130,13 +151,17 @@ export function PrayerTimes() {
     );
   }
 
-  if (error) {
+  if (error && !prayerTimes) {
     return (
         <Alert variant="destructive">
             <AlertTitle>{t('prayer_times_fetch_error_title')}</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
         </Alert>
     );
+  }
+
+  if (!prayerTimes) {
+    return null; // Don't render anything if there's no data and no error
   }
 
   return (
@@ -166,5 +191,4 @@ export function PrayerTimes() {
     </div>
   );
 }
-
     
