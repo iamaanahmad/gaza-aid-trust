@@ -171,10 +171,11 @@ export function CrisisMap() {
   const handleUpdateAlert = useCallback((updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
     setSelectedAlert(updatedAlert);
-  }, [setAlerts, setSelectedAlert]);
+  }, []);
   
   useEffect(() => {
     const fetchAlerts = async () => {
+      setLoading(true);
       // 1. Try to load from cache first
       try {
         const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
@@ -182,7 +183,6 @@ export function CrisisMap() {
           const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
           if (parsedAlerts.length > 0) {
             setAlerts(parsedAlerts);
-            setLoading(false);
           }
         }
       } catch (e) {
@@ -214,21 +214,17 @@ export function CrisisMap() {
             description: t('toast_fetch_alerts_error')
         });
         // Fallback to mock data if fetch fails and cache was empty
-        const currentAlerts = alerts;
-        if (currentAlerts.length === 0) {
+        if (alerts.length === 0) {
             setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
         }
       } finally {
-        const currentLoading = loading;
-        if (currentLoading) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
     
     fetchAlerts();
     
-  }, [t, toast]);
+  }, [t, toast, alerts.length]);
 
   const initialViewState = {
       longitude: 34.4,
