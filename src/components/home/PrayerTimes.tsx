@@ -109,6 +109,7 @@ export function PrayerTimes() {
 
   useEffect(() => {
     const getTimes = async () => {
+        setLoading(true);
         const result = await fetchPrayerTimes(t);
         if (typeof result === 'string') {
             setError(result);

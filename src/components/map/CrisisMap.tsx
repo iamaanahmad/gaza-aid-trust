@@ -183,6 +183,7 @@ export function CrisisMap() {
           const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
           if (parsedAlerts.length > 0) {
             setAlerts(parsedAlerts);
+            setLoading(false);
           }
         }
       } catch (e) {
@@ -224,7 +225,7 @@ export function CrisisMap() {
     
     fetchAlerts();
     
-  }, [t, toast, alerts.length]);
+  }, []);
 
   const initialViewState = {
       longitude: 34.4,

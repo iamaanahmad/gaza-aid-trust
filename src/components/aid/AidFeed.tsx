@@ -251,6 +251,7 @@ export function AidFeed() {
 
   useEffect(() => {
     const fetchRequests = async () => {
+      setLoading(true);
       // 1. Try to load from cache first
       try {
         const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
@@ -293,20 +294,16 @@ export function AidFeed() {
             title: t('toast_error_title'),
             description: t('toast_fetch_aid_error')
         });
-        const currentRequests = requests;
-        if (currentRequests.length === 0) {
+        if (requests.length === 0) {
           setRequests(sortRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }))));
         }
       } finally {
-        const currentLoading = loading;
-        if (currentLoading) {
-            setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchRequests();
-  }, [t, toast]); 
+  }, []); 
 
   if (loading) {
     return <AidFeedSkeleton />;
@@ -320,4 +317,3 @@ export function AidFeed() {
     </div>
   );
 }
-

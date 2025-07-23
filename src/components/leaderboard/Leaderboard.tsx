@@ -150,14 +150,12 @@ export function Leaderboard() {
             setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
         }
       } finally {
-        if (loading) {
-            setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchContributors();
-  }, [t, toast, contributors.length, loading]);
+  }, []);
 
   if (loading) {
     return <LeaderboardSkeleton />
