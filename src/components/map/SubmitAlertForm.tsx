@@ -59,7 +59,7 @@ const useSpeechRecognition = (lang: string) => {
         }
     }, [isListening, stopListening]);
     
-    const initializeRecognition = useCallback((onTranscriptUpdate: (transcript: string, isFinal: boolean) => void) => {
+    const initializeRecognition = useCallback((onTranscriptUpdate: (transcript: string) => void) => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognition) {
             toast({
@@ -76,17 +76,12 @@ const useSpeechRecognition = (lang: string) => {
         recognition.interimResults = true;
         recognition.lang = lang;
 
-        let finalTranscript = '';
         recognition.onresult = (event: any) => {
-            let interimTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript + '. ';
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
-                }
-            }
-            onTranscriptUpdate(finalTranscript + interimTranscript, false);
+            const transcript = Array.from(event.results)
+              .map((result: any) => result[0])
+              .map(result => result.transcript)
+              .join('');
+            onTranscriptUpdate(transcript);
         };
 
         recognition.onerror = (event: any) => {
@@ -102,7 +97,6 @@ const useSpeechRecognition = (lang: string) => {
         };
 
         recognition.onend = () => {
-             onTranscriptUpdate(finalTranscript, true);
              stopListening();
         };
     }, [lang, t, toast, stopListening]);
@@ -150,7 +144,6 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
     initializeRecognition((transcript) => {
         form.setValue('description', transcript, { shouldValidate: true });
         
-        // Auto-detect priority from transcript
         const detectedPriority = getPriorityFromTranscript(transcript);
         form.setValue('priority', detectedPriority);
     });
@@ -280,3 +273,5 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
     </Form>
   );
 }
+
+    

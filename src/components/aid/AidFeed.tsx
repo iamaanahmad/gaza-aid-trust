@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { AidRequest } from '@/lib/types';
 import { aidRequestsCollection } from '@/lib/firebase';
 import { doc, updateDoc, getDocs } from 'firebase/firestore';
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import { HandHeart, Users, MapPin, MessageSquareQuote, CircleCheck, Loader2 } from 'lucide-react';
+import { HandHeart, Users, MapPin, MessageSquareQuote, CircleCheck, Loader2, CircleCheckBig } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -40,8 +40,9 @@ const sortRequests = (aidData: AidRequest[]) => {
   return sorted;
 };
 
-function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPledgeSuccess: () => void }) {
+function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPledgeSuccess: (pledgedRequest: AidRequest) => void }) {
   const [pledgeState, setPledgeState] = useState<'idle' | 'processing' | 'success'>('idle');
+  const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -61,7 +62,8 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
       });
 
       setTimeout(() => {
-        onPledgeSuccess();
+        onPledgeSuccess({ ...request, status: 'Pledged' });
+        setIsOpen(false); 
       }, 2000);
 
     } catch (error) {
@@ -76,46 +78,62 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
   };
 
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>{t('donate_dialog_title')}</DialogTitle>
-        <DialogDescription>
-          {t('donate_dialog_description', { description: request.description })}
-        </DialogDescription>
-      </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button disabled={request.status !== 'Needed'}>
+          {request.status === 'Needed' ? (
+            <>
+              <HandHeart className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
+              {t('donate_button')}
+            </>
+          ) : (
+            <>
+              <CircleCheckBig className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
+              {t('status_pledged')}
+            </>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('donate_dialog_title')}</DialogTitle>
+          <DialogDescription>
+            {t('donate_dialog_description', { description: request.description })}
+          </DialogDescription>
+        </DialogHeader>
 
-      {pledgeState === 'success' ? (
-        <div className="text-center py-8 flex flex-col items-center justify-center transition-all duration-300 ease-in-out">
-            <CircleCheck className="h-16 w-16 text-green-500 mb-4" />
-            <h3 className="text-2xl font-bold text-green-600">{t('toast_thank_you')}</h3>
-            <p className="text-muted-foreground mt-2">{t('toast_pledge_success')}</p>
-        </div>
-      ) : (
-        <div className="py-4">
-          <p className="mb-4">
-            {t('donate_dialog_body', { location: request.locationName })}
-          </p>
-          <p className="font-bold text-lg mb-4">{t('donate_dialog_mock_amount')}</p>
-          <Button onClick={handlePledge} className="w-full" size="lg" disabled={pledgeState === 'processing'}>
-            {pledgeState === 'processing' ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('submitting_button')}
-              </>
-            ) : (
-              t('confirm_pledge_button')
-            )}
-          </Button>
-          <p className="text-xs text-muted-foreground mt-2 text-center">{t('donate_dialog_mock_notice')}</p>
-        </div>
-      )}
-    </DialogContent>
+        {pledgeState === 'success' ? (
+          <div className="text-center py-8 flex flex-col items-center justify-center transition-all duration-300 ease-in-out">
+              <CircleCheck className="h-16 w-16 text-green-500 mb-4" />
+              <h3 className="text-2xl font-bold text-green-600">{t('toast_thank_you')}</h3>
+              <p className="text-muted-foreground mt-2">{t('toast_pledge_success')}</p>
+          </div>
+        ) : (
+          <div className="py-4">
+            <p className="mb-4">
+              {t('donate_dialog_body', { location: request.locationName })}
+            </p>
+            <p className="font-bold text-lg mb-4">{t('donate_dialog_mock_amount')}</p>
+            <Button onClick={handlePledge} className="w-full" size="lg" disabled={pledgeState === 'processing'}>
+              {pledgeState === 'processing' ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('submitting_button')}
+                </>
+              ) : (
+                t('confirm_pledge_button')
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2 text-center">{t('donate_dialog_mock_notice')}</p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
-function AidRequestCard({ request }: { request: AidRequest }) {
+function AidRequestCard({ request, onUpdate }: { request: AidRequest, onUpdate: (updatedRequest: AidRequest) => void }) {
   const { t } = useTranslation();
-  const [isDonateOpen, setIsDonateOpen] = useState(false);
 
   const getStatusVariant = (status: AidRequest['status']) => {
     switch (status) {
@@ -200,17 +218,7 @@ function AidRequestCard({ request }: { request: AidRequest }) {
         <p className="text-xs text-muted-foreground">
           {request.timestamp ? formatDistanceToNow(new Date(request.timestamp), { addSuffix: true }) : ''}
         </p>
-        {request.status === 'Needed' && (
-           <Dialog open={isDonateOpen} onOpenChange={setIsDonateOpen}>
-             <DialogTrigger asChild>
-                <Button>
-                  <HandHeart className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
-                  {t('donate_button')}
-                </Button>
-             </DialogTrigger>
-             <DonateDialog request={request} onPledgeSuccess={() => setIsDonateOpen(false)} />
-           </Dialog>
-        )}
+        <DonateDialog request={request} onPledgeSuccess={onUpdate} />
       </CardFooter>
     </Card>
   );
@@ -242,51 +250,52 @@ const AidFeedSkeleton = () => (
     </div>
 );
 
-
 export function AidFeed() {
   const [requests, setRequests] = useState<AidRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  const handleUpdateRequest = (updatedRequest: AidRequest) => {
+    const newRequests = requests.map(req => req.id === updatedRequest.id ? updatedRequest : req);
+    const sortedData = sortRequests(newRequests);
+    setRequests(sortedData);
+    try {
+      localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
+    } catch (e) {
+      console.error("Failed to write updated aid requests to localStorage", e);
+    }
+  };
+
   useEffect(() => {
     const fetchRequests = async () => {
       setLoading(true);
-      // 1. Try to load from cache first
       try {
         const cachedData = localStorage.getItem(AID_REQUESTS_CACHE_KEY);
         if (cachedData) {
           const parsedData = JSON.parse(cachedData) as AidRequest[];
           if (parsedData.length > 0) {
             setRequests(sortRequests(parsedData));
-            setLoading(false);
           }
         }
-      } catch (e) {
-          console.error("Failed to read aid requests from localStorage", e);
-      }
-      
-      // 2. Fetch fresh data from Firestore
-      try {
+        
         const snapshot = await getDocs(aidRequestsCollection);
-
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
         
-        if (aidData.length === 0) {
-          console.log("Firestore is empty, falling back to mock aid requests.");
+        if (aidData.length === 0 && !cachedData) {
+          console.log("Firestore and cache are empty, falling back to mock aid requests.");
           aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
         }
 
-        const sortedData = sortRequests(aidData);
-        setRequests(sortedData);
-        
-        // 3. Update cache
-        try {
-          localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
-        } catch (e) {
-           console.error("Failed to write aid requests to localStorage", e);
+        if (aidData.length > 0) {
+            const sortedData = sortRequests(aidData);
+            setRequests(sortedData);
+            try {
+              localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
+            } catch (e) {
+               console.error("Failed to write aid requests to localStorage", e);
+            }
         }
-
       } catch (error) {
         console.error("Error fetching aid requests:", error);
         toast({
@@ -301,19 +310,20 @@ export function AidFeed() {
         setLoading(false);
       }
     };
-
     fetchRequests();
   }, []); 
 
-  if (loading) {
+  if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
   }
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {requests.map((request) => (
-        <AidRequestCard key={request.id} request={request} />
+        <AidRequestCard key={request.id} request={request} onUpdate={handleUpdateRequest} />
       ))}
     </div>
   );
 }
+
+    

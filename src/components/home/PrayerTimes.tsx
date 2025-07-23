@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { PrayerTimesData } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -61,9 +61,21 @@ const PrayerTimeSkeleton = () => (
     </div>
 );
 
-const fetchPrayerTimes = async (
-    t: (key: string) => string
-) => {
+export function PrayerTimes() {
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTimesData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
+
+  const prayerNameTranslations = {
+    Fajr: t('prayer_fajr'),
+    Dhuhr: t('prayer_dhuhr'),
+    Asr: t('prayer_asr'),
+    Maghrib: t('prayer_maghrib'),
+    Isha: t('prayer_isha'),
+  }
+
+  const fetchPrayerTimes = useCallback(async () => {
     try {
         const response = await fetch(
             'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
@@ -89,37 +101,22 @@ const fetchPrayerTimes = async (
         }
     } catch (err: any) {
         console.error(err);
-        return err.message;
+        setError(err.message);
+        return null;
     }
-};
-
-export function PrayerTimes() {
-  const [prayerTimes, setPrayerTimes] = useState<PrayerTimesData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { t } = useTranslation();
-
-  const prayerNameTranslations = {
-    Fajr: t('prayer_fajr'),
-    Dhuhr: t('prayer_dhuhr'),
-    Asr: t('prayer_asr'),
-    Maghrib: t('prayer_maghrib'),
-    Isha: t('prayer_isha'),
-  }
+  }, [t]);
 
   useEffect(() => {
     const getTimes = async () => {
         setLoading(true);
-        const result = await fetchPrayerTimes(t);
-        if (typeof result === 'string') {
-            setError(result);
-        } else {
+        const result = await fetchPrayerTimes();
+        if (result) {
             setPrayerTimes(result);
         }
         setLoading(false);
     }
     getTimes();
-  }, [t]);
+  }, [fetchPrayerTimes]);
 
   if (loading) {
     return (
@@ -169,3 +166,5 @@ export function PrayerTimes() {
     </div>
   );
 }
+
+    
