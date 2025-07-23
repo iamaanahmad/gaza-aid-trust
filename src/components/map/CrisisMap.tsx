@@ -222,18 +222,7 @@ export function CrisisMap() {
     };
     
     fetchAlerts();
-
-    // Keep real-time listener for map for live updates, but don't let it control initial load.
-    const unsubscribe = onSnapshot(alertsCollection, (snapshot) => {
-        const alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
-         if (alertsData.length > 0) {
-            setAlerts(alertsData);
-         }
-    });
-
-    return () => {
-      unsubscribe();
-    };
+    
   }, [t, toast]);
 
   const initialViewState = {

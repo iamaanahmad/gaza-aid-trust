@@ -154,7 +154,7 @@ export function Leaderboard() {
     };
 
     fetchContributors();
-  }, [t, toast]);
+  }, []);
 
   if (loading && contributors.length === 0) {
     return <LeaderboardSkeleton />

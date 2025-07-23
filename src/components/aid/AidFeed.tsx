@@ -303,7 +303,7 @@ export function AidFeed() {
     };
 
     fetchRequests();
-  }, [t, toast]); 
+  }, []); 
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
