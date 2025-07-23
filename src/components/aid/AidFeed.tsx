@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import type { AidRequest } from '@/lib/types';
 import { aidRequestsCollection } from '@/lib/firebase';
-import { doc, updateDoc, onSnapshot, query, orderBy, FirestoreError, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, getDocs } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -267,8 +267,7 @@ export function AidFeed() {
       
       // 2. Fetch fresh data from Firestore
       try {
-        const q = query(aidRequestsCollection, orderBy('status', 'asc'), orderBy('priority', 'asc'), orderBy('timestamp', 'desc'));
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocs(aidRequestsCollection);
 
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
         
@@ -294,18 +293,20 @@ export function AidFeed() {
             title: t('toast_error_title'),
             description: t('toast_fetch_aid_error')
         });
-        if (requests.length === 0) {
+        const currentRequests = requests;
+        if (currentRequests.length === 0) {
           setRequests(sortRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }))));
         }
       } finally {
-        if (loading) {
+        const currentLoading = loading;
+        if (currentLoading) {
             setLoading(false);
         }
       }
     };
 
     fetchRequests();
-  }, [t, toast, requests.length, loading]); 
+  }, [t, toast]); 
 
   if (loading) {
     return <AidFeedSkeleton />;
@@ -319,3 +320,4 @@ export function AidFeed() {
     </div>
   );
 }
+

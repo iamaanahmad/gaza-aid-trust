@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
-import { onSnapshot, doc, updateDoc, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, getDocs } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ThumbsUp, ThumbsDown, RadioTower, Clock, X, Info } from 'lucide-react';
@@ -171,7 +171,7 @@ export function CrisisMap() {
   const handleUpdateAlert = useCallback((updatedAlert: Alert) => {
     setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
     setSelectedAlert(updatedAlert);
-  }, []);
+  }, [setAlerts, setSelectedAlert]);
   
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -182,7 +182,7 @@ export function CrisisMap() {
           const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
           if (parsedAlerts.length > 0) {
             setAlerts(parsedAlerts);
-            setLoading(false); // Stop loading after cache is loaded
+            setLoading(false);
           }
         }
       } catch (e) {
@@ -214,11 +214,13 @@ export function CrisisMap() {
             description: t('toast_fetch_alerts_error')
         });
         // Fallback to mock data if fetch fails and cache was empty
-        if (alerts.length === 0) {
+        const currentAlerts = alerts;
+        if (currentAlerts.length === 0) {
             setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
         }
       } finally {
-        if (loading) { // Only set loading to false if it hasn't been set by cache
+        const currentLoading = loading;
+        if (currentLoading) {
           setLoading(false);
         }
       }
@@ -226,7 +228,7 @@ export function CrisisMap() {
     
     fetchAlerts();
     
-  }, [t, toast, loading]); // Keep stable dependencies
+  }, [t, toast]);
 
   const initialViewState = {
       longitude: 34.4,
