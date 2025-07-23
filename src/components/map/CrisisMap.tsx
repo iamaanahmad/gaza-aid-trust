@@ -175,7 +175,6 @@ export function CrisisMap() {
   
   useEffect(() => {
     const fetchAlerts = async () => {
-      setLoading(true);
       // 1. Try to load from cache first
       try {
         const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
@@ -227,7 +226,7 @@ export function CrisisMap() {
     
     fetchAlerts();
     
-  }, [t, toast]); // Keep stable dependencies
+  }, [t, toast, loading]); // Keep stable dependencies
 
   const initialViewState = {
       longitude: 34.4,

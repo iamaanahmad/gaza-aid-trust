@@ -105,6 +105,7 @@ export function Leaderboard() {
 
   useEffect(() => {
     const fetchContributors = async () => {
+      setLoading(true);
       // 1. Try to load from cache first
       try {
         const cachedData = localStorage.getItem(CONTRIBUTORS_CACHE_KEY);
@@ -149,14 +150,16 @@ export function Leaderboard() {
             setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
         }
       } finally {
-        setLoading(false);
+        if (loading) {
+            setLoading(false);
+        }
       }
     };
 
     fetchContributors();
-  }, []);
+  }, [t, toast, contributors.length, loading]);
 
-  if (loading && contributors.length === 0) {
+  if (loading) {
     return <LeaderboardSkeleton />
   }
 

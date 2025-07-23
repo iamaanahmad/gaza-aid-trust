@@ -298,14 +298,16 @@ export function AidFeed() {
           setRequests(sortRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }))));
         }
       } finally {
-        setLoading(false);
+        if (loading) {
+            setLoading(false);
+        }
       }
     };
 
     fetchRequests();
-  }, []); 
+  }, [t, toast, requests.length, loading]); 
 
-  if (loading && requests.length === 0) {
+  if (loading) {
     return <AidFeedSkeleton />;
   }
   
