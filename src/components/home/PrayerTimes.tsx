@@ -79,10 +79,7 @@ export function PrayerTimes() {
 
   useEffect(() => {
     const fetchPrayerTimes = async () => {
-        // 1. Start with loading state
         setLoading(true);
-
-        // 2. Try loading from cache first
         try {
             const cachedData = localStorage.getItem(PRAYER_TIMES_CACHE_KEY);
             if (cachedData) {
@@ -92,7 +89,6 @@ export function PrayerTimes() {
             console.error("Failed to read prayer times from localStorage", e);
         }
 
-        // 3. Fetch fresh data from the API
         try {
             const response = await fetch(
                 'https://api.aladhan.com/v1/timingsByCity?city=Gaza&country=Palestine&method=4'
@@ -114,7 +110,6 @@ export function PrayerTimes() {
                     date: data.data.date.readable,
                 };
                 setPrayerTimes(result);
-                // 4. Update the cache
                 try {
                     localStorage.setItem(PRAYER_TIMES_CACHE_KEY, JSON.stringify(result));
                 } catch (e) {
@@ -125,19 +120,16 @@ export function PrayerTimes() {
             }
         } catch (err: any) {
             console.error(err);
-            // Only set an error if we don't have cached data to show
             if (!prayerTimes) {
               setError(err.message);
             }
         } finally {
-            // 5. End loading state
             setLoading(false);
         }
     };
 
     fetchPrayerTimes();
-    // The empty dependency array ensures this effect runs only once on mount.
-  }, [t, prayerTimes]);
+  }, [t]);
 
   if (loading && !prayerTimes) {
     return (
@@ -161,7 +153,7 @@ export function PrayerTimes() {
   }
 
   if (!prayerTimes) {
-    return null; // Don't render anything if there's no data and no error
+    return null;
   }
 
   return (
