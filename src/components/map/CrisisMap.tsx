@@ -176,36 +176,30 @@ export function CrisisMap() {
   useEffect(() => {
     const fetchAlerts = async () => {
       setLoading(true);
-      // 1. Try to load from cache first
       try {
         const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
         if (cachedAlerts) {
           const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
           if (parsedAlerts.length > 0) {
             setAlerts(parsedAlerts);
-            setLoading(false);
           }
         }
-      } catch (e) {
-        console.error("Failed to read from localStorage", e);
-      }
-      
-      // 2. Fetch fresh data from Firestore
-      try {
+        
         const snapshot = await getDocs(alertsCollection);
         let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
         
-        if (alertsData.length === 0) {
+        if (alertsData.length === 0 && !cachedAlerts) {
             console.log("Firestore is empty, falling back to mock alerts.");
             alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
         }
         
-        setAlerts(alertsData);
-        // 3. Update cache
-        try {
-          localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
-        } catch (e) {
-          console.error("Failed to write to localStorage", e);
+        if (alertsData.length > 0) {
+            setAlerts(alertsData);
+            try {
+              localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+            } catch (e) {
+              console.error("Failed to write to localStorage", e);
+            }
         }
       } catch (error) {
         console.error("Error fetching alerts:", error);
@@ -214,7 +208,6 @@ export function CrisisMap() {
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
         });
-        // Fallback to mock data if fetch fails and cache was empty
         if (alerts.length === 0) {
             setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
         }
@@ -233,7 +226,7 @@ export function CrisisMap() {
       zoom: 10
   }
 
-  if (loading) {
+  if (loading && alerts.length === 0) {
       return <MapSkeleton />;
   }
 

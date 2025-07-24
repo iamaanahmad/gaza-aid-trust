@@ -106,38 +106,31 @@ export function Leaderboard() {
   useEffect(() => {
     const fetchContributors = async () => {
       setLoading(true);
-      // 1. Try to load from cache first
       try {
         const cachedData = localStorage.getItem(CONTRIBUTORS_CACHE_KEY);
         if (cachedData) {
           const parsedData = JSON.parse(cachedData) as Contributor[];
           if (parsedData.length > 0) {
             setContributors(parsedData);
-            setLoading(false);
           }
         }
-      } catch (e) {
-        console.error("Failed to read contributors from localStorage", e);
-      }
       
-      // 2. Fetch fresh data
-      try {
         const q = query(contributorsCollection, orderBy('rank'));
         const snapshot = await getDocs(q);
 
         let contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
-        if (contributorData.length === 0) {
+        if (contributorData.length === 0 && !cachedData) {
           console.log("Firestore is empty, falling back to mock contributors.");
           contributorData = mockContributors.map((c, i) => ({...c, id: `mock-${i}`}));
         }
         
-        setContributors(contributorData);
-
-        // 3. Update cache
-        try {
-          localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
-        } catch (e) {
-          console.error("Failed to write contributors to localStorage", e);
+        if (contributorData.length > 0) {
+            setContributors(contributorData);
+            try {
+              localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
+            } catch (e) {
+              console.error("Failed to write contributors to localStorage", e);
+            }
         }
       } catch (error) {
         console.error("Error fetching contributors:", error);
@@ -157,7 +150,7 @@ export function Leaderboard() {
     fetchContributors();
   }, []);
 
-  if (loading) {
+  if (loading && contributors.length === 0) {
     return <LeaderboardSkeleton />
   }
 
@@ -170,10 +163,7 @@ export function Leaderboard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {loading && contributors.length === 0 ? (
-            <LeaderboardSkeleton />
-        ) : (
-            <Table>
+        <Table>
             <TableHeader>
                 <TableRow>
                 <TableHead className="w-16 text-center">{t('leaderboard_col_rank')}</TableHead>
@@ -187,7 +177,6 @@ export function Leaderboard() {
                 ))}
             </TableBody>
             </Table>
-        )}
       </CardContent>
       <CardFooter>
         <p className="text-xs text-muted-foreground text-center w-full">

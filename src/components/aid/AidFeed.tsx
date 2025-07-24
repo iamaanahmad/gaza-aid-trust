@@ -256,7 +256,7 @@ export function AidFeed() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const handleUpdateRequest = (updatedRequest: AidRequest) => {
+  const handleUpdateRequest = useCallback((updatedRequest: AidRequest) => {
     const newRequests = requests.map(req => req.id === updatedRequest.id ? updatedRequest : req);
     const sortedData = sortRequests(newRequests);
     setRequests(sortedData);
@@ -265,7 +265,7 @@ export function AidFeed() {
     } catch (e) {
       console.error("Failed to write updated aid requests to localStorage", e);
     }
-  };
+  }, [requests]);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -325,5 +325,3 @@ export function AidFeed() {
     </div>
   );
 }
-
-    

@@ -83,7 +83,11 @@ export function PrayerTimes() {
         try {
             const cachedData = localStorage.getItem(PRAYER_TIMES_CACHE_KEY);
             if (cachedData) {
-                setPrayerTimes(JSON.parse(cachedData));
+                const parsedData = JSON.parse(cachedData);
+                // Basic validation to ensure it's not empty/malformed
+                if (parsedData && parsedData.timings) {
+                    setPrayerTimes(parsedData);
+                }
             }
         } catch (e) {
             console.error("Failed to read prayer times from localStorage", e);
@@ -120,7 +124,7 @@ export function PrayerTimes() {
             }
         } catch (err: any) {
             console.error(err);
-            if (!prayerTimes) {
+            if (!prayerTimes) { // Only set error if we don't even have cached data
               setError(err.message);
             }
         } finally {
@@ -183,4 +187,3 @@ export function PrayerTimes() {
     </div>
   );
 }
-    
