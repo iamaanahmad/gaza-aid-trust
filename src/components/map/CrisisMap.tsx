@@ -170,7 +170,11 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
   const handleUpdateAlert = useCallback((updatedAlert: Alert) => {
     setAlerts(prev => {
         const newAlerts = prev.map(a => a.id === updatedAlert.id ? updatedAlert : a);
-        localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(newAlerts));
+        try {
+          localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(newAlerts));
+        } catch(e) {
+          console.error("Failed to write to localStorage", e);
+        }
         return newAlerts;
     });
     setSelectedAlert(updatedAlert);
@@ -191,19 +195,18 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
         const snapshot = await getDocs(alertsCollection);
         let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
         
-        if (alertsData.length === 0 && !cachedAlerts) {
+        if (alertsData.length === 0) {
             console.log("Firestore is empty, falling back to mock alerts.");
             alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
         }
         
-        if (alertsData.length > 0) {
-            setAlerts(alertsData);
-            try {
-              localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
-            } catch (e) {
-              console.error("Failed to write to localStorage", e);
-            }
+        setAlerts(alertsData);
+        try {
+          localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+        } catch (e) {
+          console.error("Failed to write to localStorage", e);
         }
+
       } catch (error) {
         console.error("Error fetching alerts:", error);
         toast({
@@ -211,8 +214,10 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
             title: t('toast_error_title'),
             description: t('toast_fetch_alerts_error')
         });
-        if (alerts.length === 0) {
-            setAlerts(mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` })));
+        // Fallback to mock data if fetch fails and there's nothing in state
+        if (!alerts || alerts.length === 0) {
+            const mockData = mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` }));
+            setAlerts(mockData);
         }
       } finally {
         setLoading(false);
@@ -220,8 +225,8 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
     };
     
     fetchAlerts();
-    
-  }, [setAlerts, t, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initialViewState = {
       longitude: 34.4,

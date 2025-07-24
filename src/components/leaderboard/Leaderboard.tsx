@@ -119,18 +119,16 @@ export function Leaderboard() {
         const snapshot = await getDocs(q);
 
         let contributorData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contributor));
-        if (contributorData.length === 0 && !cachedData) {
+        if (contributorData.length === 0) {
           console.log("Firestore is empty, falling back to mock contributors.");
           contributorData = mockContributors.map((c, i) => ({...c, id: `mock-${i}`}));
         }
         
-        if (contributorData.length > 0) {
-            setContributors(contributorData);
-            try {
-              localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
-            } catch (e) {
-              console.error("Failed to write contributors to localStorage", e);
-            }
+        setContributors(contributorData);
+        try {
+          localStorage.setItem(CONTRIBUTORS_CACHE_KEY, JSON.stringify(contributorData));
+        } catch (e) {
+          console.error("Failed to write contributors to localStorage", e);
         }
       } catch (error) {
         console.error("Error fetching contributors:", error);
@@ -140,7 +138,8 @@ export function Leaderboard() {
           description: t('toast_fetch_leaderboard_error')
         });
         if (contributors.length === 0) {
-            setContributors(mockContributors.map((c, i) => ({...c, id: `mock-${i}`})));
+            const mockData = mockContributors.map((c, i) => ({...c, id: `mock-${i}`}));
+            setContributors(mockData);
         }
       } finally {
         setLoading(false);
@@ -148,6 +147,7 @@ export function Leaderboard() {
     };
 
     fetchContributors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading && contributors.length === 0) {

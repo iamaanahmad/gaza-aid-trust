@@ -84,7 +84,6 @@ export function PrayerTimes() {
             const cachedData = localStorage.getItem(PRAYER_TIMES_CACHE_KEY);
             if (cachedData) {
                 const parsedData = JSON.parse(cachedData);
-                // Basic validation to ensure it's not empty/malformed
                 if (parsedData && parsedData.timings) {
                     setPrayerTimes(parsedData);
                 }
@@ -124,7 +123,7 @@ export function PrayerTimes() {
             }
         } catch (err: any) {
             console.error(err);
-            if (!prayerTimes) { // Only set error if we don't even have cached data
+            if (!prayerTimes) { 
               setError(err.message);
             }
         } finally {
@@ -133,6 +132,7 @@ export function PrayerTimes() {
     };
 
     fetchPrayerTimes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading && !prayerTimes) {
@@ -187,5 +187,3 @@ export function PrayerTimes() {
     </div>
   );
 }
-
-    

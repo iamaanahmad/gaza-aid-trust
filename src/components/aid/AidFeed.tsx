@@ -287,19 +287,17 @@ export function AidFeed() {
         const snapshot = await getDocs(aidRequestsCollection);
         let aidData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AidRequest));
         
-        if (aidData.length === 0 && !cachedData) {
-          console.log("Firestore and cache are empty, falling back to mock aid requests.");
+        if (aidData.length === 0) {
+          console.log("Firestore is empty, falling back to mock aid requests.");
           aidData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
         }
 
-        if (aidData.length > 0) {
-            const sortedData = sortRequests(aidData);
-            setRequests(sortedData);
-            try {
-              localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
-            } catch (e) {
-               console.error("Failed to write aid requests to localStorage", e);
-            }
+        const sortedData = sortRequests(aidData);
+        setRequests(sortedData);
+        try {
+          localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
+        } catch (e) {
+            console.error("Failed to write aid requests to localStorage", e);
         }
       } catch (error) {
         console.error("Error fetching aid requests:", error);
@@ -309,14 +307,16 @@ export function AidFeed() {
             description: t('toast_fetch_aid_error')
         });
         if (requests.length === 0) {
-          setRequests(sortRequests(mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }))));
+          const mockData = mockAidRequests.map((req, index) => ({ ...req, id: `mock-${index}` }));
+          setRequests(sortRequests(mockData));
         }
       } finally {
         setLoading(false);
       }
     };
     fetchRequests();
-  }, [t, toast]); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;
