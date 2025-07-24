@@ -133,7 +133,7 @@ export function PrayerTimes() {
     };
 
     fetchPrayerTimes();
-  }, [t]);
+  }, []);
 
   if (loading && !prayerTimes) {
     return (
@@ -187,3 +187,5 @@ export function PrayerTimes() {
     </div>
   );
 }
+
+    
