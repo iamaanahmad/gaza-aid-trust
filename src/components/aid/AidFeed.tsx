@@ -61,9 +61,12 @@ function DonateDialog({ request, onPledgeSuccess }: { request: AidRequest, onPle
           description: t('toast_pledge_success'),
       });
 
+      const updatedRequest = { ...request, status: 'Pledged' as const };
+      
       setTimeout(() => {
-        onPledgeSuccess({ ...request, status: 'Pledged' });
+        onPledgeSuccess(updatedRequest);
         setIsOpen(false); 
+        setPledgeState('idle'); // Reset for next time
       }, 2000);
 
     } catch (error) {
@@ -257,15 +260,17 @@ export function AidFeed() {
   const { t } = useTranslation();
 
   const handleUpdateRequest = useCallback((updatedRequest: AidRequest) => {
-    const newRequests = requests.map(req => req.id === updatedRequest.id ? updatedRequest : req);
-    const sortedData = sortRequests(newRequests);
-    setRequests(sortedData);
-    try {
-      localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
-    } catch (e) {
-      console.error("Failed to write updated aid requests to localStorage", e);
-    }
-  }, [requests]);
+    setRequests(prevRequests => {
+      const newRequests = prevRequests.map(req => req.id === updatedRequest.id ? updatedRequest : req);
+      const sortedData = sortRequests(newRequests);
+      try {
+        localStorage.setItem(AID_REQUESTS_CACHE_KEY, JSON.stringify(sortedData));
+      } catch (e) {
+        console.error("Failed to write updated aid requests to localStorage", e);
+      }
+      return sortedData;
+    });
+  }, []);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -311,7 +316,7 @@ export function AidFeed() {
       }
     };
     fetchRequests();
-  }, []); 
+  }, [t, toast]); 
 
   if (loading && requests.length === 0) {
     return <AidFeedSkeleton />;

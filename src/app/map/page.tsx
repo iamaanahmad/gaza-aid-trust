@@ -13,16 +13,23 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useTranslation } from '@/hooks/use-translation';
+import type { Alert } from '@/lib/types';
 import { Megaphone } from 'lucide-react';
 import { useState } from 'react';
 
 export default function MapPage() {
   const { t } = useTranslation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  const handleNewAlert = (newAlert: Alert) => {
+    setAlerts(prevAlerts => [...prevAlerts, newAlert]);
+    setIsSheetOpen(false);
+  };
 
   return (
     <div className="relative w-full h-[calc(100vh-3.5rem)]">
-        <CrisisMap />
+        <CrisisMap alerts={alerts} setAlerts={setAlerts} />
         <div className="absolute bottom-6 ltr:left-6 rtl:right-6 z-30">
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
@@ -38,7 +45,7 @@ export default function MapPage() {
                   {t('submit_alert_form_description')}
                 </SheetDescription>
               </SheetHeader>
-              <SubmitAlertForm onFormSubmit={() => setIsSheetOpen(false)} />
+              <SubmitAlertForm onFormSubmit={handleNewAlert} />
             </SheetContent>
           </Sheet>
         </div>

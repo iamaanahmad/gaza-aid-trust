@@ -161,17 +161,20 @@ const MapSkeleton = () => {
   )
 };
 
-export function CrisisMap() {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: React.Dispatch<React.SetStateAction<Alert[]>> }) {
   const [loading, setLoading] = useState(true);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
 
   const handleUpdateAlert = useCallback((updatedAlert: Alert) => {
-    setAlerts(prev => prev.map(a => a.id === updatedAlert.id ? updatedAlert : a));
+    setAlerts(prev => {
+        const newAlerts = prev.map(a => a.id === updatedAlert.id ? updatedAlert : a);
+        localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(newAlerts));
+        return newAlerts;
+    });
     setSelectedAlert(updatedAlert);
-  }, []);
+  }, [setAlerts]);
   
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -218,7 +221,7 @@ export function CrisisMap() {
     
     fetchAlerts();
     
-  }, []);
+  }, [setAlerts, t, toast]);
 
   const initialViewState = {
       longitude: 34.4,

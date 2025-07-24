@@ -20,7 +20,7 @@ import { Mic, Send } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { addDoc } from 'firebase/firestore';
 import { alertsCollection } from '@/lib/firebase';
-import type { Alert, AlertPriority } from '@/lib/types';
+import type { Alert } from '@/lib/types';
 import { useTranslation } from '@/hooks/use-translation';
 
 interface SpeechRecognition extends EventTarget {
@@ -110,7 +110,7 @@ const useSpeechRecognition = (lang: string) => {
     };
 };
 
-export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) {
+export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Alert) => void }) {
   const { toast } = useToast();
   const { t, language } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -153,7 +153,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
   async function onSubmit(data: AlertFormValues) {
     setIsSubmitting(true);
     try {
-        const newAlert: Omit<Alert, 'id'> = {
+        const newAlertData: Omit<Alert, 'id'> = {
             location: { lat: 31.5, lng: 34.4667 }, // Placeholder
             locationName: data.locationName,
             description: data.description,
@@ -166,14 +166,16 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
             trustScore: 50,
         };
 
-        await addDoc(alertsCollection, newAlert);
+        const docRef = await addDoc(alertsCollection, newAlertData);
 
         toast({
             title: t('toast_alert_submitted'),
             description: t('toast_alert_submitted_desc'),
         });
+        
+        onFormSubmit({ ...newAlertData, id: docRef.id });
         form.reset();
-        onFormSubmit();
+
     } catch (error) {
         console.error("Error submitting alert:", error);
         toast({
@@ -273,5 +275,3 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: () => void }) 
     </Form>
   );
 }
-
-    
