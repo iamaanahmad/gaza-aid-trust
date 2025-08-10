@@ -642,4 +642,26 @@ export const translations = {
     en: 'Built for the "Hack for Gaza" hackathon. A prototype for hope and solidarity.',
     ar: 'بُني لهاكاثون "Hack for Gaza". نموذج أولي للأمل والتضامن.',
   },
+
+  // Offline Support
+  offline_mode: {
+    en: 'Offline mode - using cached data',
+    ar: 'وضع عدم الاتصال - استخدام البيانات المحفوظة',
+  },
+  back_online: {
+    en: 'Back online - syncing data...',
+    ar: 'العودة للاتصال - مزامنة البيانات...',
+  },
+  data_synced: {
+    en: 'Data synced',
+    ar: 'تم مزامنة البيانات',
+  },
+  latest_alerts_loaded: {
+    en: 'Latest alerts loaded from server',
+    ar: 'تم تحميل أحدث التنبيهات من الخادم',
+  },
+  cached_data_notice: {
+    en: 'Showing cached data (offline)',
+    ar: 'عرض البيانات المحفوظة (غير متصل)',
+  },
 };

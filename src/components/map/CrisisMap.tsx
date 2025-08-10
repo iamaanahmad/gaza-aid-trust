@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
 import { doc, updateDoc, getDocs } from 'firebase/firestore';
@@ -15,10 +15,13 @@ import Map, { Marker, Popup } from 'react-map-gl';
 import { mockAlerts } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useOffline } from '@/hooks/use-offline';
 
 const ALERTS_CACHE_KEY = 'gaza-aid-trust-alerts';
 
 function getPinColor(alert: Alert) {
+  if (!alert) return '#71717a'; // zinc-500 as default
+  
   if (alert.type === 'triage') {
     switch (alert.priority) {
       case 'High': return '#ef4444'; // red-500
@@ -27,8 +30,10 @@ function getPinColor(alert: Alert) {
       default: return '#71717a'; // zinc-500
     }
   }
-  if (alert.trustScore > 75) return '#22c55e';
-  if (alert.trustScore > 50) return '#f59e0b';
+  
+  const trustScore = alert.trustScore || 0;
+  if (trustScore > 75) return '#22c55e';
+  if (trustScore > 50) return '#f59e0b';
   return '#ef4444';
 }
 
@@ -166,9 +171,42 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { isOnline } = useOffline();
+  const syncingRef = useRef(false);
+
+  const syncAlertsFromServer = useCallback(async () => {
+    if (!navigator.onLine || syncingRef.current) return;
+    
+    syncingRef.current = true;
+    try {
+      const snapshot = await getDocs(alertsCollection);
+      let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
+      
+      if (alertsData.length === 0) {
+        alertsData = mockAlerts.map((alert, index) => ({...alert, id: `mock-${index}`}));
+      }
+      
+      setAlerts(alertsData);
+      try {
+        localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(alertsData));
+      } catch (e) {
+        console.error("Failed to write to localStorage", e);
+      }
+      
+      toast({
+        title: t('data_synced', { default: 'Data synced' }),
+        description: t('latest_alerts_loaded', { default: 'Latest alerts loaded from server' }),
+      });
+    } catch (error) {
+      console.error("Error syncing alerts:", error);
+    } finally {
+      syncingRef.current = false;
+    }
+  }, [toast, t]);
 
   const handleUpdateAlert = useCallback((updatedAlert: Alert) => {
     setAlerts(prev => {
+        if (!prev || !Array.isArray(prev)) return [updatedAlert];
         const newAlerts = prev.map(a => a.id === updatedAlert.id ? updatedAlert : a);
         try {
           localStorage.setItem(ALERTS_CACHE_KEY, JSON.stringify(newAlerts));
@@ -178,20 +216,24 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
         return newAlerts;
     });
     setSelectedAlert(updatedAlert);
-  }, [setAlerts]);
+  }, []); // Remove setAlerts dependency as it's stable
   
+  // Initial data loading effect - runs only once
   useEffect(() => {
     const fetchAlerts = async () => {
       setLoading(true);
       try {
+        // Always load cached data first for faster initial render
         const cachedAlerts = localStorage.getItem(ALERTS_CACHE_KEY);
         if (cachedAlerts) {
           const parsedAlerts = JSON.parse(cachedAlerts) as Alert[];
           if (parsedAlerts.length > 0) {
             setAlerts(parsedAlerts);
+            setLoading(false); // Show cached data immediately
           }
         }
         
+        // Then try to fetch fresh data if online
         const snapshot = await getDocs(alertsCollection);
         let alertsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Alert));
         
@@ -215,18 +257,28 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
             description: t('toast_fetch_alerts_error')
         });
         // Fallback to mock data if fetch fails and there's nothing in state
-        if (!alerts || alerts.length === 0) {
-            const mockData = mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` }));
-            setAlerts(mockData);
-        }
+        const mockData = mockAlerts.map((alert, index) => ({ ...alert, id: `mock-${index}` }));
+        setAlerts(mockData);
       } finally {
         setLoading(false);
       }
     };
     
     fetchAlerts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Empty dependency array - runs only once on mount
+
+  // Separate effect for handling back-online sync
+  useEffect(() => {
+    const handleBackOnline = () => {
+      syncAlertsFromServer();
+    };
+    
+    window.addEventListener('app:back-online', handleBackOnline);
+    
+    return () => {
+      window.removeEventListener('app:back-online', handleBackOnline);
+    };
+  }, [syncAlertsFromServer]);
 
   const initialViewState = {
       longitude: 34.4,
@@ -254,18 +306,21 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
           mapStyle="mapbox://styles/mapbox/streets-v11"
           onClick={() => setSelectedAlert(null)}
         >
-            {alerts.map((alert) => (
-                <Marker key={alert.id} longitude={alert.location.lng} latitude={alert.location.lat} onClick={(e) => {
-                    e.originalEvent.stopPropagation();
-                    setSelectedAlert(alert);
-                }}>
-                    <div className="cursor-pointer relative" aria-label={t('alert_label', { location: alert.locationName })}>
-                        <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert)}}>
-                           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                        </svg>
-                    </div>
-                </Marker>
-            ))}
+            {alerts && Array.isArray(alerts) && alerts.map((alert) => {
+                if (!alert || !alert.id || !alert.location) return null;
+                return (
+                    <Marker key={alert.id} longitude={alert.location.lng} latitude={alert.location.lat} onClick={(e) => {
+                        e.originalEvent.stopPropagation();
+                        setSelectedAlert(alert);
+                    }}>
+                        <div className="cursor-pointer relative" aria-label={t('alert_label', { location: alert.locationName })}>
+                            <svg viewBox="0 0 24 24" className="h-8 w-8 drop-shadow-lg" style={{stroke: 'white', strokeWidth: 1.5, fill: getPinColor(alert)}}>
+                               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                            </svg>
+                        </div>
+                    </Marker>
+                );
+            })}
 
             <SelectedAlertPopup alert={selectedAlert} onUpdate={handleUpdateAlert} onClose={() => setSelectedAlert(null)} />
         </Map>

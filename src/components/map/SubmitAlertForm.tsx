@@ -77,11 +77,21 @@ const useSpeechRecognition = (lang: string) => {
         recognition.lang = lang;
 
         recognition.onresult = (event: any) => {
-            const transcript = Array.from(event.results)
-              .map((result: any) => result[0])
-              .map(result => result.transcript)
-              .join('');
-            onTranscriptUpdate(transcript);
+            try {
+                if (!event.results || event.results.length === 0) return;
+                
+                const transcript = Array.from(event.results)
+                  .map((result: any) => result?.[0])
+                  .filter(result => result && result.transcript) // Filter out undefined results
+                  .map(result => result.transcript)
+                  .join('');
+                
+                if (transcript.trim()) {
+                    onTranscriptUpdate(transcript);
+                }
+            } catch (error) {
+                console.error('Speech recognition result processing error:', error);
+            }
         };
 
         recognition.onerror = (event: any) => {

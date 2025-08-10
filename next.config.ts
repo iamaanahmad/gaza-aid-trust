@@ -25,13 +25,57 @@ const withPWA = withPWAInit({
       },
     },
     {
-      urlPattern: /.*\.(?:png|jpg|jpeg|svg|gif)/i,
+      urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'firestore-cache',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60, // 5 minutes
+        },
+        networkTimeoutSeconds: 3,
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      urlPattern: /^https:\/\/.*\.googleapis\.com\/.*/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'google-apis-cache',
+        expiration: {
+          maxEntries: 30,
+          maxAgeSeconds: 60 * 60, // 1 hour
+        },
+        networkTimeoutSeconds: 3,
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      urlPattern: /.*\.(?:png|jpg|jpeg|svg|gif|webp|ico)/i,
       handler: 'CacheFirst',
       options: {
         cacheName: 'image-cache',
         expiration: {
-          maxEntries: 60,
+          maxEntries: 100,
           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      urlPattern: /.*\.(?:js|css|woff|woff2|ttf|eot)/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'static-resources',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         },
       },
     },
