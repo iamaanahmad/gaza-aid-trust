@@ -41,6 +41,7 @@ const useSpeechRecognition = (lang: string) => {
     const recognitionRef = useRef<SpeechRecognition | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const finalTranscriptRef = useRef<string>('');
+    const lastResultIndexRef = useRef<number>(0);
 
     const stopListening = useCallback(() => {
         if (recognitionRef.current) {
@@ -53,6 +54,7 @@ const useSpeechRecognition = (lang: string) => {
     const startListening = useCallback(() => {
         if (recognitionRef.current) {
             finalTranscriptRef.current = ''; // Reset final transcript
+            lastResultIndexRef.current = 0; // Reset result index
             recognitionRef.current.start();
             setIsListening(true);
             timeoutRef.current = setTimeout(() => {
@@ -83,24 +85,21 @@ const useSpeechRecognition = (lang: string) => {
                 if (!event.results || event.results.length === 0) return;
                 
                 let interimTranscript = '';
-                let finalTranscript = '';
                 
-                // Process all results
-                for (let i = 0; i < event.results.length; i++) {
+                // Only process new results to avoid repetition
+                for (let i = lastResultIndexRef.current; i < event.results.length; i++) {
                     const result = event.results[i];
                     if (result && result[0]) {
                         const transcript = result[0].transcript;
                         if (result.isFinal) {
-                            finalTranscript += transcript + ' ';
+                            // Add final result to our permanent transcript
+                            finalTranscriptRef.current += transcript + ' ';
+                            lastResultIndexRef.current = i + 1; // Update the last processed index
                         } else {
+                            // This is interim result, add to interim transcript
                             interimTranscript += transcript;
                         }
                     }
-                }
-                
-                // Update the final transcript reference
-                if (finalTranscript) {
-                    finalTranscriptRef.current += finalTranscript;
                 }
                 
                 // Combine final and interim for display
@@ -133,6 +132,7 @@ const useSpeechRecognition = (lang: string) => {
 
     const resetTranscript = useCallback(() => {
         finalTranscriptRef.current = '';
+        lastResultIndexRef.current = 0;
     }, []);
 
     return {
@@ -253,14 +253,24 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Ale
                   <Button 
                     type="button" 
                     size="icon" 
-                    variant="ghost"
+                    variant={isListening ? "destructive" : "ghost"}
                     onClick={handleMicClick} 
                     disabled={!hasSupport}
                     aria-label={isListening ? 'Stop voice input' : t('use_voice_input_label')}
-                    className="absolute rtl:left-1 ltr:right-1 top-2 h-8 w-8 text-muted-foreground"
+                    className={`absolute rtl:left-1 ltr:right-1 top-2 h-8 w-8 transition-all ${
+                      isListening 
+                        ? 'text-white bg-red-500 hover:bg-red-600' 
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
                   >
-                    <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse text-red-500' : ''}`} />
+                    <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse' : ''}`} />
                   </Button>
+                  {isListening && (
+                    <div className="absolute bottom-1 ltr:left-2 rtl:right-2 text-xs text-red-500 font-medium flex items-center gap-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      {t('listening', { default: 'Listening...' })}
+                    </div>
+                  )}
                 </div>
               </FormControl>
               <FormMessage />

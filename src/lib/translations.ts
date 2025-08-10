@@ -664,4 +664,8 @@ export const translations = {
     en: 'Showing cached data (offline)',
     ar: 'عرض البيانات المحفوظة (غير متصل)',
   },
+  listening: {
+    en: 'Listening...',
+    ar: 'جاري الاستماع...',
+  },
 };

@@ -34,9 +34,7 @@ export const metadata: Metadata = {
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
-    other: [
-      { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#87CEEB' },
-    ],
+    shortcut: '/favicon.ico',
   },
   manifest: '/manifest.json',
   metadataBase: new URL('https://gaza-aid-trust.vercel.app'),
@@ -68,8 +66,16 @@ export const metadata: Metadata = {
     title: 'Gaza Aid',
     startupImage: [
       {
-        url: '/android-chrome-192x192.png',
+        url: '/apple-touch-icon.png',
         media: '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/android-chrome-192x192.png',
+        media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/android-chrome-512x512.png',
+        media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)',
       },
     ],
   },
