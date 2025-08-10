@@ -40,6 +40,7 @@ const useSpeechRecognition = (lang: string) => {
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const finalTranscriptRef = useRef<string>('');
 
     const stopListening = useCallback(() => {
         if (recognitionRef.current) {
@@ -51,6 +52,7 @@ const useSpeechRecognition = (lang: string) => {
 
     const startListening = useCallback(() => {
         if (recognitionRef.current) {
+            finalTranscriptRef.current = ''; // Reset final transcript
             recognitionRef.current.start();
             setIsListening(true);
             timeoutRef.current = setTimeout(() => {
@@ -80,14 +82,32 @@ const useSpeechRecognition = (lang: string) => {
             try {
                 if (!event.results || event.results.length === 0) return;
                 
-                const transcript = Array.from(event.results)
-                  .map((result: any) => result?.[0])
-                  .filter(result => result && result.transcript) // Filter out undefined results
-                  .map(result => result.transcript)
-                  .join('');
+                let interimTranscript = '';
+                let finalTranscript = '';
                 
-                if (transcript.trim()) {
-                    onTranscriptUpdate(transcript);
+                // Process all results
+                for (let i = 0; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result && result[0]) {
+                        const transcript = result[0].transcript;
+                        if (result.isFinal) {
+                            finalTranscript += transcript + ' ';
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                }
+                
+                // Update the final transcript reference
+                if (finalTranscript) {
+                    finalTranscriptRef.current += finalTranscript;
+                }
+                
+                // Combine final and interim for display
+                const displayTranscript = (finalTranscriptRef.current + interimTranscript).trim();
+                
+                if (displayTranscript) {
+                    onTranscriptUpdate(displayTranscript);
                 }
             } catch (error) {
                 console.error('Speech recognition result processing error:', error);
@@ -111,10 +131,15 @@ const useSpeechRecognition = (lang: string) => {
         };
     }, [lang, t, toast, stopListening]);
 
+    const resetTranscript = useCallback(() => {
+        finalTranscriptRef.current = '';
+    }, []);
+
     return {
         isListening,
         startListening,
         stopListening,
+        resetTranscript,
         initializeRecognition,
         hasSupport: !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
     };
@@ -138,7 +163,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Ale
       defaultValues: { description: '', locationName: '', priority: 'Low' },
   });
 
-  const { isListening, startListening, stopListening, initializeRecognition, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
+  const { isListening, startListening, stopListening, resetTranscript, initializeRecognition, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
   
   const getPriorityFromTranscript = (transcript: string) => {
       const lowerTranscript = transcript.toLowerCase();
@@ -185,6 +210,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Ale
         
         onFormSubmit({ ...newAlertData, id: docRef.id });
         form.reset();
+        resetTranscript(); // Clear speech transcript when form is reset
 
     } catch (error) {
         console.error("Error submitting alert:", error);
@@ -203,6 +229,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Ale
     if (isListening) {
       stopListening();
     } else {
+      resetTranscript(); // Clear previous transcript before starting
       startListening();
     }
   }

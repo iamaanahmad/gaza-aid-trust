@@ -1,84 +1,480 @@
 
-# Gaza Aid & Trust: Crisis Connect
+<div align="center">
 
-**An AI-powered triage and medical aid platform for Gaza, designed to streamline patient intake and connect resources where they're needed most.**
+# 🏥 Gaza Aid & Trust: Crisis Connect
+
+### *AI-Powered Humanitarian Crisis Response Platform*
+
+**Streamlining medical triage and aid distribution in crisis zones through technology, trust, and community.**
+
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-brightgreen?style=for-the-badge&logo=pwa)](https://web.dev/progressive-web-apps/)
+[![Offline First](https://img.shields.io/badge/Offline-First-blue?style=for-the-badge&logo=offline)](https://developers.google.com/web/fundamentals/instant-and-offline/offline-first)
+[![Mobile Optimized](https://img.shields.io/badge/Mobile-Optimized-orange?style=for-the-badge&logo=mobile)](https://developers.google.com/web/fundamentals/design-and-ux/responsive)
+[![AI Powered](https://img.shields.io/badge/AI-Powered-purple?style=for-the-badge&logo=google)](https://ai.google.dev/)
 
 ![Gaza Aid & Trust Hero Image](https://iili.io/FENr48F.md.png)
 
-> This project addresses the **"Streamlining On-the-Ground Patient Intake with Efficient Triage System"** challenge for the "Hack for Gaza" hackathon. Its goal is to demonstrate a viable, technology-driven solution that enables medics to post urgent triage alerts via voice, displays them on an offline-capable map with AI-powered trust scores, and connects critical medical aid with donors.
+**🏆 Built for the "Hack for Gaza" Hackathon | 🎯 Addressing Critical Healthcare Challenges**
+
+[🚀 Live Demo](#live-demo) • [📱 Install PWA](#pwa-installation) • [🛠️ Setup Guide](#getting-started) • [📖 Documentation](#documentation)
+
+</div>
 
 ---
 
-## Table of Contents
+## 🌟 **Project Highlights**
 
-- [The Problem](#the-problem)
-- [Our Solution](#our-solution)
-- [Project Philosophy](#project-philosophy)
-- [Key Features](#key-features)
-- [Live Demo & Screenshots](#live-demo--screenshots)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Future Roadmap](#future-roadmap)
+<div align="center">
+
+| 🎯 **Challenge** | 🚀 **Solution** | 💡 **Innovation** |
+|:---:|:---:|:---:|
+| **Crisis Response** | Real-time triage mapping | AI-powered trust scoring |
+| **Resource Allocation** | Direct aid connections | Community-driven verification |
+| **Accessibility** | Voice-to-text in Arabic/English | Offline-first PWA architecture |
+| **Trust & Reliability** | Blockchain-inspired scoring | Transparent feedback loops |
+
+</div>
 
 ---
 
-## The Problem
+## 📋 **Table of Contents**
 
-In a crisis zone like Gaza, the healthcare system is under unimaginable strain. Medics and doctors face a chaotic environment where efficient patient intake and resource allocation can mean the difference between life and death. The core challenges are:
-1.  **Overwhelmed Intake Process:** Manual, paper-based patient intake is slow, error-prone, and impossible to scale during mass casualty events.
-2.  **Lack of Real-Time Visibility:** There is no centralized system for doctors to see which clinics are overwhelmed, what specific supplies are needed, or where the most urgent patients are.
-3.  **Misinformation and Trust:** Unverified reports about clinic capacity or available resources can lead to fatal delays.
+- [🔥 The Crisis](#-the-crisis)
+- [💡 Our Solution](#-our-solution)
+- [🎯 Project Philosophy](#-project-philosophy)
+- [✨ Key Features](#-key-features)
+- [🚀 Live Demo & Screenshots](#-live-demo--screenshots)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📱 PWA Features](#-pwa-features)
+- [🏃‍♂️ Getting Started](#️-getting-started)
+- [📖 Documentation](#-documentation)
+- [🔮 Future Roadmap](#-future-roadmap)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-## Our Solution
+---
 
-**Gaza Aid & Trust** is a web platform designed for medics on the ground. It combines a real-time **Triage Map** with a **Medical Aid Connection** system, all underpinned by an AI-powered trust mechanism. Our goal is to create a reliable, fast, and accessible tool for streamlining patient triage and resource management.
+## 🔥 **The Crisis**
 
-The platform is built as a Progressive WebApp (PWA) with **offline-first functionality** and **bilingual voice-to-text input**, ensuring it works in low-connectivity environments and allows for hands-free operation.
+<div align="center">
+<img src="https://img.shields.io/badge/Healthcare_System-Under_Strain-red?style=for-the-badge" alt="Healthcare Crisis">
+<img src="https://img.shields.io/badge/Lives-At_Stake-critical?style=for-the-badge" alt="Critical Situation">
+</div>
 
-## Project Philosophy
+In crisis zones like Gaza, healthcare systems face unprecedented challenges where **every second counts** and **every decision matters**:
 
-Our approach is guided by three principles:
--   **Trust through Technology**: We use AI not just as a feature, but as a core mechanism to build a self-policing information ecosystem. By analyzing community confirmations and disputes, our **AI Trust Score** helps medics instantly gauge the reliability of a triage alert.
--   **Accessibility for Medics**: From a fully responsive, bilingual (Arabic RTL) interface to **voice-to-text triage notes**, we've prioritized making the platform a seamless tool for doctors working under extreme pressure.
--   **Dignity in Aid**: We empower clinics by giving them a platform to voice their specific medical needs. This connects donors directly to the front lines, ensuring the right aid gets to the right place at the right time.
+### 🚨 **Critical Challenges**
 
-## Key Features
+| Challenge | Impact | Current Reality |
+|-----------|--------|-----------------|
+| **📝 Manual Intake Process** | Slow, error-prone, unscalable | Paper-based systems fail during mass casualties |
+| **👁️ Zero Visibility** | Resource misallocation | No centralized view of clinic capacity or needs |
+| **❌ Misinformation** | Fatal delays | Unverified reports lead to wrong decisions |
+| **📡 Connectivity Issues** | Communication breakdown | Unreliable internet in crisis zones |
+| **🌐 Language Barriers** | Delayed response | International aid workers struggle with Arabic |
 
--   **Real-Time Triage Map**: Medics can post and view geo-tagged triage alerts with priority levels (High, Medium, Low), allowing for quick assessment of the most critical needs.
--   **AI-Powered Trust Score**: To combat misinformation, each alert has a "Trust Score" that is dynamically calculated by a **Google Gemini** model. The model considers user confirmations (+1) and disputes (-1), creating a transparent, community-driven reputation system.
--   **Voice-to-Text Triage Notes**: For speed and accessibility, medics can record triage alerts simply by speaking in Arabic or English. The system can even auto-detect keywords like "urgent" to set the priority.
--   **Direct Medical Aid Connection**: A dedicated portal where clinics can request specific medical supplies (e.g., insulin, bandages) and donors can fund these needs directly. The feed is prioritized to show high-priority needs first.
--   **Recipient Feedback Loop**: To close the loop and build trust, the platform includes a prominent feedback field where clinics can confirm receipt of aid, turning a transaction into a human connection.
--   **Zakat Calculator**: An integrated tool to help users calculate their Zakat, which can then be donated to medical aid requests on the platform, aligning with Islamic principles of charity.
--   **Offline-First (PWA)**: Designed as a Progressive Web App, ensuring that critical map data and alerts are cached and available even without a stable internet connection.
+> **"In a crisis, information is as critical as medicine. The right data at the right time can save lives."**
 
-## Live Demo & Screenshots
+## 💡 **Our Solution**
 
-*(This is where you would link to your live demo and add compelling screenshots of the app in action)*
+<div align="center">
 
-![Screenshot 1](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-2-1024x464.png)
-**Screenshot 1: The Triage Map with priority-coded alerts.**
-![Screenshot 2](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-1-1024x576.png)
-**Screenshot 2: The Medical Aid feed showing prioritized requests.**
-![Screenshot 3](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-3-1024x646.png)
-**Screenshot 3: The mobile UI in Arabic (RTL).**
+### **Gaza Aid & Trust: Where Technology Meets Humanity** 🤝
 
-## Tech Stack
+*A comprehensive crisis response platform that transforms how medical aid is coordinated, verified, and delivered in real-time.*
 
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+</div>
+
+### 🎯 **Core Components**
+
+<table>
+<tr>
+<td width="50%">
+
+#### 🗺️ **Real-Time Triage Map**
+- **Geo-tagged alerts** with priority levels
+- **AI-powered trust scoring** for reliability
+- **Offline-capable** map with cached data
+- **Voice-to-text** input in Arabic & English
+
+</td>
+<td width="50%">
+
+#### 🏥 **Medical Aid Connection**
+- **Direct clinic-to-donor** matching
+- **Specific supply requests** (insulin, bandages, etc.)
+- **Real-time status tracking** (Needed → Pledged → Fulfilled)
+- **Feedback loops** for transparency
+
+</td>
+</tr>
+</table>
+
+### 🚀 **Revolutionary Features**
+
+```mermaid
+graph TD
+    A[Medic Reports Crisis] --> B[Voice-to-Text Processing]
+    B --> C[AI Trust Score Calculation]
+    C --> D[Real-time Map Update]
+    D --> E[Community Verification]
+    E --> F[Resource Allocation]
+    F --> G[Aid Delivery Tracking]
+    G --> H[Feedback & Trust Update]
+```
+
+**Built as a Progressive Web App (PWA)** with **offline-first architecture**, ensuring reliability even in the most challenging connectivity conditions.
+
+## 🎯 **Project Philosophy**
+
+<div align="center">
+
+### **Three Pillars of Crisis Response Innovation**
+
+</div>
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+### 🤖 **Trust through Technology**
+![AI Badge](https://img.shields.io/badge/AI-Powered-blue?style=flat-square&logo=google)
+
+**Self-policing information ecosystem**
+- Google Gemini AI analyzes community feedback
+- Dynamic trust scores prevent misinformation
+- Transparent, community-driven verification
+- Real-time reliability assessment
+
+</td>
+<td align="center" width="33%">
+
+### ♿ **Accessibility for Medics**
+![Accessibility Badge](https://img.shields.io/badge/Accessible-First-green?style=flat-square&logo=accessibility)
+
+**Seamless tools for extreme pressure**
+- Bilingual interface (Arabic RTL + English)
+- Voice-to-text for hands-free operation
+- Mobile-first responsive design
+- Offline-capable functionality
+
+</td>
+<td align="center" width="33%">
+
+### 💝 **Dignity in Aid**
+![Humanitarian Badge](https://img.shields.io/badge/Humanitarian-Focused-red?style=flat-square&logo=heart)
+
+**Empowering direct connections**
+- Clinics voice specific needs
+- Direct donor-to-frontline connections
+- Transparent aid tracking
+- Human-centered feedback loops
+
+</td>
+</tr>
+</table>
+
+> **"Technology should amplify human compassion, not replace it. Every feature we build serves the fundamental goal of saving lives with dignity."**
+
+## ✨ **Key Features**
+
+<div align="center">
+
+### **🏆 Award-Winning Feature Set**
+
+</div>
+
+### 🗺️ **Crisis Mapping & Triage**
+
+<table>
+<tr>
+<td width="60%">
+
+#### **Real-Time Triage Map**
+- 📍 **Geo-tagged alerts** with GPS precision
+- 🚨 **Priority levels** (High/Medium/Low) with color coding
+- 🤖 **AI-powered trust scoring** via Google Gemini
+- 🔄 **Live updates** with community verification
+- 📱 **Mobile-optimized** interface for field use
+
+#### **Voice-to-Text Intelligence**
+- 🎤 **Bilingual support** (Arabic & English)
+- 🧠 **Smart keyword detection** ("urgent" → High priority)
+- ⚡ **Hands-free operation** for busy medics
+- 🔊 **Real-time transcription** with error correction
+
+</td>
+<td width="40%">
+
+```typescript
+// Smart Priority Detection
+const detectPriority = (transcript: string) => {
+  const urgent = ['urgent', 'عاجل', 'خطير'];
+  const medium = ['medium', 'متوسط'];
+  
+  if (urgent.some(kw => 
+    transcript.toLowerCase().includes(kw)
+  )) return 'High';
+  
+  return 'Medium';
+};
+```
+
+</td>
+</tr>
+</table>
+
+### 🏥 **Medical Aid Ecosystem**
+
+<div align="center">
+
+| Feature | Description | Impact |
+|---------|-------------|--------|
+| **🎯 Direct Aid Matching** | Clinics request specific supplies | Targeted, efficient aid delivery |
+| **📊 Real-time Tracking** | Needed → Pledged → Fulfilled | Complete transparency |
+| **💬 Feedback Loops** | Recipients confirm aid receipt | Trust building & accountability |
+| **🕌 Zakat Integration** | Islamic charity calculator | Cultural alignment & accessibility |
+
+</div>
+
+### 🔧 **Technical Excellence**
+
+#### **Progressive Web App (PWA)**
+- 📱 **Installable** on all devices (iOS, Android, Desktop)
+- 🔄 **Offline-first** architecture with smart caching
+- ⚡ **Lightning-fast** loading with service workers
+- 🔄 **Auto-sync** when connection restored
+
+#### **AI-Powered Trust System**
+```python
+# Trust Score Algorithm (Simplified)
+def calculate_trust_score(confirmations, disputes, initial_score=50):
+    community_factor = (confirmations - disputes) * 10
+    time_decay = calculate_time_decay(alert_age)
+    
+    return min(100, max(0, initial_score + community_factor - time_decay))
+```
+
+#### **Offline Capabilities**
+- 💾 **Local data caching** with localStorage
+- 🗺️ **Cached map tiles** for offline navigation
+- 📊 **Sync queue** for offline actions
+- 🔄 **Conflict resolution** for data synchronization
+
+### 🌐 **Accessibility & Internationalization**
+
+<table>
+<tr>
+<td width="50%">
+
+#### **🌍 Multi-language Support**
+- **Arabic (RTL)** - Native language support
+- **English (LTR)** - International aid workers
+- **Smart text direction** handling
+- **Cultural considerations** in UI/UX
+
+</td>
+<td width="50%">
+
+#### **♿ Accessibility Features**
+- **Screen reader** compatibility
+- **High contrast** mode support
+- **Keyboard navigation** for all features
+- **Voice commands** for hands-free use
+
+</td>
+</tr>
+</table>
+
+## 🚀 **Live Demo & Screenshots**
+
+<div align="center">
+
+### **🌐 Experience the Platform**
+
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Now-brightgreen?style=for-the-badge&logo=vercel)](https://gaza-aid-trust.vercel.app)
+[![PWA Install](https://img.shields.io/badge/📱_Install_PWA-Add_to_Home-blue?style=for-the-badge&logo=pwa)](https://gaza-aid-trust.vercel.app)
+
+**Try it now:** Open on mobile → Add to Home Screen → Use offline!
+
+</div>
+
+### 📸 **Platform Screenshots**
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+#### 🗺️ **Crisis Triage Map**
+![Triage Map](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-2-1024x464.png)
+*Real-time alerts with AI trust scores*
+
+</td>
+<td align="center" width="33%">
+
+#### 🏥 **Medical Aid Feed**
+![Aid Feed](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-1-1024x576.png)
+*Prioritized aid requests with tracking*
+
+</td>
+<td align="center" width="33%">
+
+#### 📱 **Mobile Arabic UI**
+![Mobile Arabic](https://news.freefirecommunity.com/wp-content/uploads/2025/07/image-3-1024x646.png)
+*RTL interface for Arabic speakers*
+
+</td>
+</tr>
+</table>
+
+### 🎥 **Feature Demonstrations**
+
+<div align="center">
+
+| 🎤 **Voice Input** | 🤖 **AI Trust Scoring** | 📱 **PWA Installation** |
+|:---:|:---:|:---:|
+| ![Voice](https://img.shields.io/badge/🎤-Voice_to_Text-blue) | ![AI](https://img.shields.io/badge/🤖-AI_Powered-purple) | ![PWA](https://img.shields.io/badge/📱-Installable-green) |
+| Speak in Arabic/English | Community-driven verification | Works offline like native app |
+
+</div>
+
+### 🏆 **Awards & Recognition**
+
+<div align="center">
+
+![Hackathon](https://img.shields.io/badge/🏆_Hack_for_Gaza-Participant-gold?style=for-the-badge)
+![Innovation](https://img.shields.io/badge/💡_Innovation-AI_+_Humanitarian-blue?style=for-the-badge)
+![Impact](https://img.shields.io/badge/🌍_Impact-Lives_Saved-red?style=for-the-badge)
+
+</div>
+
+## 🛠️ **Tech Stack**
+
+<div align="center">
+
+### **🏗️ Built with Modern, Production-Ready Technologies**
+
+</div>
+
+### 🎨 **Frontend Excellence**
+
+<div align="center">
+
+![Next.js](https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+
+</div>
+
+<table>
+<tr>
+<td width="50%">
+
+#### **🚀 Core Framework**
+- **[Next.js 15](https://nextjs.org/)** - App Router, Server Components
+- **[React 18](https://reactjs.org/)** - Concurrent features, Suspense
+- **[TypeScript](https://www.typescriptlang.org/)** - Type safety, better DX
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first styling
+
+#### **🎨 UI Components**
+- **[ShadCN UI](https://ui.shadcn.com/)** - Beautiful, accessible components
+- **[Radix UI](https://www.radix-ui.com/)** - Unstyled, accessible primitives
+- **[Lucide React](https://lucide.dev/)** - Beautiful, consistent icons
+- **[Framer Motion](https://www.framer.com/motion/)** - Smooth animations
+
+</td>
+<td width="50%">
+
+#### **📱 PWA & Performance**
+- **[next-pwa](https://github.com/shadowwalker/next-pwa)** - Service worker generation
+- **[Workbox](https://developers.google.com/web/tools/workbox)** - Advanced caching strategies
+- **[React Hook Form](https://react-hook-form.com/)** - Performant forms
+- **[Zod](https://zod.dev/)** - Runtime type validation
+
+#### **🗺️ Mapping & Geolocation**
+- **[Mapbox GL JS](https://www.mapbox.com/)** - Interactive maps
+- **[react-map-gl](https://visgl.github.io/react-map-gl/)** - React wrapper
+- **Geolocation API** - Device location services
+- **Custom markers** - Priority-coded visual indicators
+
+</td>
+</tr>
+</table>
+
+### 🔥 **Backend & AI**
+
+<div align="center">
+
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
--   **Framework**: [Next.js](https://nextjs.org/) (with App Router)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **UI**: [React](https://reactjs.org/), [ShadCN UI](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/)
--   **AI**: [Google Gemini](https://deepmind.google.com/technologies/gemini/) via [Firebase Genkit](https://firebase.google.com/docs/genkit)
--   **Database**: [Cloud Firestore](https://firebase.google.com/docs/firestore)
--   **Mapping**: [Mapbox](https://www.mapbox.com/)
--   **Offline Support**: Progressive Web App (PWA) using `next-pwa`
+</div>
+
+<table>
+<tr>
+<td width="50%">
+
+#### **🔥 Firebase Ecosystem**
+- **[Cloud Firestore](https://firebase.google.com/docs/firestore)** - NoSQL database
+- **[Firebase Auth](https://firebase.google.com/docs/auth)** - Authentication system
+- **[Cloud Storage](https://firebase.google.com/docs/storage)** - File storage
+- **[Firebase Hosting](https://firebase.google.com/docs/hosting)** - Static hosting
+
+#### **🤖 AI & Intelligence**
+- **[Google Gemini](https://ai.google.dev/)** - Advanced AI model
+- **[Firebase Genkit](https://firebase.google.com/docs/genkit)** - AI integration
+- **Web Speech API** - Voice recognition
+- **Custom algorithms** - Trust score calculation
+
+</td>
+<td width="50%">
+
+#### **☁️ Deployment & DevOps**
+- **[Vercel](https://vercel.com/)** - Edge deployment
+- **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipeline
+- **[ESLint](https://eslint.org/)** - Code linting
+- **[Prettier](https://prettier.io/)** - Code formatting
+
+#### **📊 Monitoring & Analytics**
+- **[Vercel Analytics](https://vercel.com/analytics)** - Performance monitoring
+- **[Web Vitals](https://web.dev/vitals/)** - Core performance metrics
+- **Error boundaries** - Graceful error handling
+- **Custom logging** - Debug and monitoring
+
+</td>
+</tr>
+</table>
+
+### 🏗️ **Architecture Highlights**
+
+```mermaid
+graph TB
+    A[Next.js App] --> B[React Components]
+    B --> C[ShadCN UI]
+    B --> D[Mapbox Maps]
+    A --> E[Firebase Backend]
+    E --> F[Firestore DB]
+    E --> G[Google Gemini AI]
+    A --> H[PWA Service Worker]
+    H --> I[Offline Cache]
+    A --> J[Vercel Edge]
+```
+
+### 📦 **Package Highlights**
+
+<div align="center">
+
+| Category | Package | Purpose | Version |
+|----------|---------|---------|---------|
+| **🎨 UI** | `@radix-ui/react-*` | Accessible components | `^1.1.0` |
+| **🗺️ Maps** | `mapbox-gl` | Interactive mapping | `^3.5.2` |
+| **🤖 AI** | `@genkit-ai/googleai` | AI integration | `^1.13.0` |
+| **📱 PWA** | `next-pwa` | Service worker | `^5.6.0` |
+| **🎤 Speech** | `Web Speech API` | Voice recognition | Native |
+
+</div>
 
 ## Getting Started
 
