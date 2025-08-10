@@ -42,6 +42,7 @@ const useSpeechRecognition = (lang: string) => {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const finalTranscriptRef = useRef<string>('');
     const lastResultIndexRef = useRef<number>(0);
+    const isMobileRef = useRef<boolean>(false);
 
     const stopListening = useCallback(() => {
         if (recognitionRef.current) {
@@ -74,39 +75,76 @@ const useSpeechRecognition = (lang: string) => {
             return;
         }
 
+        // Detect mobile device
+        isMobileRef.current = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
         recognitionRef.current = new SpeechRecognition();
         const recognition = recognitionRef.current;
-        recognition.continuous = true;
-        recognition.interimResults = true;
+        
+        // Mobile-specific settings
+        if (isMobileRef.current) {
+            recognition.continuous = false; // Mobile works better with non-continuous
+            recognition.interimResults = false; // Disable interim results on mobile
+        } else {
+            recognition.continuous = true;
+            recognition.interimResults = true;
+        }
+        
         recognition.lang = lang;
 
         recognition.onresult = (event: any) => {
             try {
                 if (!event.results || event.results.length === 0) return;
                 
-                let interimTranscript = '';
-                
-                // Only process new results to avoid repetition
-                for (let i = lastResultIndexRef.current; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    if (result && result[0]) {
-                        const transcript = result[0].transcript;
-                        if (result.isFinal) {
-                            // Add final result to our permanent transcript
+                if (isMobileRef.current) {
+                    // Mobile: Simple approach - just get the final result
+                    const lastResult = event.results[event.results.length - 1];
+                    if (lastResult && lastResult[0] && lastResult.isFinal) {
+                        const transcript = lastResult[0].transcript.trim();
+                        if (transcript) {
                             finalTranscriptRef.current += transcript + ' ';
-                            lastResultIndexRef.current = i + 1; // Update the last processed index
-                        } else {
-                            // This is interim result, add to interim transcript
-                            interimTranscript += transcript;
+                            onTranscriptUpdate(finalTranscriptRef.current.trim());
+                            
+                            // Restart recognition for continuous listening on mobile
+                            setTimeout(() => {
+                                if (isListening && recognitionRef.current) {
+                                    try {
+                                        recognitionRef.current.start();
+                                    } catch (e) {
+                                        console.log('Recognition restart failed:', e);
+                                    }
+                                }
+                            }, 100);
                         }
                     }
-                }
-                
-                // Combine final and interim for display
-                const displayTranscript = (finalTranscriptRef.current + interimTranscript).trim();
-                
-                if (displayTranscript) {
-                    onTranscriptUpdate(displayTranscript);
+                } else {
+                    // Desktop: Advanced approach with interim results
+                    let interimTranscript = '';
+                    let newFinalTranscript = '';
+                    
+                    for (let i = 0; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        if (result && result[0]) {
+                            const transcript = result[0].transcript;
+                            if (result.isFinal) {
+                                if (i >= lastResultIndexRef.current) {
+                                    newFinalTranscript += transcript + ' ';
+                                    lastResultIndexRef.current = i + 1;
+                                }
+                            } else {
+                                interimTranscript += transcript;
+                            }
+                        }
+                    }
+                    
+                    if (newFinalTranscript) {
+                        finalTranscriptRef.current += newFinalTranscript;
+                    }
+                    
+                    const displayTranscript = (finalTranscriptRef.current + interimTranscript).trim();
+                    if (displayTranscript) {
+                        onTranscriptUpdate(displayTranscript);
+                    }
                 }
             } catch (error) {
                 console.error('Speech recognition result processing error:', error);
