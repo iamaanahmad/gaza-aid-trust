@@ -102,7 +102,6 @@ export const mockAidRequests: Omit<AidRequest, 'id'>[] = [
 
 export const mockContributors: Omit<Contributor, 'id'>[] = [
   {
-    id: 'contrib-1',
     rank: 1,
     name: 'Fatima A.',
     contributions: 28,
@@ -110,7 +109,6 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop',
   },
   {
-    id: 'contrib-2',
     rank: 2,
     name: 'Dr. Ahmed K.',
     contributions: 21,
@@ -118,14 +116,12 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop',
   },
   {
-    id: 'contrib-3',
     rank: 3,
     name: 'Anonymous Giver',
     contributions: 19,
     type: 'Donor',
   },
   {
-    id: 'contrib-4',
     rank: 4,
     name: 'Layla M.',
     contributions: 15,
@@ -133,7 +129,6 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=1886&auto=format&fit=crop',
   },
   {
-    id: 'contrib-5',
     rank: 5,
     name: 'Yusuf I.',
     contributions: 11,
@@ -141,7 +136,6 @@ export const mockContributors: Omit<Contributor, 'id'>[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1887&auto=format&fit=crop',
   },
   {
-    id: 'contrib-6',
     rank: 6,
     name: 'Community Watcher',
     contributions: 9,

@@ -3,13 +3,15 @@
 
 import { useEffect, useState } from 'react';
 import type { PrayerTimesData } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Sun, Sunrise, Sunset, Moon } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 
 const PRAYER_TIMES_CACHE_KEY = 'gaza-aid-trust-prayer-times';
+
+type PrayerName = 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
 
 const MosqueIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -39,7 +41,7 @@ const MosqueIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
   );
 
-const prayerIcons = {
+const prayerIcons: Record<PrayerName, JSX.Element> = {
   Fajr: <Sunrise className="h-6 w-6 text-primary" />,
   Dhuhr: <Sun className="h-6 w-6 text-primary" />,
   Asr: <Sun className="h-6 w-6 text-primary" />,
@@ -69,7 +71,7 @@ export function PrayerTimes() {
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  const prayerNameTranslations = {
+  const prayerNameTranslations: Record<PrayerName, string> = {
     Fajr: t('prayer_fajr'),
     Dhuhr: t('prayer_dhuhr'),
     Asr: t('prayer_asr'),
@@ -121,10 +123,10 @@ export function PrayerTimes() {
             } else {
                 throw new Error(data.data || t('prayer_times_fetch_error_generic'));
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             if (!prayerTimes) { 
-              setError(err.message);
+              setError(err instanceof Error ? err.message : 'An error occurred');
             }
         } finally {
             setLoading(false);
@@ -175,8 +177,8 @@ export function PrayerTimes() {
             {prayerTimes && Object.entries(prayerTimes.timings).map(([name, time]) => (
                 <Card key={name} className="text-center flex flex-col justify-center">
                     <CardHeader className="items-center pb-2">
-                        {(prayerIcons as any)[name]}
-                        <CardTitle className="text-lg font-bold mt-2">{(prayerNameTranslations as any)[name]}</CardTitle>
+                        {prayerIcons[name as PrayerName]}
+                        <CardTitle className="text-lg font-bold mt-2">{prayerNameTranslations[name as PrayerName]}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-2xl font-bold">{time}</p>

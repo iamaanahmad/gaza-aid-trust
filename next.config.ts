@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+// @ts-ignore
 import withPWAInit from 'next-pwa';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -80,7 +81,7 @@ const withPWA = withPWAInit({
       },
     },
      {
-      urlPattern: ({url}) => {
+      urlPattern: ({url}: {url: URL}) => {
         const isSameOrigin = self.origin === url.origin
         if (!isSameOrigin) return false
         const pathname = url.pathname

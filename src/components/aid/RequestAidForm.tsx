@@ -198,7 +198,7 @@ export function RequestAidForm({ onFormSubmit }: { onFormSubmit: () => void }) {
          <FormField
           control={form.control}
           name="photo"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>{t('form_label_photo')}</FormLabel>
               <FormControl>

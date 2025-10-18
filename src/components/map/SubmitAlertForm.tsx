@@ -23,15 +23,43 @@ import { alertsCollection } from '@/lib/firebase';
 import type { Alert } from '@/lib/types';
 import { useTranslation } from '@/hooks/use-translation';
 
+interface SpeechRecognitionResult {
+  [0]: {
+    transcript: string;
+  };
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 interface SpeechRecognition extends EventTarget {
     continuous: boolean;
     interimResults: boolean;
     lang: string;
     start(): void;
     stop(): void;
-    onresult: ((this: SpeechRecognition, ev: any) => any) | null;
-    onerror: ((this: SpeechRecognition, ev: any) => any) | null;
-    onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
+    onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
+    onend: ((this: SpeechRecognition, ev: Event) => void) | null;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
 }
 
 const useSpeechRecognition = (lang: string) => {
@@ -62,10 +90,10 @@ const useSpeechRecognition = (lang: string) => {
                 if (isListening) stopListening();
             }, 30000);
         }
-    }, [isListening, stopListening]);
+    }, [isListening, stopListening]); // eslint-disable-line react-hooks/exhaustive-deps
     
     const initializeRecognition = useCallback((onTranscriptUpdate: (transcript: string) => void) => {
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
             toast({
                 variant: 'destructive',
@@ -81,92 +109,94 @@ const useSpeechRecognition = (lang: string) => {
         recognitionRef.current = new SpeechRecognition();
         const recognition = recognitionRef.current;
         
-        // Mobile-specific settings
-        if (isMobileRef.current) {
-            recognition.continuous = false; // Mobile works better with non-continuous
-            recognition.interimResults = false; // Disable interim results on mobile
-        } else {
-            recognition.continuous = true;
-            recognition.interimResults = true;
-        }
-        
-        recognition.lang = lang;
+        if (recognition) {
+            // Mobile-specific settings
+            if (isMobileRef.current) {
+                recognition.continuous = false; // Mobile works better with non-continuous
+                recognition.interimResults = false; // Disable interim results on mobile
+            } else {
+                recognition.continuous = true;
+                recognition.interimResults = true;
+            }
+            
+            recognition.lang = lang;
 
-        recognition.onresult = (event: any) => {
-            try {
-                if (!event.results || event.results.length === 0) return;
-                
-                if (isMobileRef.current) {
-                    // Mobile: Simple approach - just get the final result
-                    const lastResult = event.results[event.results.length - 1];
-                    if (lastResult && lastResult[0] && lastResult.isFinal) {
-                        const transcript = lastResult[0].transcript.trim();
-                        if (transcript) {
-                            finalTranscriptRef.current += transcript + ' ';
-                            onTranscriptUpdate(finalTranscriptRef.current.trim());
-                            
-                            // Restart recognition for continuous listening on mobile
-                            setTimeout(() => {
-                                if (isListening && recognitionRef.current) {
-                                    try {
-                                        recognitionRef.current.start();
-                                    } catch (e) {
-                                        console.log('Recognition restart failed:', e);
-                                    }
-                                }
-                            }, 100);
-                        }
-                    }
-                } else {
-                    // Desktop: Advanced approach with interim results
-                    let interimTranscript = '';
-                    let newFinalTranscript = '';
+            recognition.onresult = (event: SpeechRecognitionEvent) => {
+                try {
+                    if (!event.results || event.results.length === 0) return;
                     
-                    for (let i = 0; i < event.results.length; i++) {
-                        const result = event.results[i];
-                        if (result && result[0]) {
-                            const transcript = result[0].transcript;
-                            if (result.isFinal) {
-                                if (i >= lastResultIndexRef.current) {
-                                    newFinalTranscript += transcript + ' ';
-                                    lastResultIndexRef.current = i + 1;
-                                }
-                            } else {
-                                interimTranscript += transcript;
+                    if (isMobileRef.current) {
+                        // Mobile: Simple approach - just get the final result
+                        const lastResult = event.results[event.results.length - 1];
+                        if (lastResult && lastResult[0] && lastResult.isFinal) {
+                            const transcript = lastResult[0].transcript.trim();
+                            if (transcript) {
+                                finalTranscriptRef.current += transcript + ' ';
+                                onTranscriptUpdate(finalTranscriptRef.current.trim());
+                                
+                                // Restart recognition for continuous listening on mobile
+                                setTimeout(() => {
+                                    if (isListening && recognitionRef.current) {
+                                        try {
+                                            recognitionRef.current.start();
+                                        } catch (e) {
+                                            console.log('Recognition restart failed:', e);
+                                        }
+                                    }
+                                }, 100);
                             }
                         }
+                    } else {
+                        // Desktop: Advanced approach with interim results
+                        let interimTranscript = '';
+                        let newFinalTranscript = '';
+                        
+                        for (let i = 0; i < event.results.length; i++) {
+                            const result = event.results[i];
+                            if (result && result[0]) {
+                                const transcript = result[0].transcript;
+                                if (result.isFinal) {
+                                    if (i >= lastResultIndexRef.current) {
+                                        newFinalTranscript += transcript + ' ';
+                                        lastResultIndexRef.current = i + 1;
+                                    }
+                                } else {
+                                    interimTranscript += transcript;
+                                }
+                            }
+                        }
+                        
+                        if (newFinalTranscript) {
+                            finalTranscriptRef.current += newFinalTranscript;
+                        }
+                        
+                        const displayTranscript = (finalTranscriptRef.current + interimTranscript).trim();
+                        if (displayTranscript) {
+                            onTranscriptUpdate(displayTranscript);
+                        }
                     }
-                    
-                    if (newFinalTranscript) {
-                        finalTranscriptRef.current += newFinalTranscript;
-                    }
-                    
-                    const displayTranscript = (finalTranscriptRef.current + interimTranscript).trim();
-                    if (displayTranscript) {
-                        onTranscriptUpdate(displayTranscript);
-                    }
+                } catch (error) {
+                    console.error('Speech recognition result processing error:', error);
                 }
-            } catch (error) {
-                console.error('Speech recognition result processing error:', error);
-            }
-        };
+            };
 
-        recognition.onerror = (event: any) => {
-            console.error('Speech recognition error:', event.error);
-            if (event.error !== 'no-speech') {
-                toast({
-                    variant: 'destructive',
-                    title: t('toast_audio_error'),
-                    description: event.error === 'not-allowed' ? 'Mic permission denied.' : t('toast_audio_error_desc'),
-                });
-            }
-             stopListening();
-        };
+            recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error !== 'no-speech') {
+                    toast({
+                        variant: 'destructive',
+                        title: t('toast_audio_error'),
+                        description: event.error === 'not-allowed' ? 'Mic permission denied.' : t('toast_audio_error_desc'),
+                    });
+                }
+                 stopListening();
+            };
 
-        recognition.onend = () => {
-             stopListening();
-        };
-    }, [lang, t, toast, stopListening]);
+            recognition.onend = () => {
+                 stopListening();
+            };
+        }
+    }, [lang, t, toast, stopListening, isListening]);
 
     const resetTranscript = useCallback(() => {
         finalTranscriptRef.current = '';
@@ -179,7 +209,7 @@ const useSpeechRecognition = (lang: string) => {
         stopListening,
         resetTranscript,
         initializeRecognition,
-        hasSupport: !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
+        hasSupport: !!window.SpeechRecognition || !!window.webkitSpeechRecognition
     };
 };
 
@@ -203,7 +233,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Ale
 
   const { isListening, startListening, stopListening, resetTranscript, initializeRecognition, hasSupport } = useSpeechRecognition(language === 'ar' ? 'ar-EG' : 'en-US');
   
-  const getPriorityFromTranscript = (transcript: string) => {
+  const getPriorityFromTranscript = useCallback((transcript: string) => {
       const lowerTranscript = transcript.toLowerCase();
       const highPriorityKeywords = ['urgent', 'high', 'عاجل', 'خطير'];
       const mediumPriorityKeywords = ['medium', 'متوسط'];
@@ -211,7 +241,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Ale
       if (highPriorityKeywords.some(kw => lowerTranscript.includes(kw))) return 'High';
       if (mediumPriorityKeywords.some(kw => lowerTranscript.includes(kw))) return 'Medium';
       return form.getValues('priority'); // Keep existing if no keyword
-  }
+  }, [form]);
 
   useEffect(() => {
     initializeRecognition((transcript) => {
@@ -220,7 +250,7 @@ export function SubmitAlertForm({ onFormSubmit }: { onFormSubmit: (newAlert: Ale
         const detectedPriority = getPriorityFromTranscript(transcript);
         form.setValue('priority', detectedPriority);
     });
-  }, [initializeRecognition, form]);
+  }, [initializeRecognition, form, getPriorityFromTranscript]);
 
 
   async function onSubmit(data: AlertFormValues) {

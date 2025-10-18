@@ -313,16 +313,16 @@ export const translations = {
     ar: 'سيستخدم شريك محلي تبرعك لشراء وتسليم المواد المطلوبة للأسرة في {location}.',
   },
   donate_dialog_mock_amount: {
-    en: 'Mock Donation: $50',
-    ar: 'تبرع وهمي: $50',
+    en: 'Example Donation: $50',
+    ar: 'تبرع مثالي: $50',
   },
   confirm_pledge_button: {
     en: 'Confirm Pledge',
     ar: 'تأكيد التعهد',
   },
   donate_dialog_mock_notice: {
-    en: 'This is a mock donation flow for the hackathon prototype.',
-    ar: 'هذا تدفق تبرع وهمي لنموذج الهاكاثون.',
+    en: 'This is an example donation flow for demo and testing purposes.',
+    ar: 'هذا مثال لتدفق التبرع لأغراض العرض والاختبار.',
   },
   status_needed: {
     en: 'Needed',
@@ -639,8 +639,8 @@ export const translations = {
 
   // Footer
   footer_text: {
-    en: 'Built for the "Hack for Gaza" hackathon. A prototype for hope and solidarity.',
-    ar: 'بُني لهاكاثون "Hack for Gaza". نموذج أولي للأمل والتضامن.',
+    en: 'Gaza Aid & Trust — an open-source humanitarian platform.',
+    ar: 'عون وثقة غزة — منصة إنسانية مفتوحة المصدر.',
   },
 
   // Offline Support

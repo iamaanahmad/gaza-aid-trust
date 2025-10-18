@@ -15,7 +15,6 @@ import Map, { Marker, Popup } from 'react-map-gl';
 import { mockAlerts } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useOffline } from '@/hooks/use-offline';
 
 const ALERTS_CACHE_KEY = 'gaza-aid-trust-alerts';
 
@@ -171,7 +170,6 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
-  const { isOnline } = useOffline();
   const syncingRef = useRef(false);
 
   const syncAlertsFromServer = useCallback(async () => {
@@ -202,7 +200,7 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
     } finally {
       syncingRef.current = false;
     }
-  }, [toast, t]);
+  }, [toast, t, setAlerts]);
 
   const handleUpdateAlert = useCallback((updatedAlert: Alert) => {
     setAlerts(prev => {
@@ -216,7 +214,7 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
         return newAlerts;
     });
     setSelectedAlert(updatedAlert);
-  }, []); // Remove setAlerts dependency as it's stable
+  }, [setAlerts]); // setAlerts is stable from props
   
   // Initial data loading effect - runs only once
   useEffect(() => {
@@ -265,7 +263,7 @@ export function CrisisMap({ alerts, setAlerts }: { alerts: Alert[], setAlerts: R
     };
     
     fetchAlerts();
-  }, []); // Empty dependency array - runs only once on mount
+  }, [setAlerts, t, toast]); // Runs only once on mount, but include deps for lint
 
   // Separate effect for handling back-online sync
   useEffect(() => {
